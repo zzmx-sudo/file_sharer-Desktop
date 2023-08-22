@@ -2,11 +2,11 @@ import uuid
 import time
 
 
-def generate_uuid():
+def generate_uuid() -> str:
 
-    return uuid.uuid1()
+    return str(uuid.uuid1())
 
-def generate_timestamp():
+def generate_timestamp() -> int:
 
     return int(time.time() * 1000)
 

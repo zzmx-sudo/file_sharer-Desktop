@@ -7,17 +7,17 @@ from threading import Thread
 
 class ProcessManager:
 
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
-    def start(self):
+    def start(self) -> None:
         pass
 
-    def add_share(self):
+    def add_share(self) -> None:
         pass
 
-    def remove_share(self):
+    def remove_share(self) -> None:
         pass
 
-    def close(self):
+    def close(self) -> None:
         pass

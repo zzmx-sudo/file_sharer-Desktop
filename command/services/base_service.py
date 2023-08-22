@@ -5,7 +5,7 @@ __all__ = [
 
 class BaseService:
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         self._sharing_dict = {}
 
