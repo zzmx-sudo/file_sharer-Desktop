@@ -1,5 +1,6 @@
 __all__ = [
-    "OperationException"
+    "OperationException",
+    "NotImplException"
 ]
 
 class BaseException(Exception):
@@ -18,3 +19,8 @@ class OperationException(BaseException):
 
         self._msg = f"无效的操作, {msg}!"
 
+class NotImplException(BaseException):
+
+    def __init__(self, msg: str) -> None:
+
+        self._msg = f"未实现错误, {msg}!"

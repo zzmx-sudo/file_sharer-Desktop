@@ -28,4 +28,3 @@ SAVE_USER_LOG = False
 
 # 日志保存路径
 LOGS_PATH = os.path.join(BASE_DIR, "logs")
-if not os.path.isdir(LOGS_PATH): os.mkdir(LOGS_PATH)
