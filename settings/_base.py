@@ -23,8 +23,8 @@ DEBUG = False
 # 是否保存系统日志
 SAVE_SYSTEM_LOG = False
 
-# 是否保存用户浏览/下载日志
-SAVE_USER_LOG = False
+# 是否保存共享日志(包含用户浏览/下载记录)
+SAVE_SHARER_LOG = False
 
 # 日志保存路径
 LOGS_PATH = os.path.join(BASE_DIR, "logs")
