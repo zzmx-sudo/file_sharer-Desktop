@@ -2,6 +2,8 @@ import os
 import platform
 import sys
 
+from utils.public_func import get_local_ip
+
 """
 请移步 `development.py` 或 `production.py` 修改配置, 配置名称字母均大写才有效
 """
@@ -15,6 +17,9 @@ SYSTEM = platform.system()
 
 # 是否为windows
 IS_WINDOWS = SYSTEM == "Windows"
+
+# 本机IP
+LOCAL_HOST = get_local_ip()
 
 # 后端端口
 WSGI_PORT = 8080

@@ -39,7 +39,8 @@ class FuseSettings:
         lock_settings = [
             "BASE_DIR",
             "SYSTEM",
-            "IS_WINDOWS"
+            "IS_WINDOWS",
+            "LOCAL_HOST"
         ]
 
         for setting in dir(mod):

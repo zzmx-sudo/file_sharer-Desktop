@@ -2,6 +2,9 @@ __all__ = [
     "HttpService"
 ]
 
+FILE_LIST_URI = "/file_list"
+DOWNLOAD_URI = "/download"
+
 import os
 from typing import Union, Any
 from multiprocessing import Queue
@@ -54,6 +57,7 @@ class HttpService(BaseService):
         self._setup()
         uvicorn.run(
             app=self._app,
+            host=settings.LOCAL_HOST,
             port=settings.WSGI_PORT
         )
 
@@ -101,12 +105,12 @@ class HttpService(BaseService):
 
     def _setup_router(self) -> None:
 
-        @self._app.get("/file_list/{uuid}")
+        @self._app.get("%s/{uuid}" % FILE_LIST_URI)
         async def file_list(uuid: str) -> dict:
 
             return {"hello": uuid}
 
-        @self._app.get("/download/{uuid}")
+        @self._app.get("%s/{uuid}" % DOWNLOAD_URI)
         async def download(uuid: str) -> Any:
 
             return {"hello": uuid}
