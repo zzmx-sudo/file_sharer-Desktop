@@ -24,3 +24,9 @@ class NotImplException(BaseException):
     def __init__(self, msg: str) -> None:
 
         self._msg = f"未实现错误, {msg}!"
+
+class UnknowParamException(BaseException):
+
+    def __init__(self, msg: str) -> None:
+
+        self._msg = f"未知的参数, {msg}!"

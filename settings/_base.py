@@ -1,5 +1,6 @@
 import os
 import platform
+import sys
 
 """
 请移步 `development.py` 或 `production.py` 修改配置, 配置名称字母均大写才有效
@@ -7,6 +8,7 @@ import platform
 
 # 项目主目录
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, BASE_DIR)
 
 # 当前操作系统
 SYSTEM = platform.system()

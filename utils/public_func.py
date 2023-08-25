@@ -4,7 +4,7 @@ import time
 
 def generate_uuid() -> str:
 
-    return str(uuid.uuid1())
+    return str(uuid.uuid1()).replace("-", "")
 
 def generate_timestamp() -> int:
 

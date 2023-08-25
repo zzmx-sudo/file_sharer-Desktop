@@ -2,16 +2,13 @@ __all__ = [
     "SharingModel"
 ]
 
-from _file import FileModel
-from typing import List
+from typing import Union
+
+from .file import FileModel, DirModel
 
 class SharingModel(dict):
 
-    def __getitem__(self, item: str) -> List[FileModel] or None:
-
-        return self.get(item, None)
-
-    def __setitem__(self, key: str, value: List[FileModel]) -> None:
+    def __setitem__(self, key: str, value: Union[FileModel, DirModel]) -> None:
 
         super(SharingModel, self).__setitem__(key, value)
 
