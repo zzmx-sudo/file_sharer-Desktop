@@ -1,6 +1,6 @@
 import os
 
-from command.services.http_service import FILE_LIST_URI, DOWNLOAD_URI
+from model import public_types as ptype
 from settings import settings
 
 class FileModel:
@@ -11,9 +11,9 @@ class FileModel:
         self._target_path = path
         self._download_number = 0
         if self._uuid[0] == "h":
-            self._share_type = "http"
+            self._share_type = ptype.ShareType.http
         else:
-            self._share_type = "ftp"
+            self._share_type = ptype.ShareType.ftp
         self._ftp_password = ""
         self._ftp_port = 10086
 
@@ -65,20 +65,26 @@ class FileModel:
     @property
     def browse_url(self) -> str:
 
-        return f"http://{settings.LOCAL_HOST}:{settings.WSGI_PORT}{FILE_LIST_URI}/{self._uuid}"
+        return f"http://{settings.LOCAL_HOST}:{settings.WSGI_PORT}{ptype.FILE_LIST_URI}/{self._uuid}"
 
     @property
     def download_url(self) -> str:
 
-        if self._share_type == "http":
-            return f"http://{settings.LOCAL_HOST}:{settings.WSGI_PORT}{DOWNLOAD_URI}/{self._uuid}"
-        else:
-            return f"ftp://a:{self.ftp_password}@{settings.LOCAL_HOST}:" \
-                   f"{self.ftp_port}/{os.path.basename(self._target_path)}"
+        return f"http://{settings.LOCAL_HOST}:{settings.WSGI_PORT}{ptype.DOWNLOAD_URI}/{self._uuid}"
+
+    @property
+    def file_name(self) -> str:
+
+        return os.path.basename(self._target_path)
 
     def to_dict(self) -> dict:
 
-        pass
+        return {
+            "uuid": self._uuid,
+            "download_url": self.download_url,
+            "file_name": self.file_name,
+            "stareType": self.shareType
+        }
 
 class DirModel(FileModel):
 
