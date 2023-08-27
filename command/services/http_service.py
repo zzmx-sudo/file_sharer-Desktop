@@ -68,6 +68,29 @@ class HttpService(BaseService):
 
     def _setup_middleware(self) -> None:
 
+        async def generate_fileObj_recursive(
+                uuid: str, parentObj: Union[None, DirModel] = None
+        ) -> Union[None, FileModel, DirModel]:
+            if parentObj is None:
+                try:
+                    parent_uuid, other_uuid = uuid.split("%", 1)
+                except ValueError:
+                    return self._sharing_dict.get(uuid)
+
+                parentObj = self._sharing_dict.get(parent_uuid)
+                if parentObj is None or not isinstance(parentObj, DirModel):
+                    return None
+                return await generate_fileObj_recursive(other_uuid, parentObj)
+
+            try:
+                parent_uuid, other_uuid = uuid.split("%", 1)
+            except ValueError:
+                return parentObj.get(uuid)
+            parentObj = parentObj.get(parent_uuid)
+            if parentObj is None or not isinstance(parentObj, DirModel):
+                return None
+            return await generate_fileObj_recursive(other_uuid, parentObj)
+
         async def is_download_ftp_without_client(
                 shareType: ptype.ShareType, request: MyRequest
         ) -> bool:
@@ -95,8 +118,7 @@ class HttpService(BaseService):
             uri, param = _request["path"].rsplit("/", 1)
             # client_platform = _request["client_platform"]
             if "%" in param:
-                uuid_parent, uuid_child = param.split("%", 1)
-                fileObj = self._sharing_dict.get(uuid_parent, {}).get(uuid_child, None)
+                fileObj = await generate_fileObj_recursive(param)
             else:
                 fileObj = self._sharing_dict.get(param, None)
             # 文件是否存在判断
