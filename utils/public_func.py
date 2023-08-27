@@ -14,6 +14,3 @@ def generate_timestamp() -> int:
 def get_local_ip() -> str:
 
     return socket.gethostbyname(socket.gethostname())
-
-result = get_local_ip()
-print(result, type(result))

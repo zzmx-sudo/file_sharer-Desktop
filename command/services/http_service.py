@@ -3,18 +3,18 @@ __all__ = [
 ]
 
 import os
-from typing import Union, Any
+from typing import Union
 from multiprocessing import Queue
 
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse, Response
 from starlette.types import Scope
 
 from ._base_service import BaseService
 from model import public_types as ptype
 from model.file import FileModel, DirModel
 from settings import settings
-from utils.logger import sharerLogger
+from utils.logger import sharerLogger, sysLogger
 
 class MyRequest:
 
@@ -27,10 +27,11 @@ class MyRequest:
         for key in ["client", "path"]:
             self.__dict__[key] = scope.get(key, "")
         for header_name, header_value in scope.get("headers"):
-            if header_name == b"sec-ch-ua-platform":
-                self.__dict__["client_platform"] = header_value.decode()
-            elif header_name == b"X-Client":
-                self.__dict__["is_client"] = True
+            if header_name == b"x-client":
+                self.__dict__["is_client"] = "True"
+                break
+            # elif header_name == b"sec-ch-ua-platform":
+            #     self.__dict__["client_platform"] = header_value.decode()
 
     def __getitem__(self, item: str) -> Union[str, tuple[str, int]]:
 
@@ -77,7 +78,18 @@ class HttpService(BaseService):
             return False
 
         @self._app.middleware("http")
-        async def check_file_exists(request: Request, cell_next):
+        async def complete_middleware(request: Request, cell_next) -> Response:
+            """
+            该中间件目前完成以下功能:
+            1. 无效/非法路由返回错误链接提示
+            2. 访问/下载的文件/文件夹是否有效校验
+            3. 访问/下载日志写入
+            4. 是否用非客户端下载FTP服务文件/文件夹
+            5. 文件/文件夹对象往后传递给视图
+            :param request: fastapi request对象
+            :param cell_next: 后续中间件/视图回调函数
+            :return: Response: fastapi支持的 response对象
+            """
             _request = MyRequest(request.scope)
             client_ip = _request["client"][0] if _request["client"] else "未知IP"
             uri, param = _request["path"].rsplit("/", 1)
@@ -100,7 +112,7 @@ class HttpService(BaseService):
                 ))
             elif uri == "/download":
                 # 用户下载时, 需进行是否为客户端判断
-                if is_download_ftp_without_client(fileObj.shareType, _request):
+                if await is_download_ftp_without_client(fileObj.shareType, _request):
                     sharerLogger.warning("用户使用非客户端无法下载FTP分享的文件/文件夹, 用户IP: %s" % client_ip)
                     return JSONResponse({"errno": 400, "errmsg": "ftp分享的文件/文件夹请使用客户端进行下载"})
                 else:
@@ -108,18 +120,37 @@ class HttpService(BaseService):
                         client_ip, fileObj.targetPath
                     ))
                     self._output_q.put(param)
+            else:
+                return JSONResponse({"errno": 404, "errmsg": "访问的链接不存在！"})
 
+            request.scope["fileObj"] = fileObj
             response = await cell_next(request)
             return response
 
     def _setup_router(self) -> None:
 
         @self._app.get("%s/{uuid}" % ptype.FILE_LIST_URI)
-        async def file_list(uuid: str) -> dict:
+        async def file_list(uuid: str, request: Request) -> dict:
 
             return {"hello": uuid}
 
         @self._app.get("%s/{uuid}" % ptype.DOWNLOAD_URI)
-        async def download(uuid: str) -> Any:
+        async def download(uuid: str, request: Request) -> Union[dict, Response]:
 
-            return {"hello": uuid}
+            fileObj = request.scope.get("fileObj")
+            fileObj: Union[None, FileModel, DirModel]
+            if not fileObj:
+                sysLogger.error(
+                    "发生了错误, 获取不到用户访问的文件/文件夹对象, "
+                    "请用uuid对比`file_sharing_backups.json`文件, "
+                    "查看分享的文件/文件夹状态, uuid: %s" % uuid
+                )
+                return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
+
+            if fileObj.shareType is ptype.ShareType.http:
+                return FileResponse(path=fileObj.targetPath)
+            elif fileObj.shareType is ptype.ShareType.ftp:
+                return {"errno": 200, "errmsg": "下载已被记录"}
+            else:
+                sysLogger.error("未被预判的分享类型: %s, 系统发生错误" % fileObj.shareType.value)
+                return {"errno": 500, "errmsg": "下载文件/文件夹失败"}

@@ -33,7 +33,7 @@ class FileModel:
         self._download_number = newValue
 
     @property
-    def shareType(self) -> str:
+    def shareType(self) -> ptype.ShareType:
 
         return self._share_type
 
@@ -83,7 +83,7 @@ class FileModel:
             "uuid": self._uuid,
             "download_url": self.download_url,
             "file_name": self.file_name,
-            "stareType": self.shareType
+            "stareType": self._share_type.value
         }
 
 class DirModel(FileModel):
