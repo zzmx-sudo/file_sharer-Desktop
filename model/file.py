@@ -19,7 +19,7 @@ class FileModel:
         ftp_base_path: Union[None, str] = None
     ) -> None:
 
-        self._uuid = f"{parent_uuid}%{uuid}" if parent_uuid else uuid
+        self._uuid = f"{parent_uuid}>{uuid}" if parent_uuid else uuid
         self._target_path = path
         self._download_number = 0
         if self._uuid[0] == "h":
@@ -95,7 +95,7 @@ class FileModel:
 
         return os.path.basename(self._target_path)
 
-    def to_dict_client(self) -> dict:
+    async def to_dict_client(self) -> dict:
 
         return {
             "uuid": self._uuid,
@@ -105,7 +105,7 @@ class FileModel:
             "isDir": self.isDir
         }
 
-    def to_dict_server(self) -> dict:
+    async def to_dict_server(self) -> dict:
 
         return {
             "uuid": self._uuid,
@@ -163,12 +163,12 @@ class DirModel(FileModel):
 
         return True
 
-    def to_dict_client(self) -> dict:
+    async def to_dict_client(self) -> dict:
 
         children = []
         for child_uuid, child in self._children.items():
             child_dict = {
-                child_uuid: child.to_dict_client()
+                child_uuid: await child.to_dict_client()
             }
             children.append(child_dict)
 
@@ -181,12 +181,12 @@ class DirModel(FileModel):
             "children": children
         }
 
-    def to_dict_server(self) -> dict:
+    async def to_dict_server(self) -> dict:
 
         children = []
         for child_uuid, child in self._children.items():
             child_dict = {
-                child_uuid: child.to_dict_server()
+                child_uuid: await child.to_dict_server()
             }
             children.append(child_dict)
 
