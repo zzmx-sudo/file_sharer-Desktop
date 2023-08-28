@@ -1,14 +1,22 @@
 import os
-from typing import Any, Union
+from typing import Any, Union, TypeVar
 
 from model import public_types as ptype
 from settings import settings
 from utils.public_func import generate_uuid
 
+FileType = TypeVar("FileType", bound="FileModel")
+
 class FileModel:
 
     def __init__(
-            self, path: str, uuid: str, parent_uuid: Union[None, str] = None
+        self: FileType,
+        path: str,
+        uuid: str,
+        parent_uuid: Union[None, str] = None,
+        pwd: Union[None, str] = None,
+        port: Union[None, int] = None,
+        ftp_base_path: Union[None, str] = None
     ) -> None:
 
         self._uuid = f"{parent_uuid}%{uuid}" if parent_uuid else uuid
@@ -18,13 +26,19 @@ class FileModel:
             self._share_type = ptype.ShareType.http
         else:
             self._share_type = ptype.ShareType.ftp
-        self._ftp_password = ""
-        self._ftp_port = 10086
+        self._ftp_pwd = pwd
+        self._ftp_port = port
+        self._ftp_base_path = ftp_base_path if ftp_base_path else ""
 
     @property
     def isDir(self) -> bool:
 
         return False
+
+    @property
+    def isExists(self) -> bool:
+
+        return os.path.exists(self._target_path)
 
     @property
     def download_number(self) -> int:
@@ -47,24 +61,24 @@ class FileModel:
         return self._target_path
 
     @property
-    def ftp_password(self) -> str:
+    def ftp_pwd(self) -> Union[None, str]:
 
-        return self._ftp_password
-
-    @ftp_password.setter
-    def ftp_password(self, newValue: str) -> None:
-
-        self._ftp_password = newValue
+        return self._ftp_pwd
 
     @property
-    def ftp_port(self) -> int:
+    def ftp_port(self) -> Union[None, int]:
 
         return self._ftp_port
 
-    @ftp_port.setter
-    def ftp_port(self, newValue: int) -> None:
+    @property
+    def ftp_basePath(self) -> str:
 
-        self._ftp_port = newValue
+        return self._ftp_base_path
+
+    @ftp_basePath.setter
+    def ftp_basePath(self, newValue: str) -> None:
+
+        self._ftp_base_path = newValue
 
     @property
     def browse_url(self) -> str:
@@ -81,22 +95,47 @@ class FileModel:
 
         return os.path.basename(self._target_path)
 
-    def to_dict(self) -> dict:
+    def to_dict_client(self) -> dict:
 
         return {
             "uuid": self._uuid,
-            "download_url": self.download_url,
-            "file_name": self.file_name,
-            "stareType": self._share_type.value
+            "downloadUrl": self.download_url,
+            "fileName": self.file_name,
+            "stareType": self._share_type.value,
+            "isDir": self.isDir
         }
+
+    def to_dict_server(self) -> dict:
+
+        return {
+            "uuid": self._uuid,
+            "downloadUrl": self.download_url,
+            "fileName": self.file_name,
+            "stareType": self._share_type.value,
+            "isDir": self.isDir,
+            "browseUrl": self.browse_url,
+            "targetPath": self._target_path,
+            "ftpPwd": self._ftp_pwd,
+            "ftpPort": self._ftp_port,
+            "ftpBasePath": self._ftp_base_path
+        }
+
+class DirChildrenModel(dict): pass
 
 class DirModel(FileModel):
 
     def __init__(
-            self, path: str, uuid: str, parent_uuid: Union[None, str] = None
+        self: FileType,
+        path: str,
+        uuid: str,
+        parent_uuid: Union[None, str] = None,
+        pwd: Union[None, str] = None,
+        port: Union[None, int] = None,
+        ftp_base_path: Union[None, str] = None
     ) -> None:
-        super(DirModel, self).__init__(path, uuid, parent_uuid)
-        self._childs = {}
+        super(DirModel, self).__init__(path, uuid, parent_uuid, pwd, port, ftp_base_path)
+
+        self._children = DirChildrenModel()
         self._setup_child()
 
     def _setup_child(self) -> None:
@@ -105,34 +144,62 @@ class DirModel(FileModel):
             file_path = os.path.join(self._target_path, file_name)
             child_uuid = generate_uuid()
             if os.path.isdir(file_path):
-                child = DirModel(file_path, child_uuid, self._uuid)
+                child = DirModel(
+                    file_path, child_uuid, self._uuid, self._ftp_pwd, self._ftp_port,
+                    self._ftp_base_path
+                )
             else:
-                child = FileModel(file_path, child_uuid, self._uuid)
+                child = FileModel(file_path, child_uuid, self._uuid, self._ftp_pwd, self._ftp_port)
+                child.ftp_basePath = self._ftp_base_path
 
-            self._childs[child_uuid] = child
+            self._children[child_uuid] = child
 
     def get(self, item: str) -> Any:
 
-        return self._childs.get(item)
+        return self._children.get(item)
 
     @property
     def isDir(self) -> bool:
 
         return True
 
-    def to_dict(self) -> dict:
+    def to_dict_client(self) -> dict:
 
-        childs = []
-        for child_uuid, child in self._childs.items():
+        children = []
+        for child_uuid, child in self._children.items():
             child_dict = {
-                child_uuid: child.to_dict()
+                child_uuid: child.to_dict_client()
             }
-            childs.append(child_dict)
+            children.append(child_dict)
 
         return {
             "uuid": self._uuid,
-            "download_url": self.download_url,
-            "file_name": self.file_name,
+            "downloadUrl": self.download_url,
+            "fileName": self.file_name,
             "stareType": self._share_type.value,
-            "childs": childs
+            "isDir": self.isDir,
+            "children": children
+        }
+
+    def to_dict_server(self) -> dict:
+
+        children = []
+        for child_uuid, child in self._children.items():
+            child_dict = {
+                child_uuid: child.to_dict_server()
+            }
+            children.append(child_dict)
+
+        return {
+            "uuid": self._uuid,
+            "downloadUrl": self.download_url,
+            "fileName": self.file_name,
+            "stareType": self._share_type.value,
+            "isDir": self.isDir,
+            "browseUrl": self.browse_url,
+            "targetPath": self._target_path,
+            "ftpPwd": self._ftp_pwd,
+            "ftpPort": self._ftp_port,
+            "ftpBasePath": self._ftp_base_path,
+            "children": children
         }

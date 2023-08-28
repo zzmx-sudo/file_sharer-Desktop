@@ -2,7 +2,6 @@ __all__ = [
     "HttpService"
 ]
 
-import os
 from typing import Union
 from multiprocessing import Queue
 
@@ -44,10 +43,15 @@ class HttpService(BaseService):
         self._app = None
 
     def _add_share(self, uuid: str, fileObj: Union[FileModel, DirModel]) -> None:
-        pass
+
+        self._sharing_dict.update({
+            uuid: fileObj
+        })
 
     def _remove_share(self, uuid: str) -> None:
-        pass
+
+        if uuid in self._sharing_dict:
+            del self._sharing_dict[uuid]
 
     def run(self) -> None:
 
@@ -78,7 +82,7 @@ class HttpService(BaseService):
                     return self._sharing_dict.get(uuid)
 
                 parentObj = self._sharing_dict.get(parent_uuid)
-                if parentObj is None or not isinstance(parentObj, DirModel):
+                if parentObj is None or not parentObj.isDir:
                     return None
                 return await generate_fileObj_recursive(other_uuid, parentObj)
 
@@ -87,7 +91,7 @@ class HttpService(BaseService):
             except ValueError:
                 return parentObj.get(uuid)
             parentObj = parentObj.get(parent_uuid)
-            if parentObj is None or not isinstance(parentObj, DirModel):
+            if parentObj is None or not parentObj.isDir:
                 return None
             return await generate_fileObj_recursive(other_uuid, parentObj)
 
@@ -122,17 +126,17 @@ class HttpService(BaseService):
             else:
                 fileObj = self._sharing_dict.get(param, None)
             # 文件是否存在判断
-            if fileObj is None or not os.path.exists(fileObj.targetPath):
+            if fileObj is None or not fileObj.isExists:
                 sharerLogger.warning("访问错误路径或文件/文件夹已不存在, 访问链接: %s, 用户IP: %s" % (
                     _request["path"], client_ip
                 ))
                 return JSONResponse({"errno": 404, "errmsg": "错误的路径或文件已不存在！"})
             # 浏览/下载记录写入日志
-            if uri == "/file_list":
+            if uri == ptype.FILE_LIST_URI:
                 sharerLogger.info("用户IP: %s, 用户访问了文件列表, 文件链接: %s" % (
                     client_ip, fileObj.targetPath,
                 ))
-            elif uri == "/download":
+            elif uri == ptype.DOWNLOAD_URI:
                 # 用户下载时, 需进行是否为客户端判断
                 if await is_download_ftp_without_client(fileObj.shareType, _request):
                     sharerLogger.warning("用户使用非客户端无法下载FTP分享的文件/文件夹, 用户IP: %s" % client_ip)
