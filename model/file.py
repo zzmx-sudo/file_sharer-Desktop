@@ -20,15 +20,48 @@ class FileModel:
     ) -> None:
 
         self._uuid = f"{parent_uuid}>{uuid}" if parent_uuid else uuid
-        self._target_path = path
+        self._target_path = path.rstrip(os.sep) if path.endswith(os.sep) else path
         self._download_number = 0
+        self._is_sharing = False
+        self._row_number = None
+        self._ftp_pwd = pwd
+        self._ftp_port = port
+
         if self._uuid[0] == "h":
             self._share_type = ptype.ShareType.http
         else:
             self._share_type = ptype.ShareType.ftp
-        self._ftp_pwd = pwd
-        self._ftp_port = port
-        self._ftp_base_path = ftp_base_path if ftp_base_path else ""
+
+        if self._share_type is ptype.ShareType.ftp:
+            self._ftp_base_path = ftp_base_path if ftp_base_path \
+                else os.path.dirname(self._target_path)
+        else:
+            self._ftp_base_path = None
+
+    @property
+    def uuid(self) -> str:
+
+        return self._uuid
+
+    @property
+    def isSharing(self) -> bool:
+
+        return self._is_sharing
+
+    @isSharing.setter
+    def isSharing(self, newValue: bool) -> None:
+
+        self._is_sharing = newValue
+
+    @property
+    def rowNumber(self) -> Union[None, int]:
+
+        return self._row_number
+
+    @rowNumber.setter
+    def rowNumber(self, newValue: int) -> None:
+
+        self._row_number = newValue
 
     @property
     def isDir(self) -> bool:
@@ -71,14 +104,9 @@ class FileModel:
         return self._ftp_port
 
     @property
-    def ftp_basePath(self) -> str:
+    def ftp_basePath(self) -> Union[None, str]:
 
         return self._ftp_base_path
-
-    @ftp_basePath.setter
-    def ftp_basePath(self, newValue: str) -> None:
-
-        self._ftp_base_path = newValue
 
     @property
     def browse_url(self) -> str:
@@ -120,6 +148,26 @@ class FileModel:
             "ftpBasePath": self._ftp_base_path
         }
 
+    def to_dump_backup(self) -> dict:
+
+        normal = {
+            "path": self._target_path,
+            "uuid": self._uuid,
+            "parent_uuid": None,
+            "share_type": self._share_type
+        }
+        if self._share_type is ptype.ShareType.ftp:
+            normal.update({
+                "pwd": self._ftp_pwd,
+                "port": self._ftp_port,
+                "ftp_base_path": self._ftp_base_path
+            })
+
+        return normal
+
+    def __eq__(self, other: str) -> bool:
+        return other.rsplit(os.sep) == self._target_path
+
 class DirChildrenModel(dict): pass
 
 class DirModel(FileModel):
@@ -135,6 +183,11 @@ class DirModel(FileModel):
     ) -> None:
         super(DirModel, self).__init__(path, uuid, parent_uuid, pwd, port, ftp_base_path)
 
+        if self._share_type is ptype.ShareType.ftp:
+            self._ftp_base_path = ftp_base_path if ftp_base_path else self._target_path
+        else:
+            self._ftp_base_path = None
+
         self._children = DirChildrenModel()
         self._setup_child()
 
@@ -143,14 +196,10 @@ class DirModel(FileModel):
         for file_name in os.listdir(self._target_path):
             file_path = os.path.join(self._target_path, file_name)
             child_uuid = generate_uuid()
-            if os.path.isdir(file_path):
-                child = DirModel(
-                    file_path, child_uuid, self._uuid, self._ftp_pwd, self._ftp_port,
-                    self._ftp_base_path
-                )
-            else:
-                child = FileModel(file_path, child_uuid, self._uuid, self._ftp_pwd, self._ftp_port)
-                child.ftp_basePath = self._ftp_base_path
+            fileModel = DirModel if os.path.isdir(file_path) else FileModel
+            child = fileModel(
+                file_path, child_uuid, self._uuid, self._ftp_pwd, self._ftp_port, self._ftp_base_path
+            )
 
             self._children[child_uuid] = child
 

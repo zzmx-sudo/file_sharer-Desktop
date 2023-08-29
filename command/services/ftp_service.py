@@ -13,7 +13,7 @@ from model.file import FileModel, DirModel
 
 class FtpService(BaseService):
 
-    def _add_share(self, uuid: str, fileObj: Union[FileModel, DirModel]) -> None:
+    def _add_share(self, fileObj: Union[FileModel, DirModel]) -> None:
 
         pass
 

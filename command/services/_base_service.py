@@ -32,13 +32,13 @@ class BaseService:
             if not self._input_q.empty():
                 command_type, command_msg = self._input_q.get()
                 if command_type == "add":
-                    self._add_share(*command_msg)
+                    self._add_share(command_msg)
                 elif command_type == "remove":
                     self._remove_share(command_msg)
             else:
                 time.sleep(0.5)
 
-    def _add_share(self, uuid: str, fileObj: Union[FileModel, DirModel]) -> None:
+    def _add_share(self, fileObj: Union[FileModel, DirModel]) -> None:
 
         raise NotImplException("实现service对象的类必须有定义`_add_share`方法")
 

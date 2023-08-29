@@ -42,10 +42,10 @@ class HttpService(BaseService):
         super(HttpService, self).__init__(input_q, output_q)
         self._app = None
 
-    def _add_share(self, uuid: str, fileObj: Union[FileModel, DirModel]) -> None:
+    def _add_share(self, fileObj: Union[FileModel, DirModel]) -> None:
 
         self._sharing_dict.update({
-            uuid: fileObj
+            fileObj.uuid: fileObj
         })
 
     def _remove_share(self, uuid: str) -> None:
@@ -184,7 +184,7 @@ class HttpService(BaseService):
                 return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
 
             if fileObj.shareType is ptype.ShareType.http:
-                return FileResponse(path=fileObj.targetPath)
+                return FileResponse(path=fileObj.targetPath, filename=fileObj.file_name)
             elif fileObj.shareType is ptype.ShareType.ftp:
                 return {"errno": 200, "errmsg": "下载已被记录"}
             else:
