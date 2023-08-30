@@ -2,6 +2,7 @@ __all__ = [
     "FtpService"
 ]
 
+import sys
 import time
 from typing import Union
 from multiprocessing import Queue
@@ -69,4 +70,7 @@ class FtpService(BaseService):
         self.watch()
 
         while True:
-            time.sleep(1000)
+            try:
+                time.sleep(1000)
+            except KeyboardInterrupt:
+                sys.exit(0)
