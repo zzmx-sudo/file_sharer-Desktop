@@ -1,5 +1,6 @@
 __all__ = [
-    "SharingModel"
+    "SharingModel",
+    "FuseSharingModel"
 ]
 
 import os
@@ -43,27 +44,27 @@ class FuseSharingModel(list):
     def append(self, fileObj: Union[FileModel, DirModel]) -> None:
         
         super(FuseSharingModel, self).append(fileObj)
-        fileObj.rowNumber = self.length
+        fileObj.rowIndex = self.length - 1
 
     def remove(self, uuid: str) -> None:
 
         target_index: Union[None, int] = None
-        for index,  fileObj in enumerate(self):
+        for fileObj in self:
             if fileObj.uuid == uuid:
-                super(FuseSharingModel, self).pop(index)
-                target_index = index
+                super(FuseSharingModel, self).pop(fileObj.rowIndex)
+                target_index = fileObj.rowIndex
                 break
 
         if target_index is None:
             return
 
         for index in range(target_index, self.length):
-            self[index].rowNumber -= 1
+            self[index].rowIndex -= 1
 
     def contains(self, target_path: str, share_type: shareType) -> Union[None, int]:
         for fileObj in self:
             if fileObj == target_path and fileObj.shareType is share_type:
-                return fileObj.rowNumber
+                return fileObj.rowIndex
 
         return None
 
@@ -83,12 +84,12 @@ class FuseSharingModel(list):
 
     def dump(self) -> None:
 
-        backup_result: list = []
+        backup_result: list[dict[str: Union[None, str]]] = [
+            fileObj.to_dump_backup()
+            for fileObj in self
+        ]
+
         backup_file_path: str = os.path.join(settings.BASE_DIR, "file_sharing_backups.json")
-
-        for fileObj in self:
-            backup_result.append(fileObj.to_dump_backup())
-
         with open(backup_file_path, "w") as f:
             json.dump(backup_result, f, indent=4, separators=(",", ": "), ensure_ascii=False)
 
@@ -110,7 +111,12 @@ class FuseSharingModel(list):
                 sysLogger.error("加载历史分享记录失败, file_sharing_backups.json文件已损坏")
                 return model
 
+        path_share_params: list[tuple[str, str]] = []
         for file_dict in backup_result:
+            path_share_param = (file_dict.get("path"), file_dict.get("share_type"))
+            if path_share_param in path_share_params:
+                continue
+            path_share_params.append(path_share_param)
             isDir = file_dict.get("isDir")
             fileModel = FileModel if not isDir else DirModel
             try:

@@ -1,14 +1,12 @@
 [
-  {
-    "uuid": "4f6b08aa-402b-11ee-b5db-acbc32ac1d35",
-    "startTimestamp": 1692626705324,
-    "endTimestamp": 1692634026718,
-    "shareType": "http",
-    "isSharing": true,
-    "path": "",
-    "isDir": false
-  },
-  {
-
-  }
+    {
+        "path": "/Users/mr.cheng/GitSourceCodes/file_sharer-LAN",
+        "uuid": "f65ed1d08473211eea3b7acbc32ac1d35",
+        "parent_uuid": null,
+        "share_type": "ftp",
+        "isDir": true,
+        "pwd": "YMl5a",
+        "port": 10086,
+        "ftp_base_path": "/Users/mr.cheng/GitSourceCodes/file_sharer-LAN"
+    }
 ]

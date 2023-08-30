@@ -14,12 +14,12 @@ from .services import HttpService, FtpService
 
 class ServiceProcessManager:
 
-    def __init__(self) -> None:
+    def __init__(self, output_q: Queue) -> None:
         self._http_service = None
         self._ftp_service = None
         self._http_input_q = Queue()
         self._ftp_input_q = Queue()
-        self._output_q = Queue()
+        self._output_q = output_q
 
     def add_share(self, fileObj: Union[FileModel, DirModel]) -> bool:
         share_type = fileObj.shareType
@@ -60,7 +60,7 @@ class ServiceProcessManager:
         if self._http_service is None:
             http_service = HttpService(self._http_input_q, self._output_q)
             self._http_service = Process(target=http_service.run)
-            self._http_service.daemon = False
+            self._http_service.daemon = True
             self._http_service.start()
 
         self._http_input_q.put(("add", fileObj))
@@ -70,7 +70,7 @@ class ServiceProcessManager:
         if self._ftp_service is None:
             ftp_service = FtpService(self._ftp_input_q, self._output_q)
             self._ftp_service = Process(target=ftp_service.run)
-            self._ftp_service.daemon = False
+            self._ftp_service.daemon = True
             self._ftp_service.start()
 
         self._ftp_input_q.put(("add", fileObj))

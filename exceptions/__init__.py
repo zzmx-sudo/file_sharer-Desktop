@@ -1,6 +1,7 @@
 __all__ = [
     "OperationException",
-    "NotImplException"
+    "NotImplException",
+    "UnknowParamException"
 ]
 
 class BaseException(Exception):

@@ -186,7 +186,8 @@ class HttpService(BaseService):
             if fileObj.shareType is ptype.ShareType.http:
                 return FileResponse(path=fileObj.targetPath, filename=fileObj.file_name)
             elif fileObj.shareType is ptype.ShareType.ftp:
-                return {"errno": 200, "errmsg": "下载已被记录"}
+                ftp_data = await fileObj.to_ftp_data()
+                return {"errno": 200, "errmsg": "", "data": ftp_data}
             else:
                 sysLogger.error("未被预判的分享类型: %s, 系统发生错误" % fileObj.shareType.value)
                 return {"errno": 500, "errmsg": "下载文件/文件夹失败"}
