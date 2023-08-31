@@ -115,7 +115,10 @@ class FileModel:
     @property
     def ftp_cwd(self) -> str:
 
-        return os.path.dirname(self._target_path.replace(self._ftp_base_path, ""))
+        result = os.path.dirname(self._target_path.replace(self._ftp_base_path, "", 1))
+        if settings.IS_WINDOWS:
+            result = result.replace("\\", "/")
+        return result
 
     @property
     def browse_url(self) -> str:

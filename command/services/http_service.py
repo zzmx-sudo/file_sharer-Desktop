@@ -111,8 +111,9 @@ class HttpService(BaseService):
             1. 无效/非法路由返回错误链接提示
             2. 访问/下载的文件/文件夹是否有效校验
             3. 访问/下载日志写入
-            4. 是否用非客户端下载FTP服务文件/文件夹
-            5. 文件/文件夹对象往后传递给视图
+            4. 是否下载文件夹
+            5. 是否用非客户端下载FTP服务文件/文件夹
+            6. 文件/文件夹对象往后传递给视图
             :param request: fastapi request对象
             :param cell_next: 后续中间件/视图回调函数
             :return: Response: fastapi支持的 response对象
@@ -134,13 +135,14 @@ class HttpService(BaseService):
                     client_ip, fileObj.targetPath,
                 ))
             elif uri == ptype.DOWNLOAD_URI:
-                # 用户下载时, 需进行是否为客户端判断
+                # 是否为文件夹判断
+                if fileObj.isDir:
+                    sharerLogger.warning("用户使用非客户端无法下载分享的文件夹, 用户IP: %s" % client_ip)
+                    return JSONResponse({"errno": 400, "errmsg": "无法直接下载文件夹, 请使用客户端进行下载！"})
+                # 下载的若为FTP分享文件, 需进行是否为客户端判断
                 if await is_download_ftp_without_client(fileObj.shareType, _request):
                     sharerLogger.warning("用户使用非客户端无法下载FTP分享的文件/文件夹, 用户IP: %s" % client_ip)
-                    return JSONResponse({"errno": 400, "errmsg": "ftp分享的文件/文件夹请使用客户端进行下载"})
-                elif fileObj.shareType is ptype.ShareType.http and fileObj.isDir:
-                    sharerLogger.warning("用户使用非客户端无法下载HTTP分享的文件夹, 用户IP: %s" % client_ip)
-                    return JSONResponse({"errno": 400, "errmsg": "http分享的文件夹请使用客户端进行下载"})
+                    return JSONResponse({"errno": 400, "errmsg": "ftp分享的文件/文件夹请使用客户端进行下载！"})
                 else:
                     sharerLogger.info("用户IP: %s, 用户下载了文件, 文件链接: %s" % (
                         client_ip, fileObj.targetPath
