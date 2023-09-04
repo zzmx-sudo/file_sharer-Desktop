@@ -1,0 +1,33 @@
+<RCC>
+  <qresource prefix="icons">
+    <file>../images/icon/client-active.png</file>
+    <file>../images/icon/back-active.png</file>
+    <file>../images/icon/close-active.png</file>
+    <file>../images/icon/copy-active.png</file>
+    <file>../images/icon/download-active.png</file>
+    <file>../images/icon/file-active.png</file>
+    <file>../images/icon/folder-active.png</file>
+    <file>../images/icon/forware-active.png</file>
+    <file>../images/icon/home-active.png</file>
+    <file>../images/icon/maximize-active.png</file>
+    <file>../images/icon/minimize-active.png</file>
+    <file>../images/icon/server-active.png</file>
+    <file>../images/icon/setting-active.png</file>
+    <file>../images/icon/share-active.png</file>
+    <file>../images/icon/back.png</file>
+    <file>../images/icon/client.png</file>
+    <file>../images/icon/close.png</file>
+    <file>../images/icon/copy.png</file>
+    <file>../images/icon/download.png</file>
+    <file>../images/icon/file.png</file>
+    <file>../images/icon/folder.png</file>
+    <file>../images/icon/forward.png</file>
+    <file>../images/icon/home.png</file>
+    <file>../images/icon/maximize.png</file>
+    <file>../images/icon/minimize.png</file>
+    <file>../images/icon/server.png</file>
+    <file>../images/icon/setting.png</file>
+    <file>../images/icon/share.png</file>
+  </qresource>
+  <qresource prefix="images"/>
+</RCC>
