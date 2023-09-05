@@ -9,7 +9,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, FileResponse, Response
 from starlette.types import Scope
 
-from ._base_service import BaseService
+from . _base_service import BaseService
 from model import public_types as ptype
 from model.file import FileModel, DirModel
 from settings import settings

@@ -10,7 +10,7 @@ import psutil
 from model.file import FileModel, DirModel
 from model import public_types as ptype
 from utils.logger import sysLogger
-from .services import HttpService, FtpService
+from . services import HttpService, FtpService
 
 class ServiceProcessManager:
 

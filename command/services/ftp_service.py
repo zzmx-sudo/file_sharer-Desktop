@@ -12,7 +12,7 @@ from pyftpdlib.authorizers import DummyAuthorizer
 from pyftpdlib.handlers import FTPHandler
 from pyftpdlib.servers import FTPServer
 
-from ._base_service import BaseService
+from . _base_service import BaseService
 from model.file import FileModel, DirModel
 from settings import settings
 

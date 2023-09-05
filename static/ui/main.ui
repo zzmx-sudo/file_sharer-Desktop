@@ -19,7 +19,7 @@
 Global */
 * {
 	margin: 0;
-	paddingf: 0;
+	padding: 0;
 	font-size: 14px;
 	font-family: &quot;KaiTi&quot;;
 }
@@ -55,12 +55,12 @@ QTooltip */
 QToolTip {
 	color: #409eff;
 	background-color: rgba(236, 236, 236, 180);
-	border: 1px solid #ffffff;
+	border: 1px solid #409eff;
 	background-image: none;
 	background-position: left center;
     background-repeat: no-repeat;
 	border: none;
-	border-left: 2px solid rgb(255, 121, 198);
+	border-left: 3px solid #409eff;
 	text-align: left;
 	padding-left: 8px;
 	margin: 0px;
@@ -71,7 +71,6 @@ AppBg */
 #AppBg {	
 	background-color: #ffffff;
 	border: 1px solid #409eff;
-	border-radius: 5%
 }
 
 /* ///////////////////////////////////////////////////////////////////////////////
@@ -503,7 +502,7 @@ Content Bottom Bar */
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QPushButton" name="pushButton">
+                 <widget class="QPushButton" name="settingButton">
                   <property name="minimumSize">
                    <size>
                     <width>0</width>
@@ -1144,7 +1143,7 @@ Content Bottom Bar */
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="maximizeButton">
+                 <widget class="QPushButton" name="maximizeRestoreButton">
                   <property name="minimumSize">
                    <size>
                     <width>28</width>

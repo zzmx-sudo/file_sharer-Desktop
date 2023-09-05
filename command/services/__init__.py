@@ -3,5 +3,5 @@ __all__ = [
     "HttpService"
 ]
 
-from .ftp_service import FtpService
-from .http_service import HttpService
+from . ftp_service import FtpService
+from . http_service import HttpService

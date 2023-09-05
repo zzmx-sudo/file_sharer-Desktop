@@ -7,8 +7,8 @@ import os
 import json
 from typing import Union, TypeVar
 
-from .file import FileModel, DirModel
-from .public_types import ShareType as shareType
+from . file import FileModel, DirModel
+from . public_types import ShareType as shareType
 from settings import settings
 from utils.logger import sysLogger
 
