@@ -20,7 +20,8 @@ Global */
 * {
 	margin: 0;
 	paddingf: 0;
-	font-size: 12px;
+	font-size: 14px;
+	font-family: &quot;KaiTi&quot;;
 }
 
 /* ///////////////////////////////////////////////////////////////////////////////
@@ -28,6 +29,25 @@ QWidget */
 QWidget{
 	color: rgb(0, 0, 0);
 	border: none;
+}
+
+/* ///////////////////////////////////////////////////////////////////////////////
+QCheckBox */
+QCheckBox {
+	spacing: 10px;
+}
+QCheckBox::indicator {
+	border: 2px solid #409eff;
+	width: 15px;
+	height: 15px;
+	border-radius: 9px;
+	background: rgb(236, 236, 236);
+}
+QCheckBox::indicator:hover {
+	background-color: #ffffff;
+}
+QCheckBox::indicator:checked {
+	background-image: url(:/icons/images/icon/check.png);
 }
 
 /* ///////////////////////////////////////////////////////////////////////////////
@@ -73,16 +93,22 @@ Top Logo */
 Left Menu Box */
 #leftMenuBox {
 	background-color: rgb(222, 222, 222);
-	padding: 0 4px 0 4px;
 }
 #leftMenuFrame {
-	padding: 5px 0;
+	padding-bottom: 5px;
+}
+#leftBottomBox {
+	padding: 0 5px;
 }
 #leftMenuBox .QPushButton:hover {
 	background-color: #ffffff;
 }
 #leftMenuBox .QPushButton:pressed {
 	background-color: #409eff;
+}
+#leftTopBox .QPushButton {
+	border: none;
+	border-radius: 0;
 }
 
 /* ///////////////////////////////////////////////////////////////////////////////
@@ -96,11 +122,46 @@ Extra Top Box */
 	background-color: rgb(64, 158, 255);
 	padding: 0 10px;
 }
+#extraTopBox .QLabel {
+	color: #ffffff;
+	font: 14px &quot;JetBrains Mono&quot;;
+}
 #extraTopBox .QPushButton:hover {
-	background-color: rgb(57, 143, 229);
+	background-color: rgb(85, 170, 255);
 }
 #extraTopBox .QPushButton:pressed {
 	background-color: #ffffff;
+}
+/* ///////////////////////////////////////////////////////////////////////////////
+Extra Content Box */
+#extraContentBox {
+	margin: 10px 0;
+}
+#extraContentBox #saveShareBox, #saveSystemBox {
+	padding-left: 15px;
+}
+#downloadPathBox, #logPathBox {
+	padding: 10px;
+}
+#logPathLabel, #downloadPathLabel {
+	margin-bottom: 5px;
+}
+#logPathEdit, #downloadPathEdit {
+	border: 1px solid #409eff;
+	border-radius: 3%;
+	margin-right: 10px;
+	background-color: rgb(236, 236, 236);
+	font: 12px &quot;JetBrains Mono&quot;;
+}
+#logPathButton, #downloadPathButton {
+	border: 2px solid #409eff;
+	border-radius: 5%;
+}
+#logPathButton:hover, #downloadPathButton:hover {
+	background-color: #ffffff;
+}
+#logPathButton:pressed, #downloadPathButton:pressed {
+	background-color: #409eff;
 }
 /* ///////////////////////////////////////////////////////////////////////////////
 Extra Bottom Box */
@@ -115,7 +176,6 @@ Extra Bottom Box */
 	border: 2px solid #ffffff;
 }
 #extraBottomBox #cancelSettingButton {
-	
 	background-color: rgb(217, 217, 217);
 	color: rgb(0, 0, 0);
 }
@@ -133,6 +193,9 @@ Content Top Box */
 #contentTopBox {
 	background-color: rgb(236, 236, 236);
 	padding: 0 10px 0 20px;
+}
+#contentTitleBox .QLabel {
+	font: 14px &quot;JetBrains Mono&quot;;
 }
 #contentTopBox .QPushButton:hover {
 	background-color: #ffffff;
@@ -280,13 +343,13 @@ Content Bottom Bar */
               <widget class="QFrame" name="leftTopBox">
                <property name="minimumSize">
                 <size>
-                 <width>50</width>
+                 <width>0</width>
                  <height>0</height>
                 </size>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>50</width>
+                 <width>16777215</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -316,13 +379,13 @@ Content Bottom Bar */
                  <widget class="QPushButton" name="homeButton">
                   <property name="minimumSize">
                    <size>
-                    <width>50</width>
+                    <width>0</width>
                     <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>50</width>
+                    <width>16777215</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -338,13 +401,13 @@ Content Bottom Bar */
                  <widget class="QPushButton" name="serverButton">
                   <property name="minimumSize">
                    <size>
-                    <width>50</width>
+                    <width>0</width>
                     <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>50</width>
+                    <width>16777215</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -360,13 +423,13 @@ Content Bottom Bar */
                  <widget class="QPushButton" name="clientButton">
                   <property name="minimumSize">
                    <size>
-                    <width>50</width>
+                    <width>0</width>
                     <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>50</width>
+                    <width>16777215</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -382,13 +445,13 @@ Content Bottom Bar */
                  <widget class="QPushButton" name="downloadButton">
                   <property name="minimumSize">
                    <size>
-                    <width>50</width>
+                    <width>0</width>
                     <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>50</width>
+                    <width>16777215</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -407,13 +470,13 @@ Content Bottom Bar */
               <widget class="QFrame" name="leftBottomBox">
                <property name="minimumSize">
                 <size>
-                 <width>50</width>
+                 <width>0</width>
                  <height>0</height>
                 </size>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>50</width>
+                 <width>16777215</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -443,14 +506,14 @@ Content Bottom Bar */
                  <widget class="QPushButton" name="pushButton">
                   <property name="minimumSize">
                    <size>
-                    <width>50</width>
-                    <height>50</height>
+                    <width>0</width>
+                    <height>45</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>50</width>
-                    <height>50</height>
+                    <width>16777215</width>
+                    <height>45</height>
                    </size>
                   </property>
                   <property name="styleSheet">
@@ -474,13 +537,13 @@ Content Bottom Bar */
         <widget class="QFrame" name="extraBox">
          <property name="minimumSize">
           <size>
-           <width>200</width>
+           <width>0</width>
            <height>0</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
-           <width>200</width>
+           <width>0</width>
            <height>16777215</height>
           </size>
          </property>
@@ -530,6 +593,9 @@ Content Bottom Bar */
                 <font>
                  <family>JetBrains Mono</family>
                  <pointsize>-1</pointsize>
+                 <weight>50</weight>
+                 <italic>false</italic>
+                 <bold>false</bold>
                 </font>
                </property>
                <property name="text">
@@ -562,7 +628,7 @@ Content Bottom Bar */
             </layout>
            </widget>
           </item>
-          <item>
+          <item alignment="Qt::AlignTop">
            <widget class="QFrame" name="extraContentBox">
             <property name="frameShape">
              <enum>QFrame::StyledPanel</enum>
@@ -570,6 +636,315 @@ Content Bottom Bar */
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
             </property>
+            <layout class="QVBoxLayout" name="verticalLayout_15">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QFrame" name="saveSystemBox">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>40</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>40</height>
+                </size>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+               </property>
+               <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+               </property>
+               <layout class="QHBoxLayout" name="horizontalLayout_6">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QCheckBox" name="saveSystemCheck">
+                  <property name="text">
+                   <string>保存系统日志</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="saveShareBox">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>40</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>40</height>
+                </size>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+               </property>
+               <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+               </property>
+               <layout class="QHBoxLayout" name="horizontalLayout_7">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QCheckBox" name="saveSgareCheck">
+                  <property name="text">
+                   <string>保存分享日志</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="logPathBox">
+               <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+               </property>
+               <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_13">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="logPathLabel">
+                  <property name="text">
+                   <string>日志路径：</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QFrame" name="logPathFrame">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="frameShape">
+                   <enum>QFrame::StyledPanel</enum>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Raised</enum>
+                  </property>
+                  <layout class="QHBoxLayout" name="horizontalLayout_8">
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
+                   <property name="leftMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <widget class="QLineEdit" name="logPathEdit">
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="logPathButton">
+                     <property name="minimumSize">
+                      <size>
+                       <width>40</width>
+                       <height>20</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>40</width>
+                       <height>20</height>
+                      </size>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">background-image: url(:/icons/images/icon/folder.png);</string>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="downloadPathBox">
+               <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+               </property>
+               <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_14">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="downloadPathLabel">
+                  <property name="text">
+                   <string>下载路径：</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QFrame" name="downloadPathFrame">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="frameShape">
+                   <enum>QFrame::StyledPanel</enum>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Raised</enum>
+                  </property>
+                  <layout class="QHBoxLayout" name="horizontalLayout_9">
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
+                   <property name="leftMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <widget class="QLineEdit" name="downloadPathEdit"/>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="downloadPathButton">
+                     <property name="minimumSize">
+                      <size>
+                       <width>40</width>
+                       <height>20</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>40</width>
+                       <height>20</height>
+                      </size>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">background-image: url(:/icons/images/icon/folder.png);</string>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
           <item alignment="Qt::AlignHCenter">
@@ -698,11 +1073,14 @@ Content Bottom Bar */
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_9">
                 <item>
-                 <widget class="QLabel" name="label">
+                 <widget class="QLabel" name="contentTitleLabel">
                   <property name="font">
                    <font>
                     <family>JetBrains Mono</family>
                     <pointsize>-1</pointsize>
+                    <weight>50</weight>
+                    <italic>false</italic>
+                    <bold>false</bold>
                    </font>
                   </property>
                   <property name="text">
@@ -862,7 +1240,7 @@ Content Bottom Bar */
                </property>
                <property name="font">
                 <font>
-                 <family>JetBrains Mono</family>
+                 <family>KaiTi</family>
                  <pointsize>-1</pointsize>
                 </font>
                </property>
@@ -892,7 +1270,7 @@ Content Bottom Bar */
                  <widget class="QFrame" name="authorLabelBox">
                   <property name="font">
                    <font>
-                    <family>JetBrains Mono</family>
+                    <family>KaiTi</family>
                     <pointsize>-1</pointsize>
                    </font>
                   </property>
@@ -922,7 +1300,7 @@ Content Bottom Bar */
                     <widget class="QLabel" name="authorLabel">
                      <property name="font">
                       <font>
-                       <family>JetBrains Mono</family>
+                       <family>KaiTi</family>
                        <pointsize>-1</pointsize>
                       </font>
                      </property>
