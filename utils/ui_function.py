@@ -12,6 +12,7 @@ from PyQt5.Qt import QPushButton
 from PyQt5.QtGui import QMouseEvent
 
 from main import MainWindow
+from . custom_grips import CustomGrip
 
 class UiFunction:
 
@@ -27,11 +28,16 @@ class UiFunction:
         self._select_setting_style = """
         border: 2px solid #409eff;background-color: #ffffff;
         """
+        self._left_grip = CustomGrip(self._main_window, Qt.LeftEdge)
+        self._right_grip = CustomGrip(self._main_window, Qt.RightEdge)
+        self._top_grip = CustomGrip(self._main_window, Qt.TopEdge)
+        self._bottom_grip = CustomGrip(self._main_window, Qt.BottomEdge)
 
     def setup(self) -> None:
         # main window event connect
         self._main_window.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self._main_window.mousePressEvent = self._mousePressEvent
+        self._main_window.resizeEvent = self._resize_grips
         # elements event connect
         self._setup_event_connect()
         # main window scale
@@ -146,6 +152,12 @@ class UiFunction:
         for button in self._elements.leftTopBox.findChildren(QPushButton):
             if button.objectName() != menu_button_name:
                 button.setStyleSheet(self._deselect_menu(button.styleSheet()))
+
+    def _resize_grips(self, event: QMouseEvent) -> None:
+        self._left_grip.setGeometry(0, 10, 10, self._main_window.height())
+        self._right_grip.setGeometry(self._main_window.width() - 10, 10, 10, self._main_window.height())
+        self._top_grip.setGeometry(0, 0, self._main_window.width(), 10)
+        self._bottom_grip.setGeometry(0, self._main_window.height() - 10, self._main_window.width(), 10)
 
     def _move_center(self) -> None:
         screen = QtWidgets.QDesktopWidget().screenGeometry()
