@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>935</width>
-    <height>549</height>
+    <width>980</width>
+    <height>580</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -203,6 +203,11 @@ Content Top Box */
 	background-color: #409eff;
 }
 /* ///////////////////////////////////////////////////////////////////////////////
+Content Bottom Box */
+#contentBottomBox {
+	background-color: rgb(246, 246, 246);
+}
+/* ///////////////////////////////////////////////////////////////////////////////
 Content Bottom Bar */
 #contentBottomBar {
 	background-color: rgb(236, 236, 236);
@@ -388,6 +393,9 @@ Content Bottom Bar */
                     <height>50</height>
                    </size>
                   </property>
+                  <property name="toolTip">
+                   <string>首页</string>
+                  </property>
                   <property name="styleSheet">
                    <string notr="true">background-image: url(:/icons/images/icon/home.png);</string>
                   </property>
@@ -409,6 +417,9 @@ Content Bottom Bar */
                     <width>16777215</width>
                     <height>50</height>
                    </size>
+                  </property>
+                  <property name="toolTip">
+                   <string>服务端</string>
                   </property>
                   <property name="styleSheet">
                    <string notr="true">background-image: url(:/icons/images/icon/server.png);</string>
@@ -432,6 +443,9 @@ Content Bottom Bar */
                     <height>50</height>
                    </size>
                   </property>
+                  <property name="toolTip">
+                   <string>客户端</string>
+                  </property>
                   <property name="styleSheet">
                    <string notr="true">background-image: url(:/icons/images/icon/client.png);</string>
                   </property>
@@ -453,6 +467,9 @@ Content Bottom Bar */
                     <width>16777215</width>
                     <height>50</height>
                    </size>
+                  </property>
+                  <property name="toolTip">
+                   <string>下载记录</string>
                   </property>
                   <property name="styleSheet">
                    <string notr="true">background-image: url(:/icons/images/icon/download.png);</string>
@@ -515,6 +532,9 @@ Content Bottom Bar */
                     <height>45</height>
                    </size>
                   </property>
+                  <property name="toolTip">
+                   <string>打开/关闭设置窗口</string>
+                  </property>
                   <property name="styleSheet">
                    <string notr="true">background-image: url(:/icons/images/icon/setting.png);</string>
                   </property>
@@ -576,7 +596,7 @@ Content Bottom Bar */
             <property name="maximumSize">
              <size>
               <width>16777215</width>
-              <height>50</height>
+              <height>45</height>
              </size>
             </property>
             <property name="frameShape">
@@ -615,6 +635,9 @@ Content Bottom Bar */
                  <width>28</width>
                  <height>28</height>
                 </size>
+               </property>
+               <property name="toolTip">
+                <string>关闭设置窗口</string>
                </property>
                <property name="styleSheet">
                 <string notr="true">background-image: url(:/icons/images/icon/close-active.png);</string>
@@ -689,6 +712,9 @@ Content Bottom Bar */
                 </property>
                 <item>
                  <widget class="QCheckBox" name="saveSystemCheck">
+                  <property name="toolTip">
+                   <string>勾选保存系统日志</string>
+                  </property>
                   <property name="text">
                    <string>保存系统日志</string>
                   </property>
@@ -735,6 +761,9 @@ Content Bottom Bar */
                 </property>
                 <item>
                  <widget class="QCheckBox" name="saveSgareCheck">
+                  <property name="toolTip">
+                   <string>勾选保存分享日志</string>
+                  </property>
                   <property name="text">
                    <string>保存分享日志</string>
                   </property>
@@ -830,6 +859,9 @@ Content Bottom Bar */
                        <width>40</width>
                        <height>20</height>
                       </size>
+                     </property>
+                     <property name="toolTip">
+                      <string>打开资源管理器选择路径</string>
                      </property>
                      <property name="styleSheet">
                       <string notr="true">background-image: url(:/icons/images/icon/folder.png);</string>
@@ -929,6 +961,9 @@ Content Bottom Bar */
                        <height>20</height>
                       </size>
                      </property>
+                     <property name="toolTip">
+                      <string>打开资源管理器选择路径</string>
+                     </property>
                      <property name="styleSheet">
                       <string notr="true">background-image: url(:/icons/images/icon/folder.png);</string>
                      </property>
@@ -975,6 +1010,9 @@ Content Bottom Bar */
                  <height>30</height>
                 </size>
                </property>
+               <property name="toolTip">
+                <string>保存配置</string>
+               </property>
                <property name="text">
                 <string>保存</string>
                </property>
@@ -993,6 +1031,9 @@ Content Bottom Bar */
                  <width>120</width>
                  <height>30</height>
                 </size>
+               </property>
+               <property name="toolTip">
+                <string>取消配置</string>
                </property>
                <property name="text">
                 <string>取消</string>
@@ -1034,6 +1075,12 @@ Content Bottom Bar */
           </property>
           <item>
            <widget class="QFrame" name="contentTopBox">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>45</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
               <width>16777215</width>
@@ -1134,6 +1181,9 @@ Content Bottom Bar */
                     <height>28</height>
                    </size>
                   </property>
+                  <property name="toolTip">
+                   <string>最小化窗口</string>
+                  </property>
                   <property name="styleSheet">
                    <string notr="true">background-image: url(:/icons/images/icon/minimize.png);</string>
                   </property>
@@ -1156,6 +1206,9 @@ Content Bottom Bar */
                     <height>28</height>
                    </size>
                   </property>
+                  <property name="toolTip">
+                   <string>窗口全屏</string>
+                  </property>
                   <property name="styleSheet">
                    <string notr="true">background-image: url(:/icons/images/icon/maximize.png);</string>
                   </property>
@@ -1177,6 +1230,9 @@ Content Bottom Bar */
                     <width>28</width>
                     <height>28</height>
                    </size>
+                  </property>
+                  <property name="toolTip">
+                   <string>关闭应用</string>
                   </property>
                   <property name="styleSheet">
                    <string notr="true">background-image: url(:/icons/images/icon/close.png);</string>
@@ -1227,6 +1283,424 @@ Content Bottom Bar */
                <property name="frameShadow">
                 <enum>QFrame::Raised</enum>
                </property>
+               <layout class="QHBoxLayout" name="horizontalLayout_10">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QStackedWidget" name="stackedWidget">
+                  <widget class="QWidget" name="home"/>
+                  <widget class="QWidget" name="server">
+                   <layout class="QVBoxLayout" name="verticalLayout_16">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QFrame" name="createShareFrame">
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>30</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>16777215</width>
+                        <height>30</height>
+                       </size>
+                      </property>
+                      <property name="frameShape">
+                       <enum>QFrame::StyledPanel</enum>
+                      </property>
+                      <property name="frameShadow">
+                       <enum>QFrame::Raised</enum>
+                      </property>
+                      <layout class="QHBoxLayout" name="horizontalLayout_12">
+                       <property name="spacing">
+                        <number>0</number>
+                       </property>
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                       <item>
+                        <widget class="QFrame" name="serverParamFrame">
+                         <property name="frameShape">
+                          <enum>QFrame::StyledPanel</enum>
+                         </property>
+                         <property name="frameShadow">
+                          <enum>QFrame::Raised</enum>
+                         </property>
+                         <layout class="QHBoxLayout" name="horizontalLayout_11">
+                          <property name="spacing">
+                           <number>0</number>
+                          </property>
+                          <property name="leftMargin">
+                           <number>0</number>
+                          </property>
+                          <property name="topMargin">
+                           <number>0</number>
+                          </property>
+                          <property name="rightMargin">
+                           <number>0</number>
+                          </property>
+                          <property name="bottomMargin">
+                           <number>0</number>
+                          </property>
+                          <item alignment="Qt::AlignLeft">
+                           <widget class="QFrame" name="shareTypeFrame">
+                            <property name="minimumSize">
+                             <size>
+                              <width>0</width>
+                              <height>0</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>16777215</width>
+                              <height>16777215</height>
+                             </size>
+                            </property>
+                            <property name="frameShape">
+                             <enum>QFrame::StyledPanel</enum>
+                            </property>
+                            <property name="frameShadow">
+                             <enum>QFrame::Raised</enum>
+                            </property>
+                            <layout class="QHBoxLayout" name="horizontalLayout_13">
+                             <property name="spacing">
+                              <number>0</number>
+                             </property>
+                             <property name="leftMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="topMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="rightMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="bottomMargin">
+                              <number>0</number>
+                             </property>
+                             <item>
+                              <widget class="QLabel" name="shareTypeLabel">
+                               <property name="minimumSize">
+                                <size>
+                                 <width>70</width>
+                                 <height>0</height>
+                                </size>
+                               </property>
+                               <property name="maximumSize">
+                                <size>
+                                 <width>70</width>
+                                 <height>16777215</height>
+                                </size>
+                               </property>
+                               <property name="text">
+                                <string>分享类型：</string>
+                               </property>
+                              </widget>
+                             </item>
+                             <item>
+                              <widget class="QComboBox" name="shareTypeCombo">
+                               <item>
+                                <property name="text">
+                                 <string>HTTP</string>
+                                </property>
+                               </item>
+                               <item>
+                                <property name="text">
+                                 <string>FTP</string>
+                                </property>
+                               </item>
+                              </widget>
+                             </item>
+                            </layout>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QFrame" name="sharePathFrame">
+                            <property name="minimumSize">
+                             <size>
+                              <width>0</width>
+                              <height>0</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>16777215</width>
+                              <height>16777215</height>
+                             </size>
+                            </property>
+                            <property name="frameShape">
+                             <enum>QFrame::StyledPanel</enum>
+                            </property>
+                            <property name="frameShadow">
+                             <enum>QFrame::Raised</enum>
+                            </property>
+                            <layout class="QHBoxLayout" name="horizontalLayout_14">
+                             <property name="spacing">
+                              <number>0</number>
+                             </property>
+                             <property name="leftMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="topMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="rightMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="bottomMargin">
+                              <number>0</number>
+                             </property>
+                             <item>
+                              <widget class="QLabel" name="sharePathLabel">
+                               <property name="text">
+                                <string>分享路径：</string>
+                               </property>
+                              </widget>
+                             </item>
+                             <item>
+                              <widget class="QLineEdit" name="sharePathEdit"/>
+                             </item>
+                             <item>
+                              <widget class="QPushButton" name="sharePathButton">
+                               <property name="minimumSize">
+                                <size>
+                                 <width>40</width>
+                                 <height>20</height>
+                                </size>
+                               </property>
+                               <property name="maximumSize">
+                                <size>
+                                 <width>40</width>
+                                 <height>20</height>
+                                </size>
+                               </property>
+                               <property name="styleSheet">
+                                <string notr="true">background-image: url(:/icons/images/icon/folder.png);</string>
+                               </property>
+                               <property name="text">
+                                <string/>
+                               </property>
+                              </widget>
+                             </item>
+                            </layout>
+                           </widget>
+                          </item>
+                          <item alignment="Qt::AlignRight">
+                           <widget class="QFrame" name="shareFileFrame">
+                            <property name="minimumSize">
+                             <size>
+                              <width>0</width>
+                              <height>0</height>
+                             </size>
+                            </property>
+                            <property name="frameShape">
+                             <enum>QFrame::StyledPanel</enum>
+                            </property>
+                            <property name="frameShadow">
+                             <enum>QFrame::Raised</enum>
+                            </property>
+                            <layout class="QHBoxLayout" name="horizontalLayout_15">
+                             <property name="spacing">
+                              <number>0</number>
+                             </property>
+                             <property name="leftMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="topMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="rightMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="bottomMargin">
+                              <number>0</number>
+                             </property>
+                             <item>
+                              <widget class="QLabel" name="shareFileLbael">
+                               <property name="minimumSize">
+                                <size>
+                                 <width>70</width>
+                                 <height>0</height>
+                                </size>
+                               </property>
+                               <property name="maximumSize">
+                                <size>
+                                 <width>70</width>
+                                 <height>16777215</height>
+                                </size>
+                               </property>
+                               <property name="text">
+                                <string>选取文件：</string>
+                               </property>
+                              </widget>
+                             </item>
+                             <item>
+                              <widget class="QComboBox" name="shareFileCombo">
+                               <item>
+                                <property name="text">
+                                 <string>分享整个文件夹</string>
+                                </property>
+                               </item>
+                              </widget>
+                             </item>
+                            </layout>
+                           </widget>
+                          </item>
+                         </layout>
+                        </widget>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="createShareButton">
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>30</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>16777215</width>
+                        <height>30</height>
+                       </size>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QTableWidget" name="shareListTable">
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>16777215</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <row>
+                       <property name="text">
+                        <string>新建行</string>
+                       </property>
+                      </row>
+                      <row>
+                       <property name="text">
+                        <string>新建行</string>
+                       </property>
+                      </row>
+                      <row>
+                       <property name="text">
+                        <string>新建行</string>
+                       </property>
+                      </row>
+                      <row>
+                       <property name="text">
+                        <string>新建行</string>
+                       </property>
+                      </row>
+                      <row>
+                       <property name="text">
+                        <string>新建行</string>
+                       </property>
+                      </row>
+                      <row>
+                       <property name="text">
+                        <string>新建行</string>
+                       </property>
+                      </row>
+                      <row>
+                       <property name="text">
+                        <string>新建行</string>
+                       </property>
+                      </row>
+                      <row>
+                       <property name="text">
+                        <string>新建行</string>
+                       </property>
+                      </row>
+                      <row>
+                       <property name="text">
+                        <string>新建行</string>
+                       </property>
+                      </row>
+                      <row>
+                       <property name="text">
+                        <string>新建行</string>
+                       </property>
+                      </row>
+                      <column>
+                       <property name="text">
+                        <string>0</string>
+                       </property>
+                      </column>
+                      <column>
+                       <property name="text">
+                        <string>1</string>
+                       </property>
+                      </column>
+                      <column>
+                       <property name="text">
+                        <string>2</string>
+                       </property>
+                      </column>
+                      <column>
+                       <property name="text">
+                        <string>3</string>
+                       </property>
+                      </column>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                  <widget class="QWidget" name="client"/>
+                  <widget class="QWidget" name="download"/>
+                 </widget>
+                </item>
+               </layout>
               </widget>
              </item>
              <item>
