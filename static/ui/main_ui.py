@@ -12,7 +12,6 @@ from PyQt5 import QtGui, QtWidgets
 
 from . main_qrc import *
 
-
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -165,6 +164,21 @@ class Ui_MainWindow(object):
 "#logPathButton:pressed, #downloadPathButton:pressed {\n"
 "    background-color: #409eff;\n"
 "}\n"
+"#outsideLinkFrame {\n"
+"    padding: 10px 0 10px 10px;\n"
+"}\n"
+"#shareProjectButton {\n"
+"    margin-bottom: 10px;\n"
+"}\n"
+"#shareProjectButton, #browseProjectButton {\n"
+"    border: 1px solid #409eff;\n"
+"}\n"
+"#shareProjectButton:hover, #browseProjectButton:hover {\n"
+"    background-color: #409eff;\n"
+"}\n"
+"#shareProjectButton:pressed, #browseProjectButton:pressed {\n"
+"    border: 2px solid #ffffff;\n"
+"}\n"
 "/* ///////////////////////////////////////////////////////////////////////////////\n"
 "Extra Bottom Box */\n"
 "#extraBottomBox #saveSettingButton {\n"
@@ -209,6 +223,32 @@ class Ui_MainWindow(object):
 "Content Bottom Box */\n"
 "#contentBottomBox {\n"
 "    background-color: rgb(246, 246, 246);\n"
+"}\n"
+"/* ///////////////////////////////////////////////////////////////////////////////\n"
+"Content stackedWidget Box */\n"
+"/* ///////////////////////////////////////////////////////////////////////////////\n"
+"Content server Box */\n"
+"#server {\n"
+"    background-color: rgb(246, 246, 246);\n"
+"}\n"
+"#createShareFrame {\n"
+"    padding: 20px;\n"
+"}\n"
+"#createShareButton {\n"
+"    margin: 0 20px;\n"
+"    background-color: rgb(42, 188, 255);\n"
+"    color: #ffffff;\n"
+"    border-radius: 10%;\n"
+"}\n"
+"#createShareButton:hover {\n"
+"    background-color: rgb(64, 158, 255);\n"
+"}\n"
+"#createShareButton:pressed {\n"
+"    border: 2px solid #ffffff;\n"
+"}\n"
+"#shareListTable {\n"
+"    margin-top: 9px;\n"
+"    border-top: 2px solid #409eff;\n"
 "}\n"
 "/* ///////////////////////////////////////////////////////////////////////////////\n"
 "Content Bottom Bar */\n"
@@ -455,6 +495,25 @@ class Ui_MainWindow(object):
         self.horizontalLayout_9.addWidget(self.downloadPathButton)
         self.verticalLayout_14.addWidget(self.downloadPathFrame)
         self.verticalLayout_15.addWidget(self.downloadPathBox)
+        self.outsideLinkFrame = QtWidgets.QFrame(self.extraContentBox)
+        self.outsideLinkFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.outsideLinkFrame.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.outsideLinkFrame.setObjectName("outsideLinkFrame")
+        self.verticalLayout_17 = QtWidgets.QVBoxLayout(self.outsideLinkFrame)
+        self.verticalLayout_17.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_17.setSpacing(0)
+        self.verticalLayout_17.setObjectName("verticalLayout_17")
+        self.shareProjectButton = QtWidgets.QPushButton(self.outsideLinkFrame)
+        self.shareProjectButton.setMinimumSize(QtCore.QSize(80, 34))
+        self.shareProjectButton.setMaximumSize(QtCore.QSize(80, 34))
+        self.shareProjectButton.setObjectName("shareProjectButton")
+        self.verticalLayout_17.addWidget(self.shareProjectButton)
+        self.browseProjectButton = QtWidgets.QPushButton(self.outsideLinkFrame)
+        self.browseProjectButton.setMinimumSize(QtCore.QSize(80, 22))
+        self.browseProjectButton.setMaximumSize(QtCore.QSize(80, 22))
+        self.browseProjectButton.setObjectName("browseProjectButton")
+        self.verticalLayout_17.addWidget(self.browseProjectButton)
+        self.verticalLayout_15.addWidget(self.outsideLinkFrame)
         self.verticalLayout_3.addWidget(self.extraContentBox, 0, QtCore.Qt.AlignTop)
         self.extraBottomBox = QtWidgets.QFrame(self.extraBox)
         self.extraBottomBox.setMaximumSize(QtCore.QSize(16777215, 100))
@@ -572,8 +631,8 @@ class Ui_MainWindow(object):
         self.verticalLayout_16.setSpacing(0)
         self.verticalLayout_16.setObjectName("verticalLayout_16")
         self.createShareFrame = QtWidgets.QFrame(self.server)
-        self.createShareFrame.setMinimumSize(QtCore.QSize(0, 30))
-        self.createShareFrame.setMaximumSize(QtCore.QSize(16777215, 30))
+        self.createShareFrame.setMinimumSize(QtCore.QSize(0, 60))
+        self.createShareFrame.setMaximumSize(QtCore.QSize(16777215, 60))
         self.createShareFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.createShareFrame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.createShareFrame.setObjectName("createShareFrame")
@@ -601,7 +660,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_13.setObjectName("horizontalLayout_13")
         self.shareTypeLabel = QtWidgets.QLabel(self.shareTypeFrame)
         self.shareTypeLabel.setMinimumSize(QtCore.QSize(70, 0))
-        self.shareTypeLabel.setMaximumSize(QtCore.QSize(70, 16777215))
+        self.shareTypeLabel.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.shareTypeLabel.setObjectName("shareTypeLabel")
         self.horizontalLayout_13.addWidget(self.shareTypeLabel)
         self.shareTypeCombo = QtWidgets.QComboBox(self.shareTypeFrame)
@@ -621,6 +680,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_14.setSpacing(0)
         self.horizontalLayout_14.setObjectName("horizontalLayout_14")
         self.sharePathLabel = QtWidgets.QLabel(self.sharePathFrame)
+        self.sharePathLabel.setMinimumSize(QtCore.QSize(70, 0))
         self.sharePathLabel.setObjectName("sharePathLabel")
         self.horizontalLayout_14.addWidget(self.sharePathLabel)
         self.sharePathEdit = QtWidgets.QLineEdit(self.sharePathFrame)
@@ -645,7 +705,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_15.setObjectName("horizontalLayout_15")
         self.shareFileLbael = QtWidgets.QLabel(self.shareFileFrame)
         self.shareFileLbael.setMinimumSize(QtCore.QSize(70, 0))
-        self.shareFileLbael.setMaximumSize(QtCore.QSize(70, 16777215))
+        self.shareFileLbael.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.shareFileLbael.setObjectName("shareFileLbael")
         self.horizontalLayout_15.addWidget(self.shareFileLbael)
         self.shareFileCombo = QtWidgets.QComboBox(self.shareFileFrame)
@@ -656,9 +716,8 @@ class Ui_MainWindow(object):
         self.horizontalLayout_12.addWidget(self.serverParamFrame)
         self.verticalLayout_16.addWidget(self.createShareFrame)
         self.createShareButton = QtWidgets.QPushButton(self.server)
-        self.createShareButton.setMinimumSize(QtCore.QSize(0, 30))
-        self.createShareButton.setMaximumSize(QtCore.QSize(16777215, 30))
-        self.createShareButton.setText("")
+        self.createShareButton.setMinimumSize(QtCore.QSize(0, 32))
+        self.createShareButton.setMaximumSize(QtCore.QSize(16777215, 32))
         self.createShareButton.setObjectName("createShareButton")
         self.verticalLayout_16.addWidget(self.createShareButton)
         self.shareListTable = QtWidgets.QTableWidget(self.server)
@@ -777,6 +836,8 @@ class Ui_MainWindow(object):
         self.logPathButton.setToolTip(_translate("MainWindow", "打开资源管理器选择路径"))
         self.downloadPathLabel.setText(_translate("MainWindow", "下载路径："))
         self.downloadPathButton.setToolTip(_translate("MainWindow", "打开资源管理器选择路径"))
+        self.shareProjectButton.setText(_translate("MainWindow", "分享软件"))
+        self.browseProjectButton.setText(_translate("MainWindow", "打开项目"))
         self.saveSettingButton.setToolTip(_translate("MainWindow", "保存配置"))
         self.saveSettingButton.setText(_translate("MainWindow", "保存"))
         self.cancelSettingButton.setToolTip(_translate("MainWindow", "取消配置"))
@@ -791,6 +852,7 @@ class Ui_MainWindow(object):
         self.sharePathLabel.setText(_translate("MainWindow", "分享路径："))
         self.shareFileLbael.setText(_translate("MainWindow", "选取文件："))
         self.shareFileCombo.setItemText(0, _translate("MainWindow", "分享整个文件夹"))
+        self.createShareButton.setText(_translate("MainWindow", "新建分享"))
         item = self.shareListTable.verticalHeaderItem(0)
         item.setText(_translate("MainWindow", "新建行"))
         item = self.shareListTable.verticalHeaderItem(1)

@@ -2,14 +2,16 @@ __all__ = [
     "UiFunction"
 ]
 
+import webbrowser
 from typing import Union
 
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import (
     QPropertyAnimation, QEasingCurve, Qt, QEvent, QPoint
 )
-from PyQt5.Qt import QPushButton
+from PyQt5.Qt import QPushButton, QMessageBox
 from PyQt5.QtGui import QMouseEvent
+import pyperclip as clip
 
 from main import MainWindow
 from . custom_grips import CustomGrip
@@ -20,6 +22,7 @@ class UiFunction:
 
         self._main_window = window
         self._elements = self._main_window.ui
+        # self._elements = self._main_window
         self._maximize_flag: bool = False
         self._dragPos: Union[QPoint, None] = None
         self._select_menu_style = """
@@ -27,6 +30,11 @@ class UiFunction:
         """
         self._select_setting_style = """
         border: 2px solid #409eff;background-color: #ffffff;
+        """
+        self._messageBox_normal_style = """
+        QMessageBox {background-color: rgb(236, 236, 236); border: 1px solid #409eff; border-radius: 10%;}
+        QLabel {border: none; font-size: 14px;}
+        QMessageBox QPushButton {width: 60px; height: 40px; border-radius: 10px;}
         """
         self._left_grip = CustomGrip(self._main_window, Qt.LeftEdge)
         self._right_grip = CustomGrip(self._main_window, Qt.RightEdge)
@@ -43,18 +51,23 @@ class UiFunction:
         # main window scale
 
     def _setup_event_connect(self) -> None:
+        # window element
         self._elements.minimizeButton.clicked.connect(lambda: self._main_window.showMinimized())
         self._elements.maximizeRestoreButton.clicked.connect(lambda : self._maximize_restore())
-        self._elements.settingButton.clicked.connect(lambda : self._extra_setting())
-        self._elements.closeSettingButton.clicked.connect(lambda : self._extra_setting())
-        self._elements.closeAppButton.clicked.connect(lambda : self._main_window.close())
-        self._elements.contentTopBox.mouseDoubleClickEvent = self._contentTopDpubleClicked
-        self._elements.contentTopBox.mouseMoveEvent = self._moveWindow
-
+        self._elements.closeAppButton.clicked.connect(lambda: self._main_window.close())
+        # left menu element
         self._elements.homeButton.clicked.connect(self._menu_button_clicked)
         self._elements.serverButton.clicked.connect(self._menu_button_clicked)
         self._elements.clientButton.clicked.connect(self._menu_button_clicked)
         self._elements.downloadButton.clicked.connect(self._menu_button_clicked)
+        self._elements.settingButton.clicked.connect(lambda: self._extra_setting())
+        # extra element
+        self._elements.shareProjectButton.clicked.connect(lambda : self._save_share_msg())
+        self._elements.browseProjectButton.clicked.connect(lambda: self._open_project_code())
+        self._elements.closeSettingButton.clicked.connect(lambda : self._extra_setting())
+        # content element
+        self._elements.contentTopBox.mouseDoubleClickEvent = self._contentTopDpubleClicked
+        self._elements.contentTopBox.mouseMoveEvent = self._moveWindow
 
     def _maximize_restore(self) -> None:
         maximize_image = "background-image: url(:/icons/images/icon/maximize.png);"
@@ -74,6 +87,16 @@ class UiFunction:
                 self._elements.maximizeRestoreButton.styleSheet().replace(restore_image, maximize_image)
             )
 
+    def _save_share_msg(self):
+        msg = "我正在使用file-sharer分享/下载文件, 快一起来玩玩吧, 下载地址: https://github.com/zzmx-sudo/file_sharer-LAN"
+        clip.copy(msg)
+
+        self._show_info_messageBox("复制成功, 快发送给小伙伴吧^_^")
+
+    def _open_project_code(self):
+
+        webbrowser.open_new_tab("https://github.com/zzmx-sudo/file_sharer-LAN")
+
     def _extra_setting(self) -> None:
         style = self._elements.settingButton.styleSheet()
         width = self._elements.extraBox.width()
@@ -87,7 +110,7 @@ class UiFunction:
             self._elements.settingButton.setStyleSheet(style.replace(self._select_setting_style, ""))
             widthExtended = minExtend
 
-        self.animation = QPropertyAnimation(self._elements.extraBox, b"maximumWidth")
+        self.animation = QPropertyAnimation(self._elements.extraBox, b"minimumWidth")
         self.animation.setDuration(500)
         self.animation.setStartValue(width)
         self.animation.setEndValue(widthExtended)
@@ -167,3 +190,22 @@ class UiFunction:
             (screen.width() - window.width()) / 2,
             (screen.height() - window.height()) / 2
         )
+
+    def _show_info_messageBox(self, msg: str, title: Union[str, None] = None) -> None:
+        if title is None:
+            title = "消息提示"
+        info = QMessageBox(
+            QMessageBox.Information,
+            title, msg,
+            QMessageBox.Ok,
+            parent=self._main_window
+        )
+        info.setStyleSheet(self._messageBox_normal_style + """
+            QMessageBox QPushButton {
+                border: 1px solid #409eff;
+            }
+            QMessageBox QPushButton:hover {
+                background-color: #ffffff;
+            }
+        """)
+        info.exec_()

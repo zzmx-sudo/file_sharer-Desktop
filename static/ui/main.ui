@@ -162,6 +162,21 @@ Extra Content Box */
 #logPathButton:pressed, #downloadPathButton:pressed {
 	background-color: #409eff;
 }
+#outsideLinkFrame {
+	padding: 10px 0 10px 10px;
+}
+#shareProjectButton {
+	margin-bottom: 10px;
+}
+#shareProjectButton, #browseProjectButton {
+	border: 1px solid #409eff;
+}
+#shareProjectButton:hover, #browseProjectButton:hover {
+	background-color: #409eff;
+}
+#shareProjectButton:pressed, #browseProjectButton:pressed {
+	border: 2px solid #ffffff;
+}
 /* ///////////////////////////////////////////////////////////////////////////////
 Extra Bottom Box */
 #extraBottomBox #saveSettingButton {
@@ -206,6 +221,32 @@ Content Top Box */
 Content Bottom Box */
 #contentBottomBox {
 	background-color: rgb(246, 246, 246);
+}
+/* ///////////////////////////////////////////////////////////////////////////////
+Content stackedWidget Box */
+/* ///////////////////////////////////////////////////////////////////////////////
+Content server Box */
+#server {
+	background-color: rgb(246, 246, 246);
+}
+#createShareFrame {
+	padding: 20px;
+}
+#createShareButton {
+	margin: 0 20px;
+	background-color: rgb(42, 188, 255);
+	color: #ffffff;
+	border-radius: 10%;
+}
+#createShareButton:hover {
+	background-color: rgb(64, 158, 255);
+}
+#createShareButton:pressed {
+	border: 2px solid #ffffff;
+}
+#shareListTable {
+	margin-top: 9px;
+	border-top: 2px solid #409eff;
 }
 /* ///////////////////////////////////////////////////////////////////////////////
 Content Bottom Bar */
@@ -978,6 +1019,71 @@ Content Bottom Bar */
                </layout>
               </widget>
              </item>
+             <item>
+              <widget class="QFrame" name="outsideLinkFrame">
+               <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+               </property>
+               <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_17">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QPushButton" name="shareProjectButton">
+                  <property name="minimumSize">
+                   <size>
+                    <width>80</width>
+                    <height>34</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>80</width>
+                    <height>34</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>分享软件</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="browseProjectButton">
+                  <property name="minimumSize">
+                   <size>
+                    <width>80</width>
+                    <height>22</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>80</width>
+                    <height>22</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>打开项目</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
             </layout>
            </widget>
           </item>
@@ -1324,13 +1430,13 @@ Content Bottom Bar */
                       <property name="minimumSize">
                        <size>
                         <width>0</width>
-                        <height>30</height>
+                        <height>60</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
                         <width>16777215</width>
-                        <height>30</height>
+                        <height>60</height>
                        </size>
                       </property>
                       <property name="frameShape">
@@ -1425,7 +1531,7 @@ Content Bottom Bar */
                                </property>
                                <property name="maximumSize">
                                 <size>
-                                 <width>70</width>
+                                 <width>16777215</width>
                                  <height>16777215</height>
                                 </size>
                                </property>
@@ -1489,6 +1595,12 @@ Content Bottom Bar */
                              </property>
                              <item>
                               <widget class="QLabel" name="sharePathLabel">
+                               <property name="minimumSize">
+                                <size>
+                                 <width>70</width>
+                                 <height>0</height>
+                                </size>
+                               </property>
                                <property name="text">
                                 <string>分享路径：</string>
                                </property>
@@ -1562,7 +1674,7 @@ Content Bottom Bar */
                                </property>
                                <property name="maximumSize">
                                 <size>
-                                 <width>70</width>
+                                 <width>16777215</width>
                                  <height>16777215</height>
                                 </size>
                                </property>
@@ -1594,17 +1706,17 @@ Content Bottom Bar */
                       <property name="minimumSize">
                        <size>
                         <width>0</width>
-                        <height>30</height>
+                        <height>32</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
                         <width>16777215</width>
-                        <height>30</height>
+                        <height>32</height>
                        </size>
                       </property>
                       <property name="text">
-                       <string/>
+                       <string>新建分享</string>
                       </property>
                      </widget>
                     </item>
