@@ -9,7 +9,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import (
     QPropertyAnimation, QEasingCurve, Qt, QEvent, QPoint
 )
-from PyQt5.Qt import QPushButton, QMessageBox, QTableWidget
+from PyQt5.Qt import QPushButton, QMessageBox
 from PyQt5.QtGui import QMouseEvent
 import pyperclip as clip
 
@@ -68,7 +68,7 @@ class UiFunction:
         # content element
         self._elements.contentTopBox.mouseDoubleClickEvent = self._contentTopDpubleClicked
         self._elements.contentTopBox.mouseMoveEvent = self._moveWindow
-        # self._elements.shareListTable.verticalHeader().setVisible(False)
+        self._elements.shareListTable.verticalHeader().setVisible(False)
 
     def _maximize_restore(self) -> None:
         maximize_image = "background-image: url(:/icons/images/icon/maximize.png);"
@@ -88,13 +88,13 @@ class UiFunction:
                 self._elements.maximizeRestoreButton.styleSheet().replace(restore_image, maximize_image)
             )
 
-    def _save_share_msg(self):
+    def _save_share_msg(self) -> None:
         msg = "我正在使用file-sharer分享/下载文件, 快一起来玩玩吧, 下载地址: https://github.com/zzmx-sudo/file_sharer-LAN"
         clip.copy(msg)
 
-        self._show_info_messageBox("复制成功, 快发送给小伙伴吧^_^")
+        self.show_info_messageBox("复制成功, 快发送给小伙伴吧^_^")
 
-    def _open_project_code(self):
+    def _open_project_code(self) -> None:
 
         webbrowser.open_new_tab("https://github.com/zzmx-sudo/file_sharer-LAN")
 
@@ -192,7 +192,12 @@ class UiFunction:
             (screen.height() - window.height()) / 2
         )
 
-    def _show_info_messageBox(self, msg: str, title: Union[str, None] = None) -> None:
+    def show_info_messageBox(
+            self,
+            msg: str,
+            title: Union[str, None] = None,
+            msg_color: str = "black"
+    ) -> None:
         if title is None:
             title = "消息提示"
         info = QMessageBox(
@@ -201,12 +206,15 @@ class UiFunction:
             QMessageBox.Ok,
             parent=self._main_window
         )
-        info.setStyleSheet(self._messageBox_normal_style + """
-            QMessageBox QPushButton {
+        info.setStyleSheet(self._messageBox_normal_style + f"""
+            QLabel {{
+                color: {msg_color}
+            }}
+            QMessageBox QPushButton {{
                 border: 1px solid #409eff;
-            }
-            QMessageBox QPushButton:hover {
+            }}
+            QMessageBox QPushButton:hover {{
                 background-color: #ffffff;
-            }
+            }}
         """)
         info.exec_()

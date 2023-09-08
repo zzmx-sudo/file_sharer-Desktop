@@ -15,7 +15,7 @@ from . main_qrc import *
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(980, 580)
+        MainWindow.resize(988, 580)
         self.styleSheet = QtWidgets.QWidget(MainWindow)
         self.styleSheet.setStyleSheet("/* ///////////////////////////////////////////////////////////////////////////////\n"
 "Global */\n"
@@ -31,6 +31,118 @@ class Ui_MainWindow(object):
 "QWidget{\n"
 "    color: rgb(0, 0, 0);\n"
 "    border: none;\n"
+"}\n"
+"\n"
+"/* ///////////////////////////////////////////////////////////////////////////////\n"
+"QComboBox */\n"
+"QComboBox {\n"
+"    background-color: rgb(236, 236, 236);\n"
+"    border-radius: 5%;\n"
+"    border: 2px solid #409eff;\n"
+"    padding: 5px;\n"
+"    padding-left: 10px;\n"
+"}\n"
+"QComboBox:hover {\n"
+"    background-color: #409eff;\n"
+"}\n"
+"QComboBox::drop-down {\n"
+"    subcontrol-origin: padding;\n"
+"    subcontrol-position: top right;\n"
+"    width: 25px;\n"
+"    border-left-width: 1px;\n"
+"    border-left-color: #409eff;\n"
+"    border-left-style: solid;\n"
+"    border-top-right-radius: 3px;\n"
+"    border-bottom-right-radius: 3px;\n"
+"    background-image: url(:/icons/images/icon/down.png);\n"
+"    background-position: center;\n"
+"    background-repeat: no-reperat;\n"
+"}\n"
+"QComboBox::drop-down:hover {\n"
+"    background-image: url(:/icons/images/icon/down-avtive.png);\n"
+"}\n"
+"QComboBox QAbstractItemView {\n"
+"    color: rgb(0, 0, 0);\n"
+"    background-color: rgb(236, 236, 236);\n"
+"    padding: 10px;\n"
+"    selection-background-color: #409eff;\n"
+"}\n"
+"\n"
+"/* ///////////////////////////////////////////////////////////////////////////////\n"
+"QTableWidget */\n"
+"QTableWidget {\n"
+"    background-color: rgb(247, 247, 247);\n"
+"    padding: 10px;\n"
+"    border-radius: 5px;\n"
+"    gridline-color: rgb(236, 236, 236);\n"
+"    border-top: 2px solid #ffffff;\n"
+"    border-bottom: 2px solid #409eff;\n"
+"}\n"
+"QTableWidget::item {\n"
+"    padding-left: 5px;\n"
+"    padding-right: 5px;\n"
+"    gridline-color: rgb(236, 236, 236);\n"
+"}\n"
+"QTableWidget::item:selected {\n"
+"    background-color: rgb(126, 199, 255);\n"
+"}\n"
+"QTableWidget::horizontalHeader {\n"
+"    background-color: rgb(247, 247, 247);\n"
+"}\n"
+"QHeaderView::section {\n"
+"    background-color: rgb(247, 247, 247);\n"
+"    max-width: 100px;\n"
+"    border: none;\n"
+"    border-style: none;\n"
+"}\n"
+"QHeaderView::section:horizontal {\n"
+"    border: 1px solid #409eff;\n"
+"    background-color: rgb(247, 247, 247);\n"
+"    padding: 3px;\n"
+"    border-top-left-radius: 7px;\n"
+"    border-top-right-radius: 7px;\n"
+"}\n"
+"QHeaderView::section:vertical {\n"
+"    border: 1px solid rgb(44, 49, 60);\n"
+"}\n"
+"\n"
+"/* ///////////////////////////////////////////////////////////////////////////////\n"
+"QScrollBar */\n"
+"QScrollBar:vertical {\n"
+"    border: none;\n"
+"    background: rgb(236, 236, 236);\n"
+"    width: 8px;\n"
+"    margin: 21px 0 21px 0;\n"
+"    border-radius: 0px;\n"
+"}\n"
+"QScrollBar::handle:vertical {    \n"
+"    background: #409eff;\n"
+"    min-height: 25px;\n"
+"    border-radius: 4px\n"
+"}\n"
+"QScrollBar::add-line:vertical {\n"
+"    border: none;\n"
+"    background: rgb(100, 100, 100);\n"
+"    height: 20px;\n"
+"    border-bottom-left-radius: 4px;\n"
+"    border-bottom-right-radius: 4px;\n"
+"    subcontrol-position: bottom;\n"
+"    subcontrol-origin: margin;\n"
+"}\n"
+"QScrollBar::sub-line:vertical {\n"
+"    border: none;\n"
+"    background: rgb(100, 100, 100);\n"
+"    height: 20px;\n"
+"    border-top-left-radius: 4px;\n"
+"    border-top-right-radius: 4px;\n"
+"    subcontrol-position: top;\n"
+"    subcontrol-origin: margin;\n"
+"}\n"
+"QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {\n"
+"    background: none;\n"
+"}\n"
+"QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {\n"
+"    background: none;\n"
 "}\n"
 "\n"
 "/* ///////////////////////////////////////////////////////////////////////////////\n"
@@ -80,8 +192,15 @@ class Ui_MainWindow(object):
 "QPushButton {\n"
 "    background-position: center;\n"
 "    background-repeat: no-repeat;\n"
-"    border: none;\n"
+"    border: 2px solid rgb(126, 199, 255);\n"
 "    border-radius: 5%;\n"
+"    background-color: rg(236, 236, 236)\n"
+"}\n"
+"QPushButton:hover {\n"
+"    border: 2px solid #409eff;\n"
+"}\n"
+"QPushButton:pressed {\n"
+"    background-color: #409eff;\n"
 "}\n"
 "\n"
 "/* ///////////////////////////////////////////////////////////////////////////////\n"
@@ -111,6 +230,9 @@ class Ui_MainWindow(object):
 "    border: none;\n"
 "    border-radius: 0;\n"
 "}\n"
+"#settingButton {\n"
+"    border: none;\n"
+"}\n"
 "\n"
 "/* ///////////////////////////////////////////////////////////////////////////////\n"
 "Extra Box */\n"
@@ -125,9 +247,13 @@ class Ui_MainWindow(object):
 "}\n"
 "#extraTopBox .QLabel {\n"
 "    color: #ffffff;\n"
-"    font: 14px \"JetBrains Mono\";\n"
+"    font-size: 18px;\n"
+"}\n"
+"#extraTopBox .QPushButton {\n"
+"    border: none;\n"
 "}\n"
 "#extraTopBox .QPushButton:hover {\n"
+"    border: none;\n"
 "    background-color: rgb(85, 170, 255);\n"
 "}\n"
 "#extraTopBox .QPushButton:pressed {\n"
@@ -144,58 +270,38 @@ class Ui_MainWindow(object):
 "#downloadPathBox, #logPathBox {\n"
 "    padding: 10px;\n"
 "}\n"
-"#logPathLabel, #downloadPathLabel {\n"
+"#extraContentBox .QLabel {\n"
 "    margin-bottom: 5px;\n"
 "}\n"
-"#logPathEdit, #downloadPathEdit {\n"
+"#extraContentBox .QLineEdit {\n"
 "    border: 1px solid #409eff;\n"
 "    border-radius: 3%;\n"
 "    margin-right: 10px;\n"
 "    background-color: rgb(236, 236, 236);\n"
 "    font: 12px \"JetBrains Mono\";\n"
 "}\n"
-"#logPathButton, #downloadPathButton {\n"
-"    border: 2px solid #409eff;\n"
-"    border-radius: 5%;\n"
-"}\n"
-"#logPathButton:hover, #downloadPathButton:hover {\n"
-"    background-color: #ffffff;\n"
-"}\n"
-"#logPathButton:pressed, #downloadPathButton:pressed {\n"
-"    background-color: #409eff;\n"
-"}\n"
-"#outsideLinkFrame {\n"
-"    padding: 10px 0 10px 10px;\n"
-"}\n"
-"#shareProjectButton {\n"
-"    margin-bottom: 10px;\n"
-"}\n"
-"#shareProjectButton, #browseProjectButton {\n"
-"    border: 1px solid #409eff;\n"
-"}\n"
-"#shareProjectButton:hover, #browseProjectButton:hover {\n"
-"    background-color: #409eff;\n"
-"}\n"
-"#shareProjectButton:pressed, #browseProjectButton:pressed {\n"
-"    border: 2px solid #ffffff;\n"
-"}\n"
+"\n"
 "/* ///////////////////////////////////////////////////////////////////////////////\n"
 "Extra Bottom Box */\n"
 "#extraBottomBox #saveSettingButton {\n"
+"    border: none;\n"
 "    background-color: rgb(42, 188, 255);\n"
 "    color: #ffffff;\n"
 "}\n"
 "#extraBottomBox #saveSettingButton:hover {\n"
+"    border: none;\n"
 "    background-color: rgb(64, 158, 255);\n"
 "}\n"
 "#extraBottomBox #saveSettingButton:pressed {\n"
 "    border: 2px solid #ffffff;\n"
 "}\n"
 "#extraBottomBox #cancelSettingButton {\n"
+"    border: none;\n"
 "    background-color: rgb(217, 217, 217);\n"
 "    color: rgb(0, 0, 0);\n"
 "}\n"
 "#extraBottomBox #cancelSettingButton:hover {\n"
+"    border: none;\n"
 "    background-color: rgb(184, 184, 184);\n"
 "}\n"
 "#extraBottomBox #cancelSettingButton:pressed {\n"
@@ -213,10 +319,15 @@ class Ui_MainWindow(object):
 "#contentTitleBox .QLabel {\n"
 "    font: 14px \"JetBrains Mono\";\n"
 "}\n"
+"#contentTopBox .QPushButton {\n"
+"    border: none;\n"
+"}\n"
 "#contentTopBox .QPushButton:hover {\n"
+"    border: none;\n"
 "    background-color: #ffffff;\n"
 "}\n"
 "#contentTopBox .QPushButton:pressed {\n"
+"    border: none;\n"
 "    background-color: #409eff;\n"
 "}\n"
 "/* ///////////////////////////////////////////////////////////////////////////////\n"
@@ -231,24 +342,23 @@ class Ui_MainWindow(object):
 "#server {\n"
 "    background-color: rgb(246, 246, 246);\n"
 "}\n"
-"#createShareFrame {\n"
-"    padding: 20px;\n"
-"}\n"
 "#createShareButton {\n"
-"    margin: 0 20px;\n"
+"    border: none;\n"
+"    border-radius: 13%;\n"
 "    background-color: rgb(42, 188, 255);\n"
 "    color: #ffffff;\n"
-"    border-radius: 10%;\n"
 "}\n"
 "#createShareButton:hover {\n"
+"    border: none;\n"
 "    background-color: rgb(64, 158, 255);\n"
 "}\n"
 "#createShareButton:pressed {\n"
 "    border: 2px solid #ffffff;\n"
 "}\n"
-"#shareListTable {\n"
-"    margin-top: 9px;\n"
-"    border-top: 2px solid #409eff;\n"
+"#sharePathFrame .QLineEdit {\n"
+"    border: 1px solid #409eff;\n"
+"    border-radius: 5%;\n"
+"    margin-right: 10px;\n"
 "}\n"
 "/* ///////////////////////////////////////////////////////////////////////////////\n"
 "Content Bottom Bar */\n"
@@ -376,11 +486,8 @@ class Ui_MainWindow(object):
         self.horizontalLayout_5.setObjectName("horizontalLayout_5")
         self.settingLabel = QtWidgets.QLabel(self.extraTopBox)
         font = QtGui.QFont()
-        font.setFamily("JetBrains Mono")
+        font.setFamily("KaiTi")
         font.setPointSize(-1)
-        font.setBold(False)
-        font.setItalic(False)
-        font.setWeight(50)
         self.settingLabel.setFont(font)
         self.settingLabel.setObjectName("settingLabel")
         self.horizontalLayout_5.addWidget(self.settingLabel)
@@ -424,9 +531,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout_7.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_7.setSpacing(0)
         self.horizontalLayout_7.setObjectName("horizontalLayout_7")
-        self.saveSgareCheck = QtWidgets.QCheckBox(self.saveShareBox)
-        self.saveSgareCheck.setObjectName("saveSgareCheck")
-        self.horizontalLayout_7.addWidget(self.saveSgareCheck)
+        self.saveShareCheck = QtWidgets.QCheckBox(self.saveShareBox)
+        self.saveShareCheck.setObjectName("saveShareCheck")
+        self.horizontalLayout_7.addWidget(self.saveShareCheck)
         self.verticalLayout_15.addWidget(self.saveShareBox)
         self.logPathBox = QtWidgets.QFrame(self.extraContentBox)
         self.logPathBox.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -500,17 +607,23 @@ class Ui_MainWindow(object):
         self.outsideLinkFrame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.outsideLinkFrame.setObjectName("outsideLinkFrame")
         self.verticalLayout_17 = QtWidgets.QVBoxLayout(self.outsideLinkFrame)
-        self.verticalLayout_17.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout_17.setSpacing(0)
+        self.verticalLayout_17.setContentsMargins(10, 10, 0, 10)
+        self.verticalLayout_17.setSpacing(5)
         self.verticalLayout_17.setObjectName("verticalLayout_17")
         self.shareProjectButton = QtWidgets.QPushButton(self.outsideLinkFrame)
-        self.shareProjectButton.setMinimumSize(QtCore.QSize(80, 34))
-        self.shareProjectButton.setMaximumSize(QtCore.QSize(80, 34))
+        self.shareProjectButton.setMinimumSize(QtCore.QSize(100, 26))
+        self.shareProjectButton.setMaximumSize(QtCore.QSize(100, 26))
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/icons/images/icon/share.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.shareProjectButton.setIcon(icon)
         self.shareProjectButton.setObjectName("shareProjectButton")
         self.verticalLayout_17.addWidget(self.shareProjectButton)
         self.browseProjectButton = QtWidgets.QPushButton(self.outsideLinkFrame)
-        self.browseProjectButton.setMinimumSize(QtCore.QSize(80, 22))
-        self.browseProjectButton.setMaximumSize(QtCore.QSize(80, 22))
+        self.browseProjectButton.setMinimumSize(QtCore.QSize(100, 26))
+        self.browseProjectButton.setMaximumSize(QtCore.QSize(100, 26))
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(":/icons/images/icon/browse.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.browseProjectButton.setIcon(icon1)
         self.browseProjectButton.setObjectName("browseProjectButton")
         self.verticalLayout_17.addWidget(self.browseProjectButton)
         self.verticalLayout_15.addWidget(self.outsideLinkFrame)
@@ -630,25 +743,17 @@ class Ui_MainWindow(object):
         self.verticalLayout_16.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_16.setSpacing(0)
         self.verticalLayout_16.setObjectName("verticalLayout_16")
-        self.createShareFrame = QtWidgets.QFrame(self.server)
-        self.createShareFrame.setMinimumSize(QtCore.QSize(0, 60))
-        self.createShareFrame.setMaximumSize(QtCore.QSize(16777215, 60))
-        self.createShareFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.createShareFrame.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.createShareFrame.setObjectName("createShareFrame")
-        self.horizontalLayout_12 = QtWidgets.QHBoxLayout(self.createShareFrame)
-        self.horizontalLayout_12.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_12.setSpacing(0)
-        self.horizontalLayout_12.setObjectName("horizontalLayout_12")
-        self.serverParamFrame = QtWidgets.QFrame(self.createShareFrame)
-        self.serverParamFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.serverParamFrame.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.serverParamFrame.setObjectName("serverParamFrame")
-        self.horizontalLayout_11 = QtWidgets.QHBoxLayout(self.serverParamFrame)
-        self.horizontalLayout_11.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_11.setSpacing(0)
-        self.horizontalLayout_11.setObjectName("horizontalLayout_11")
-        self.shareTypeFrame = QtWidgets.QFrame(self.serverParamFrame)
+        self.createShareParamFrame = QtWidgets.QFrame(self.server)
+        self.createShareParamFrame.setMinimumSize(QtCore.QSize(0, 60))
+        self.createShareParamFrame.setMaximumSize(QtCore.QSize(16777215, 60))
+        self.createShareParamFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.createShareParamFrame.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.createShareParamFrame.setObjectName("createShareParamFrame")
+        self.horizontalLayout_14 = QtWidgets.QHBoxLayout(self.createShareParamFrame)
+        self.horizontalLayout_14.setContentsMargins(20, 5, 20, 5)
+        self.horizontalLayout_14.setSpacing(20)
+        self.horizontalLayout_14.setObjectName("horizontalLayout_14")
+        self.shareTypeFrame = QtWidgets.QFrame(self.createShareParamFrame)
         self.shareTypeFrame.setMinimumSize(QtCore.QSize(0, 0))
         self.shareTypeFrame.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.shareTypeFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -668,64 +773,91 @@ class Ui_MainWindow(object):
         self.shareTypeCombo.addItem("")
         self.shareTypeCombo.addItem("")
         self.horizontalLayout_13.addWidget(self.shareTypeCombo)
-        self.horizontalLayout_11.addWidget(self.shareTypeFrame, 0, QtCore.Qt.AlignLeft)
-        self.sharePathFrame = QtWidgets.QFrame(self.serverParamFrame)
+        self.horizontalLayout_14.addWidget(self.shareTypeFrame)
+        self.sharePathFrame = QtWidgets.QFrame(self.createShareParamFrame)
         self.sharePathFrame.setMinimumSize(QtCore.QSize(0, 0))
         self.sharePathFrame.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.sharePathFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.sharePathFrame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.sharePathFrame.setObjectName("sharePathFrame")
-        self.horizontalLayout_14 = QtWidgets.QHBoxLayout(self.sharePathFrame)
-        self.horizontalLayout_14.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_14.setSpacing(0)
-        self.horizontalLayout_14.setObjectName("horizontalLayout_14")
+        self.horizontalLayout_12 = QtWidgets.QHBoxLayout(self.sharePathFrame)
+        self.horizontalLayout_12.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_12.setSpacing(0)
+        self.horizontalLayout_12.setObjectName("horizontalLayout_12")
         self.sharePathLabel = QtWidgets.QLabel(self.sharePathFrame)
         self.sharePathLabel.setMinimumSize(QtCore.QSize(70, 0))
         self.sharePathLabel.setObjectName("sharePathLabel")
-        self.horizontalLayout_14.addWidget(self.sharePathLabel)
+        self.horizontalLayout_12.addWidget(self.sharePathLabel)
         self.sharePathEdit = QtWidgets.QLineEdit(self.sharePathFrame)
+        self.sharePathEdit.setMinimumSize(QtCore.QSize(152, 30))
+        self.sharePathEdit.setMaximumSize(QtCore.QSize(16777215, 30))
         self.sharePathEdit.setObjectName("sharePathEdit")
-        self.horizontalLayout_14.addWidget(self.sharePathEdit)
+        self.horizontalLayout_12.addWidget(self.sharePathEdit)
         self.sharePathButton = QtWidgets.QPushButton(self.sharePathFrame)
-        self.sharePathButton.setMinimumSize(QtCore.QSize(40, 20))
-        self.sharePathButton.setMaximumSize(QtCore.QSize(40, 20))
+        self.sharePathButton.setMinimumSize(QtCore.QSize(60, 30))
+        self.sharePathButton.setMaximumSize(QtCore.QSize(60, 30))
         self.sharePathButton.setStyleSheet("background-image: url(:/icons/images/icon/folder.png);")
         self.sharePathButton.setText("")
         self.sharePathButton.setObjectName("sharePathButton")
-        self.horizontalLayout_14.addWidget(self.sharePathButton)
-        self.horizontalLayout_11.addWidget(self.sharePathFrame)
-        self.shareFileFrame = QtWidgets.QFrame(self.serverParamFrame)
+        self.horizontalLayout_12.addWidget(self.sharePathButton)
+        self.horizontalLayout_14.addWidget(self.sharePathFrame)
+        self.shareFileFrame = QtWidgets.QFrame(self.createShareParamFrame)
         self.shareFileFrame.setMinimumSize(QtCore.QSize(0, 0))
         self.shareFileFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.shareFileFrame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.shareFileFrame.setObjectName("shareFileFrame")
-        self.horizontalLayout_15 = QtWidgets.QHBoxLayout(self.shareFileFrame)
-        self.horizontalLayout_15.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_15.setSpacing(0)
-        self.horizontalLayout_15.setObjectName("horizontalLayout_15")
+        self.horizontalLayout_11 = QtWidgets.QHBoxLayout(self.shareFileFrame)
+        self.horizontalLayout_11.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_11.setSpacing(0)
+        self.horizontalLayout_11.setObjectName("horizontalLayout_11")
         self.shareFileLbael = QtWidgets.QLabel(self.shareFileFrame)
         self.shareFileLbael.setMinimumSize(QtCore.QSize(70, 0))
         self.shareFileLbael.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.shareFileLbael.setObjectName("shareFileLbael")
-        self.horizontalLayout_15.addWidget(self.shareFileLbael)
+        self.horizontalLayout_11.addWidget(self.shareFileLbael)
         self.shareFileCombo = QtWidgets.QComboBox(self.shareFileFrame)
         self.shareFileCombo.setObjectName("shareFileCombo")
         self.shareFileCombo.addItem("")
-        self.horizontalLayout_15.addWidget(self.shareFileCombo)
-        self.horizontalLayout_11.addWidget(self.shareFileFrame, 0, QtCore.Qt.AlignRight)
-        self.horizontalLayout_12.addWidget(self.serverParamFrame)
-        self.verticalLayout_16.addWidget(self.createShareFrame)
-        self.createShareButton = QtWidgets.QPushButton(self.server)
-        self.createShareButton.setMinimumSize(QtCore.QSize(0, 32))
-        self.createShareButton.setMaximumSize(QtCore.QSize(16777215, 32))
+        self.horizontalLayout_11.addWidget(self.shareFileCombo)
+        self.horizontalLayout_14.addWidget(self.shareFileFrame)
+        self.verticalLayout_16.addWidget(self.createShareParamFrame)
+        self.createShareButtonFrame = QtWidgets.QFrame(self.server)
+        self.createShareButtonFrame.setMinimumSize(QtCore.QSize(0, 40))
+        self.createShareButtonFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.createShareButtonFrame.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.createShareButtonFrame.setObjectName("createShareButtonFrame")
+        self.verticalLayout_18 = QtWidgets.QVBoxLayout(self.createShareButtonFrame)
+        self.verticalLayout_18.setContentsMargins(20, 5, 20, 10)
+        self.verticalLayout_18.setSpacing(0)
+        self.verticalLayout_18.setObjectName("verticalLayout_18")
+        self.createShareButton = QtWidgets.QPushButton(self.createShareButtonFrame)
+        self.createShareButton.setMinimumSize(QtCore.QSize(0, 26))
+        self.createShareButton.setMaximumSize(QtCore.QSize(16777215, 26))
         self.createShareButton.setObjectName("createShareButton")
-        self.verticalLayout_16.addWidget(self.createShareButton)
-        self.shareListTable = QtWidgets.QTableWidget(self.server)
+        self.verticalLayout_18.addWidget(self.createShareButton)
+        self.verticalLayout_16.addWidget(self.createShareButtonFrame)
+        self.shareListFrame = QtWidgets.QFrame(self.server)
+        self.shareListFrame.setMinimumSize(QtCore.QSize(0, 50))
+        self.shareListFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.shareListFrame.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.shareListFrame.setObjectName("shareListFrame")
+        self.horizontalLayout_15 = QtWidgets.QHBoxLayout(self.shareListFrame)
+        self.horizontalLayout_15.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_15.setSpacing(0)
+        self.horizontalLayout_15.setObjectName("horizontalLayout_15")
+        self.shareListTable = QtWidgets.QTableWidget(self.shareListFrame)
         self.shareListTable.setMinimumSize(QtCore.QSize(0, 0))
         self.shareListTable.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        self.shareListTable.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.shareListTable.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        self.shareListTable.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        self.shareListTable.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
+        self.shareListTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.shareListTable.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.shareListTable.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.shareListTable.setObjectName("shareListTable")
-        self.shareListTable.setColumnCount(4)
-        self.shareListTable.setRowCount(10)
+        self.shareListTable.setColumnCount(5)
+        self.shareListTable.setRowCount(16)
         item = QtWidgets.QTableWidgetItem()
         self.shareListTable.setVerticalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
@@ -747,6 +879,18 @@ class Ui_MainWindow(object):
         item = QtWidgets.QTableWidgetItem()
         self.shareListTable.setVerticalHeaderItem(9, item)
         item = QtWidgets.QTableWidgetItem()
+        self.shareListTable.setVerticalHeaderItem(10, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.shareListTable.setVerticalHeaderItem(11, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.shareListTable.setVerticalHeaderItem(12, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.shareListTable.setVerticalHeaderItem(13, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.shareListTable.setVerticalHeaderItem(14, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.shareListTable.setVerticalHeaderItem(15, item)
+        item = QtWidgets.QTableWidgetItem()
         self.shareListTable.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
         self.shareListTable.setHorizontalHeaderItem(1, item)
@@ -754,7 +898,18 @@ class Ui_MainWindow(object):
         self.shareListTable.setHorizontalHeaderItem(2, item)
         item = QtWidgets.QTableWidgetItem()
         self.shareListTable.setHorizontalHeaderItem(3, item)
-        self.verticalLayout_16.addWidget(self.shareListTable)
+        item = QtWidgets.QTableWidgetItem()
+        self.shareListTable.setHorizontalHeaderItem(4, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.shareListTable.setItem(0, 0, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.shareListTable.setItem(0, 1, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.shareListTable.setItem(0, 2, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.shareListTable.setItem(0, 3, item)
+        self.horizontalLayout_15.addWidget(self.shareListTable)
+        self.verticalLayout_16.addWidget(self.shareListFrame)
         self.stackedWidget.addWidget(self.server)
         self.client = QtWidgets.QWidget()
         self.client.setObjectName("client")
@@ -826,12 +981,12 @@ class Ui_MainWindow(object):
         self.clientButton.setToolTip(_translate("MainWindow", "客户端"))
         self.downloadButton.setToolTip(_translate("MainWindow", "下载记录"))
         self.settingButton.setToolTip(_translate("MainWindow", "打开/关闭设置窗口"))
-        self.settingLabel.setText(_translate("MainWindow", "Settings"))
+        self.settingLabel.setText(_translate("MainWindow", "设置"))
         self.closeSettingButton.setToolTip(_translate("MainWindow", "关闭设置窗口"))
         self.saveSystemCheck.setToolTip(_translate("MainWindow", "勾选保存系统日志"))
         self.saveSystemCheck.setText(_translate("MainWindow", "保存系统日志"))
-        self.saveSgareCheck.setToolTip(_translate("MainWindow", "勾选保存分享日志"))
-        self.saveSgareCheck.setText(_translate("MainWindow", "保存分享日志"))
+        self.saveShareCheck.setToolTip(_translate("MainWindow", "勾选保存分享日志"))
+        self.saveShareCheck.setText(_translate("MainWindow", "保存分享日志"))
         self.logPathLabel.setText(_translate("MainWindow", "日志路径："))
         self.logPathButton.setToolTip(_translate("MainWindow", "打开资源管理器选择路径"))
         self.downloadPathLabel.setText(_translate("MainWindow", "下载路径："))
@@ -840,8 +995,8 @@ class Ui_MainWindow(object):
         self.browseProjectButton.setText(_translate("MainWindow", "打开项目"))
         self.saveSettingButton.setToolTip(_translate("MainWindow", "保存配置"))
         self.saveSettingButton.setText(_translate("MainWindow", "保存"))
-        self.cancelSettingButton.setToolTip(_translate("MainWindow", "取消配置"))
-        self.cancelSettingButton.setText(_translate("MainWindow", "取消"))
+        self.cancelSettingButton.setToolTip(_translate("MainWindow", "撤回配置"))
+        self.cancelSettingButton.setText(_translate("MainWindow", "撤回"))
         self.contentTitleLabel.setText(_translate("MainWindow", "File Sharer - LAN file sharing helper."))
         self.minimizeButton.setToolTip(_translate("MainWindow", "最小化窗口"))
         self.maximizeRestoreButton.setToolTip(_translate("MainWindow", "窗口全屏"))
@@ -854,32 +1009,57 @@ class Ui_MainWindow(object):
         self.shareFileCombo.setItemText(0, _translate("MainWindow", "分享整个文件夹"))
         self.createShareButton.setText(_translate("MainWindow", "新建分享"))
         item = self.shareListTable.verticalHeaderItem(0)
-        item.setText(_translate("MainWindow", "新建行"))
-        item = self.shareListTable.verticalHeaderItem(1)
-        item.setText(_translate("MainWindow", "新建行"))
-        item = self.shareListTable.verticalHeaderItem(2)
-        item.setText(_translate("MainWindow", "新建行"))
-        item = self.shareListTable.verticalHeaderItem(3)
-        item.setText(_translate("MainWindow", "新建行"))
-        item = self.shareListTable.verticalHeaderItem(4)
-        item.setText(_translate("MainWindow", "新建行"))
-        item = self.shareListTable.verticalHeaderItem(5)
-        item.setText(_translate("MainWindow", "新建行"))
-        item = self.shareListTable.verticalHeaderItem(6)
-        item.setText(_translate("MainWindow", "新建行"))
-        item = self.shareListTable.verticalHeaderItem(7)
-        item.setText(_translate("MainWindow", "新建行"))
-        item = self.shareListTable.verticalHeaderItem(8)
-        item.setText(_translate("MainWindow", "新建行"))
-        item = self.shareListTable.verticalHeaderItem(9)
-        item.setText(_translate("MainWindow", "新建行"))
-        item = self.shareListTable.horizontalHeaderItem(0)
         item.setText(_translate("MainWindow", "0"))
-        item = self.shareListTable.horizontalHeaderItem(1)
+        item = self.shareListTable.verticalHeaderItem(1)
         item.setText(_translate("MainWindow", "1"))
-        item = self.shareListTable.horizontalHeaderItem(2)
+        item = self.shareListTable.verticalHeaderItem(2)
         item.setText(_translate("MainWindow", "2"))
-        item = self.shareListTable.horizontalHeaderItem(3)
+        item = self.shareListTable.verticalHeaderItem(3)
         item.setText(_translate("MainWindow", "3"))
+        item = self.shareListTable.verticalHeaderItem(4)
+        item.setText(_translate("MainWindow", "4"))
+        item = self.shareListTable.verticalHeaderItem(5)
+        item.setText(_translate("MainWindow", "5"))
+        item = self.shareListTable.verticalHeaderItem(6)
+        item.setText(_translate("MainWindow", "6"))
+        item = self.shareListTable.verticalHeaderItem(7)
+        item.setText(_translate("MainWindow", "7"))
+        item = self.shareListTable.verticalHeaderItem(8)
+        item.setText(_translate("MainWindow", "8"))
+        item = self.shareListTable.verticalHeaderItem(9)
+        item.setText(_translate("MainWindow", "9"))
+        item = self.shareListTable.verticalHeaderItem(10)
+        item.setText(_translate("MainWindow", "10"))
+        item = self.shareListTable.verticalHeaderItem(11)
+        item.setText(_translate("MainWindow", "11"))
+        item = self.shareListTable.verticalHeaderItem(12)
+        item.setText(_translate("MainWindow", "12"))
+        item = self.shareListTable.verticalHeaderItem(13)
+        item.setText(_translate("MainWindow", "13"))
+        item = self.shareListTable.verticalHeaderItem(14)
+        item.setText(_translate("MainWindow", "14"))
+        item = self.shareListTable.verticalHeaderItem(15)
+        item.setText(_translate("MainWindow", "15"))
+        item = self.shareListTable.horizontalHeaderItem(0)
+        item.setText(_translate("MainWindow", "分享类型"))
+        item = self.shareListTable.horizontalHeaderItem(1)
+        item.setText(_translate("MainWindow", "分享路径"))
+        item = self.shareListTable.horizontalHeaderItem(2)
+        item.setText(_translate("MainWindow", "分享文件"))
+        item = self.shareListTable.horizontalHeaderItem(3)
+        item.setText(_translate("MainWindow", "分享状态"))
+        item = self.shareListTable.horizontalHeaderItem(4)
+        item.setText(_translate("MainWindow", "操作"))
+        __sortingEnabled = self.shareListTable.isSortingEnabled()
+        self.shareListTable.setSortingEnabled(False)
+        item = self.shareListTable.item(0, 0)
+        item.setText(_translate("MainWindow", "HTTP"))
+        item = self.shareListTable.item(0, 1)
+        item.setText(_translate("MainWindow", "/Users/mr.cheng/GitSourceCodes/file_sharer-LAN"))
+        item = self.shareListTable.item(0, 2)
+        item.setText(_translate("MainWindow", "整个文件夹"))
+        item = self.shareListTable.item(0, 3)
+        item.setText(_translate("MainWindow", "分享中"))
+        self.shareListTable.setSortingEnabled(__sortingEnabled)
         self.authorLabel.setText(_translate("MainWindow", "By: 大宝天天见丶"))
         self.versionLabel.setText(_translate("MainWindow", "v0.0.1"))

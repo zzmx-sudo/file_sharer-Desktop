@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>980</width>
+    <width>988</width>
     <height>580</height>
    </rect>
   </property>
@@ -763,9 +763,6 @@ Content Bottom Bar */
                 <font>
                  <family>KaiTi</family>
                  <pointsize>-1</pointsize>
-                 <weight>50</weight>
-                 <italic>false</italic>
-                 <bold>false</bold>
                 </font>
                </property>
                <property name="text">
@@ -911,7 +908,7 @@ Content Bottom Bar */
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QCheckBox" name="saveSgareCheck">
+                 <widget class="QCheckBox" name="saveShareCheck">
                   <property name="toolTip">
                    <string>勾选保存分享日志</string>
                   </property>
@@ -1257,10 +1254,10 @@ Content Bottom Bar */
                 </size>
                </property>
                <property name="toolTip">
-                <string>取消配置</string>
+                <string>撤回配置</string>
                </property>
                <property name="text">
-                <string>取消</string>
+                <string>撤回</string>
                </property>
               </widget>
              </item>
