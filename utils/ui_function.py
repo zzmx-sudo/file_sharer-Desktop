@@ -9,7 +9,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import (
     QPropertyAnimation, QEasingCurve, Qt, QEvent, QPoint
 )
-from PyQt5.Qt import QPushButton, QMessageBox
+from PyQt5.Qt import QPushButton, QMessageBox, QTableWidget
 from PyQt5.QtGui import QMouseEvent
 import pyperclip as clip
 
@@ -21,8 +21,8 @@ class UiFunction:
     def __init__(self, window: MainWindow) -> None:
 
         self._main_window = window
-        self._elements = self._main_window.ui
-        # self._elements = self._main_window
+        # self._elements = self._main_window.ui
+        self._elements = self._main_window
         self._maximize_flag: bool = False
         self._dragPos: Union[QPoint, None] = None
         self._select_menu_style = """
@@ -68,6 +68,7 @@ class UiFunction:
         # content element
         self._elements.contentTopBox.mouseDoubleClickEvent = self._contentTopDpubleClicked
         self._elements.contentTopBox.mouseMoveEvent = self._moveWindow
+        # self._elements.shareListTable.verticalHeader().setVisible(False)
 
     def _maximize_restore(self) -> None:
         maximize_image = "background-image: url(:/icons/images/icon/maximize.png);"

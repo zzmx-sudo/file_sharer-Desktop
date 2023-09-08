@@ -1,5 +1,9 @@
 <RCC>
   <qresource prefix="icons">
+    <file>../images/icon/browse.png</file>
+    <file>../images/icon/browse-active.png</file>
+    <file>../images/icon/down.png</file>
+    <file>../images/icon/down-avtive.png</file>
     <file>../images/icon/check.png</file>
     <file>../images/icon/client-active.png</file>
     <file>../images/icon/back-active.png</file>
