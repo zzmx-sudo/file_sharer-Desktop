@@ -43,7 +43,7 @@ class UiFunction:
 
     def setup(self) -> None:
         # main window event connect
-        self._main_window.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        self._main_window.setWindowFlags(Qt.FramelessWindowHint)
         self._main_window.mousePressEvent = self._mousePressEvent
         self._main_window.resizeEvent = self._resize_grips
         # elements event connect

@@ -43,6 +43,12 @@ class ServiceProcessManager:
             sysLogger.error(f"未知的共享类型参数: {share_type}, 共享失败！")
             return False
 
+    def modify_settings(self, key: str, value: Union[bool, str]) -> bool:
+        self._http_input_q.put(("settings", (key, value)))
+        self._ftp_input_q.put(("settings", (key, value)))
+
+        return True
+
     def close_ftp(self) -> bool:
         if self._ftp_service is not None:
             self._kill_process(self._ftp_service.pid)

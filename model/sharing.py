@@ -107,7 +107,7 @@ class FuseSharingModel(list):
         with open(backup_file_path) as f:
             try:
                 backup_result = json.loads(f.read())
-            except json.decoder.JSONDecodeError:
+            except json.JSONDecodeError:
                 sysLogger.error("加载历史分享记录失败, file_sharing_backups.json文件已损坏")
                 return model
 

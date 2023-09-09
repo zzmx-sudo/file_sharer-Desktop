@@ -3,6 +3,7 @@ __all__ = [
 ]
 
 import os
+import json
 import importlib
 from typing import Any
 
@@ -86,6 +87,37 @@ class FuseSettings:
 
         if not os.path.isdir(logs_path):
             raise OperationException(f"配置的日志文件夹路径不存在, LOGS_PATH: {logs_path}")
+
+    def load(self) -> None:
+        settings_file = os.path.join(self.BASE_DIR, "settings.json")
+        if not os.path.exists(settings_file):
+            return
+        with open(settings_file) as f:
+            try:
+                settings_config = json.loads(f.read())
+            except json.JSONDecodeError:
+                return
+        if not isinstance(settings_config, dict):
+            return
+
+        self.__dict__["SAVE_SYSTEM_LOG"] = settings_config.get("saveSystemLog", True)
+        self.__dict__["SAVE_SHARER_LOG"] = settings_config.get("saveShareLog", True)
+        logsPath = settings_config.get("logsPath")
+        if logsPath and os.path.isdir(logsPath):
+            self.__dict__["LOGS_PATH"] = logsPath
+        downloadPath = settings_config.get("downloadPath")
+        if downloadPath and os.path.isdir(downloadPath):
+            self.__dict__["DOWNLOAD_DIR"] = downloadPath
+
+    def dump(self) -> None:
+        settings_file = os.path.join(self.BASE_DIR, "settings.json")
+        with open(settings_file, "w") as f:
+            json.dump({
+                "saveSystemLog": self.SAVE_SYSTEM_LOG,
+                "saveShareLog": self.SAVE_SHARER_LOG,
+                "logsPath": self.LOGS_PATH,
+                "downloadPath": self.DOWNLOAD_DIR
+            }, f, indent=4, separators=(",", ": "), ensure_ascii=False)
 
 
 settings = FuseSettings("develop")

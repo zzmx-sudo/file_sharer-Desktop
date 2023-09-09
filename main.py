@@ -42,19 +42,7 @@ class MainWindow(QMainWindow):
         self.ui.show()
 
     def _load_settings(self) -> None:
-        settings_file = os.path.join(settings.BASE_DIR, "settings.json")
-        if not os.path.exists(settings_file):
-            self._cancel_settings()
-            return
-        with open(settings_file) as f:
-            settings_config = json.loads(f.read())
-        if not isinstance(settings_config, dict):
-            self._cancel_settings()
-            return
-        settings.SAVE_SYSTEM_LOG = True and settings_config.get("saveSystemLog", True)
-        settings.SAVE_SHARER_LOG = True and settings_config.get("saveShareLog", True)
-        settings.LOGS_PATH = settings_config.get("logsPath") or settings.LOGS_PATH
-        settings.DOWNLOAD_DIR = settings_config.get("downloadPath") or settings.DOWNLOAD_DIR
+        settings.load()
         self._cancel_settings()
 
     def _load_sharing_backups(self) -> None:
@@ -73,16 +61,16 @@ class MainWindow(QMainWindow):
         logs_path = self.ui.logPathEdit.text()
         download_path = self.ui.downloadPathEdit.text()
         if not logs_path or not download_path:
-            self._ui_function.show_info_messageBox("保存设置错误,日志路径或下载路径不可为空", msg_color="red")
+            self._ui_function.show_info_messageBox("保存设置错误,日志路径或下载路径不可为空！", msg_color="red")
             return
         if not os.path.isdir(logs_path):
             self._ui_function.show_info_messageBox(
-                "保存设置错误,日志路径不存在,建议用按钮打开资源管理器选择路径", msg_color="red"
+                "保存设置错误,日志路径不存在！\n建议用按钮打开资源管理器选择路径", msg_color="red"
             )
             return
         if not os.path.isdir(download_path):
             self._ui_function.show_info_messageBox(
-                "保存设置错误,下载路径不存在,建议用按钮打开资源管理器选择路径", msg_color="red"
+                "保存设置错误,下载路径不存在！\n建议用按钮打开资源管理器选择路径", msg_color="red"
             )
             return
 
@@ -95,6 +83,8 @@ class MainWindow(QMainWindow):
         settings.DOWNLOAD_DIR = download_path
         settings.SAVE_SYSTEM_LOG = save_system_log
         settings.SAVE_SHARER_LOG = save_share_log
+
+        settings.dump()
         self._ui_function.show_info_messageBox("保存配置成功")
 
     def _cancel_settings(self) -> None:

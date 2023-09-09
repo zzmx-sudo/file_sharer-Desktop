@@ -10,6 +10,8 @@ from multiprocessing import Queue
 from model.sharing import SharingModel
 from model.file import FileModel, DirModel
 from exceptions import NotImplException, OperationException
+from settings import settings
+from utils.logger import sysLogger, sharerLogger
 
 class BaseService:
 
@@ -35,6 +37,8 @@ class BaseService:
                     self._add_share(command_msg)
                 elif command_type == "remove":
                     self._remove_share(command_msg)
+                elif command_type == "settings":
+                    self._modify_settings(*command_msg)
             else:
                 time.sleep(0.5)
 
@@ -45,6 +49,15 @@ class BaseService:
     def _remove_share(self, uuid: str) -> None:
 
         raise NotImplException("实现service对象的类必须有定义`_remove_share`方法")
+
+    def _modify_settings(self, *args) -> None:
+
+        if len(args) != 2:
+            return
+        setattr(settings, args[0], args[1])
+        if args[0] == "LOGS_PATH":
+            sysLogger.reload()
+            sharerLogger.reload()
 
     def run(self) -> None:
 
