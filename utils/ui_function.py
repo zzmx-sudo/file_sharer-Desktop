@@ -51,21 +51,21 @@ class UiFunction:
         # main window scale
 
     def _setup_event_connect(self) -> None:
-        # window element
+        # window elements
         self._elements.minimizeButton.clicked.connect(lambda: self._main_window.showMinimized())
         self._elements.maximizeRestoreButton.clicked.connect(lambda : self._maximize_restore())
         self._elements.closeAppButton.clicked.connect(lambda: self._main_window.close())
-        # left menu element
+        # left menu elements
         self._elements.homeButton.clicked.connect(self._menu_button_clicked)
         self._elements.serverButton.clicked.connect(self._menu_button_clicked)
         self._elements.clientButton.clicked.connect(self._menu_button_clicked)
         self._elements.downloadButton.clicked.connect(self._menu_button_clicked)
         self._elements.settingButton.clicked.connect(lambda: self._extra_setting())
-        # extra element
+        # extra elements
         self._elements.shareProjectButton.clicked.connect(lambda : self._save_share_msg())
         self._elements.browseProjectButton.clicked.connect(lambda: self._open_project_code())
         self._elements.closeSettingButton.clicked.connect(lambda : self._extra_setting())
-        # content element
+        # content elements
         self._elements.contentTopBox.mouseDoubleClickEvent = self._contentTopDpubleClicked
         self._elements.contentTopBox.mouseMoveEvent = self._moveWindow
         self._elements.shareListTable.verticalHeader().setVisible(False)

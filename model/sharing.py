@@ -124,6 +124,8 @@ class FuseSharingModel(list):
             except TypeError:
                 sysLogger.error("加载历史分享记录失败, file_sharing_backups.json文件已损坏")
                 return model
+            except FileNotFoundError:
+                continue
 
             model.append(fileObj)
 

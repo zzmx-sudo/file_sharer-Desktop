@@ -1,6 +1,7 @@
 import os
 import sys
-import json
+from multiprocessing import Queue
+from typing import Union
 
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QCheckBox
 from PyQt5.Qt import QApplication
@@ -9,6 +10,9 @@ from PyQt5.uic import loadUi
 from static.ui.main_ui import Ui_MainWindow
 from settings import settings
 from utils.logger import sysLogger, sharerLogger
+from command.manage import ServiceProcessManager
+from model.sharing import FuseSharingModel
+from model.file import FileModel, DirModel
 
 class MainWindow(QMainWindow):
 
@@ -46,16 +50,24 @@ class MainWindow(QMainWindow):
         self._cancel_settings()
 
     def _load_sharing_backups(self) -> None:
-        pass
+        self.ui.shareListTable.setRowCount(0)
+        self._sharing_list = FuseSharingModel.load()
+        for fileObj in self._sharing_list:
+            self._add_share_table_item(fileObj)
 
     def _create_manager_and_watch_output(self) -> None:
-        pass
+        self._output_q = Queue()
+        self._process = ServiceProcessManager(self._output_q)
 
     def _setup_event_connect(self) -> None:
+        # settings elements
         self.ui.logPathButton.clicked.connect(lambda : self._open_folder(self.ui.logPathEdit))
         self.ui.downloadPathButton.clicked.connect(lambda : self._open_folder(self.ui.downloadPathEdit))
         self.ui.saveSettingButton.clicked.connect(lambda : self._save_settings())
         self.ui.cancelSettingButton.clicked.connect(lambda : self._cancel_settings())
+        # server elements
+        self.ui.sharePathButton.clicked.connect(lambda : self._open_folder(self.ui.sharePathEdit))
+        self.ui.createShareButton.clicked.connect(lambda : self._create_share())
 
     def _save_settings(self) -> None:
         logs_path = self.ui.logPathEdit.text()
@@ -75,15 +87,19 @@ class MainWindow(QMainWindow):
             return
 
         save_system_log = self.ui.saveSystemCheck.isChecked()
+        if save_system_log != settings.SAVE_SYSTEM_LOG:
+            settings.SAVE_SYSTEM_LOG = save_system_log
+            self._process.modify_settings("SAVE_SYSTEM_LOG", save_system_log)
         save_share_log = self.ui.saveShareCheck.isChecked()
+        if save_share_log != settings.SAVE_SHARER_LOG:
+            settings.SAVE_SHARER_LOG = save_share_log
+            self._process.modify_settings("SAVE_SHARER_LOG", save_share_log)
         if settings.LOGS_PATH != logs_path:
             settings.LOGS_PATH = logs_path
+            self._process.modify_settings("LOGS_PATH", logs_path)
             sysLogger.reload()
             sharerLogger.reload()
         settings.DOWNLOAD_DIR = download_path
-        settings.SAVE_SYSTEM_LOG = save_system_log
-        settings.SAVE_SHARER_LOG = save_share_log
-
         settings.dump()
         self._ui_function.show_info_messageBox("保存配置成功")
 
@@ -93,10 +109,20 @@ class MainWindow(QMainWindow):
         self.ui.logPathEdit.setText(settings.LOGS_PATH)
         self.ui.downloadPathEdit.setText(settings.DOWNLOAD_DIR)
 
+    def _create_share(self) -> None:
+        pass
+
     def _open_folder(self, lineEdit: QLineEdit) -> None:
         folder_path = QFileDialog.getExistingDirectory(self, "选择文件夹", "./")
         if folder_path:
             lineEdit.setText(folder_path)
+
+    def _add_share_table_item(self, filObj: Union[FileModel, DirModel], isSharing: bool = False) -> None:
+        pass
+
+    def _remove_share_table_item(self, table_number: int) -> None:
+        pass
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
