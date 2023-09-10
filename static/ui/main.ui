@@ -1522,6 +1522,9 @@ Content Bottom Bar */
                 </property>
                 <item>
                  <widget class="QStackedWidget" name="stackedWidget">
+                  <property name="currentIndex">
+                   <number>0</number>
+                  </property>
                   <widget class="QWidget" name="home"/>
                   <widget class="QWidget" name="server">
                    <layout class="QVBoxLayout" name="verticalLayout_16">
@@ -1788,13 +1791,7 @@ Content Bottom Bar */
                            </widget>
                           </item>
                           <item>
-                           <widget class="QComboBox" name="shareFileCombo">
-                            <item>
-                             <property name="text">
-                              <string>分享整个文件夹</string>
-                             </property>
-                            </item>
-                           </widget>
+                           <widget class="QComboBox" name="shareFileCombo"/>
                           </item>
                          </layout>
                         </widget>

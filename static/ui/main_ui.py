@@ -817,7 +817,6 @@ class Ui_MainWindow(object):
         self.horizontalLayout_11.addWidget(self.shareFileLbael)
         self.shareFileCombo = QtWidgets.QComboBox(self.shareFileFrame)
         self.shareFileCombo.setObjectName("shareFileCombo")
-        self.shareFileCombo.addItem("")
         self.horizontalLayout_11.addWidget(self.shareFileCombo)
         self.horizontalLayout_14.addWidget(self.shareFileFrame)
         self.verticalLayout_16.addWidget(self.createShareParamFrame)
@@ -971,6 +970,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.styleSheet)
 
         self.retranslateUi(MainWindow)
+        self.stackedWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -1006,7 +1006,6 @@ class Ui_MainWindow(object):
         self.shareTypeCombo.setItemText(1, _translate("MainWindow", "FTP"))
         self.sharePathLabel.setText(_translate("MainWindow", "分享路径："))
         self.shareFileLbael.setText(_translate("MainWindow", "选取文件："))
-        self.shareFileCombo.setItemText(0, _translate("MainWindow", "分享整个文件夹"))
         self.createShareButton.setText(_translate("MainWindow", "新建分享"))
         item = self.shareListTable.verticalHeaderItem(0)
         item.setText(_translate("MainWindow", "0"))

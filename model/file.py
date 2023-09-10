@@ -4,11 +4,15 @@ __all__ = [
 ]
 
 import os
+import random
 from typing import Any, Union
+
+from PyQt5.Qt import QPushButton
 
 from model import public_types as ptype
 from settings import settings
-from utils.public_func import generate_uuid
+from utils import public_func
+from utils.ui_function import UiFunction
 
 class FileModel:
 
@@ -39,8 +43,19 @@ class FileModel:
         if self._share_type is ptype.ShareType.ftp:
             self._ftp_base_path = ftp_base_path if ftp_base_path \
                 else os.path.dirname(self._target_path)
+            if self._ftp_port is None:
+                self._ftp_port = self._generate_ftp_port()
+            if self._ftp_pwd is None:
+                self._ftp_pwd = public_func.generate_ftp_passwd()
         else:
             self._ftp_base_path = None
+
+    def _generate_ftp_port(self):
+        port = random.randint(10000, 65500)
+        if not public_func.exists_port(port):
+            return port
+        else:
+            return self._generate_ftp_port()
 
     @property
     def uuid(self) -> str:
@@ -190,6 +205,14 @@ class FileModel:
 
         return normal
 
+    def add_buttons(
+        self,
+        start_close_button: QPushButton,
+        copy_browse_button: QPushButton,
+        ui_function: UiFunction,
+    ):
+        pass
+
     def __eq__(self, other: str) -> bool:
         return other.rstrip(os.sep) == self._target_path
 
@@ -221,7 +244,7 @@ class DirModel(FileModel):
 
         for file_name in os.listdir(self._target_path):
             file_path = os.path.join(self._target_path, file_name)
-            child_uuid = generate_uuid()
+            child_uuid = public_func.generate_uuid()
             fileModel = DirModel if os.path.isdir(file_path) else FileModel
             child = fileModel(
                 file_path, child_uuid, self._uuid, self._ftp_pwd, self._ftp_port, self._ftp_base_path

@@ -15,6 +15,7 @@ import pyperclip as clip
 
 from main import MainWindow
 from . custom_grips import CustomGrip
+from model.file import FileModel, DirModel
 
 class UiFunction:
 
@@ -218,3 +219,11 @@ class UiFunction:
             }}
         """)
         info.exec_()
+
+    def add_share_table_item(self, fileObj: Union[FileModel, DirModel]) -> None:
+
+        pass
+
+    def remove_share_table_item(self, rowIndex: int) -> None:
+
+        pass

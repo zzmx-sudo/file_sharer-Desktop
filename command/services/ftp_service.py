@@ -42,9 +42,19 @@ class FtpService(BaseService):
         if uuid in self._sharing_dict:
             del self._sharing_dict[uuid]
 
-        if uuid in self._uuid_ftpServer_params:
+        ftpServer = self._uuid_ftpServer_params.get(uuid)
+        if ftpServer is None:
+            return
+
+        need_close_server = True
+        for fileObj in self._sharing_dict.values():
+            if fileObj.ftp_port == ftpServer.address[1]:
+                need_close_server = False
+                self._uuid_ftpServer_params[fileObj.uuid] = ftpServer
+
+        del self._uuid_ftpServer_params[uuid]
+        if need_close_server:
             self._uuid_ftpServer_params[uuid].close_when_done()
-            del self._uuid_ftpServer_params[uuid]
 
     def _start_new_server(self, fileObj: Union[FileModel, DirModel]) -> None:
 

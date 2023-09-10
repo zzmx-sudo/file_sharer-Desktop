@@ -46,19 +46,10 @@ class FuseSharingModel(list):
         super(FuseSharingModel, self).append(fileObj)
         fileObj.rowIndex = self.length - 1
 
-    def remove(self, uuid: str) -> None:
+    def remove(self, rowIndex: int) -> None:
 
-        target_index: Union[None, int] = None
-        for fileObj in self:
-            if fileObj.uuid == uuid:
-                super(FuseSharingModel, self).pop(fileObj.rowIndex)
-                target_index = fileObj.rowIndex
-                break
-
-        if target_index is None:
-            return
-
-        for index in range(target_index, self.length):
+        super(FuseSharingModel, self).pop(rowIndex)
+        for index in range(rowIndex, self.length):
             self[index].rowIndex -= 1
 
     def contains(self, target_path: str, share_type: shareType) -> Union[None, int]:

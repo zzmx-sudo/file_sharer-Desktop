@@ -3,7 +3,9 @@ import sys
 from multiprocessing import Queue
 from typing import Union
 
-from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QCheckBox
+from PyQt5.QtWidgets import (
+    QMainWindow, QFileDialog, QLineEdit, QCheckBox, QWidget
+)
 from PyQt5.Qt import QApplication
 from PyQt5.uic import loadUi
 
@@ -13,6 +15,8 @@ from utils.logger import sysLogger, sharerLogger
 from command.manage import ServiceProcessManager
 from model.sharing import FuseSharingModel
 from model.file import FileModel, DirModel
+from model.public_types import ShareType as shareType
+from utils.public_func import generate_uuid
 
 class MainWindow(QMainWindow):
 
@@ -67,11 +71,12 @@ class MainWindow(QMainWindow):
         self.ui.cancelSettingButton.clicked.connect(lambda : self._cancel_settings())
         # server elements
         self.ui.sharePathButton.clicked.connect(lambda : self._open_folder(self.ui.sharePathEdit))
+        self.ui.sharePathButton.clicked.connect(lambda : self._update_file_combo())
         self.ui.createShareButton.clicked.connect(lambda : self._create_share())
 
     def _save_settings(self) -> None:
-        logs_path = self.ui.logPathEdit.text()
-        download_path = self.ui.downloadPathEdit.text()
+        logs_path: str = self.ui.logPathEdit.text()
+        download_path: str = self.ui.downloadPathEdit.text()
         if not logs_path or not download_path:
             self._ui_function.show_info_messageBox("保存设置错误,日志路径或下载路径不可为空！", msg_color="red")
             return
@@ -86,11 +91,11 @@ class MainWindow(QMainWindow):
             )
             return
 
-        save_system_log = self.ui.saveSystemCheck.isChecked()
+        save_system_log: bool = self.ui.saveSystemCheck.isChecked()
         if save_system_log != settings.SAVE_SYSTEM_LOG:
             settings.SAVE_SYSTEM_LOG = save_system_log
             self._process.modify_settings("SAVE_SYSTEM_LOG", save_system_log)
-        save_share_log = self.ui.saveShareCheck.isChecked()
+        save_share_log: bool = self.ui.saveShareCheck.isChecked()
         if save_share_log != settings.SAVE_SHARER_LOG:
             settings.SAVE_SHARER_LOG = save_share_log
             self._process.modify_settings("SAVE_SHARER_LOG", save_share_log)
@@ -109,19 +114,82 @@ class MainWindow(QMainWindow):
         self.ui.logPathEdit.setText(settings.LOGS_PATH)
         self.ui.downloadPathEdit.setText(settings.DOWNLOAD_DIR)
 
+    def _update_file_combo(self) -> None:
+        share_path: str = self.ui.sharePathEdit.text()
+        if not os.path.isdir(share_path):
+            return
+        self.ui.shareFileCombo.clear()
+        fileList: list = os.listdir(share_path)
+        for item in fileList:
+            self.ui.shareFileCombo.addItem(item)
+
     def _create_share(self) -> None:
-        pass
+        base_path: str = self.ui.sharePathEdit.text()
+        if not os.path.isdir(base_path):
+            self._ui_function.show_info_messageBox(
+                "分享的路径不存在！\n建议用按钮打开资源管理器选择路径", msg_color="red"
+            )
+            return
+        target_path: str = os.path.join(base_path, self.ui.shareFileCombo.currentText())
+        if not os.path.exists(target_path):
+            self._ui_function.show_info_messageBox(
+                "分享的路径不存在！\n请确认后再新建", msg_color="red"
+            )
+            return
+        share_type: Union[str, shareType] = self.ui.shareTypeCombo.currentText()
+        share_type = shareType.ftp if share_type == "FTP" else shareType.http
+        shared_row_number: Union[None, int] = self._sharing_list.contains(target_path, share_type)
+        if shared_row_number is not None:
+            self._ui_function.show_info_messageBox(
+                f"该路径已被分享过, 他在分享记录的第 [{shared_row_number + 1}] 行",
+                msg_color="red"
+            )
+            return
+        uuid: str = f"{share_type.value[0]}{generate_uuid()}"
+        fileModel = DirModel if os.path.isdir(target_path) else FileModel
+        if share_type is shareType.ftp:
+            shared_fileObj = self._sharing_list.get_ftp_shared(target_path)
+        else:
+            shared_fileObj = None
+        if shared_fileObj is None:
+            fileObj = fileModel(target_path, uuid)
+        else:
+            fileObj = fileModel(
+                target_path, uuid, pwd=shared_fileObj.ftp_pwd,
+                port=shared_fileObj.ftp_pwd, ftp_base_path=shared_fileObj.ftp_basePath
+            )
+        self._add_share_table_item(fileObj, True)
+        self._sharing_list.append(fileObj)
+
+    def _remove_share(self, rowIndex: int) -> None:
+        if rowIndex < 0 or rowIndex >= self._sharing_list.length:
+            sysLogger.error(f"移除分享记录异常,行号溢出,欲移除的行号:{rowIndex+1},总行数:{self._sharing_list.length}")
+            return
+        fileObj = self._sharing_list[rowIndex]
+        if fileObj.isSharing:
+            self._ui_function.show_info_messageBox(
+                "该分享未关闭,请先关闭分享后再移除哦～", msg_color="red"
+            )
+            return
+        self._sharing_list.remove(rowIndex)
+        del fileObj
+        self._remove_share_table_item(rowIndex)
 
     def _open_folder(self, lineEdit: QLineEdit) -> None:
         folder_path = QFileDialog.getExistingDirectory(self, "选择文件夹", "./")
         if folder_path:
             lineEdit.setText(folder_path)
 
-    def _add_share_table_item(self, filObj: Union[FileModel, DirModel], isSharing: bool = False) -> None:
-        pass
+    def _add_share_table_item(
+        self,
+        fileObj: Union[FileModel, DirModel],
+        isSharing: bool = False
+    ) -> None:
+        fileObj.isSharing = isSharing
+        self._ui_function.add_share_table_item(fileObj)
 
-    def _remove_share_table_item(self, table_number: int) -> None:
-        pass
+    def _remove_share_table_item(self, rowIndex: int) -> None:
+        self._ui_function.remove_share_table_item(rowIndex)
 
 
 if __name__ == '__main__':
