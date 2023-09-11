@@ -51,6 +51,7 @@ class FtpService(BaseService):
             if fileObj.ftp_port == ftpServer.address[1]:
                 need_close_server = False
                 self._uuid_ftpServer_params[fileObj.uuid] = ftpServer
+                break
 
         del self._uuid_ftpServer_params[uuid]
         if need_close_server:

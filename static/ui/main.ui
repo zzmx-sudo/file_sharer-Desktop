@@ -106,6 +106,13 @@ QHeaderView::section:vertical {
 
 /* ///////////////////////////////////////////////////////////////////////////////
 QScrollBar */
+QScrollBar:horizontal {
+	border: none;
+    background: rgb(236, 236, 236);
+    height: 8px;
+    margin: 0 21px 0 21px;
+	border-radius: 0px;
+}
 QScrollBar:vertical {
 	border: none;
     background: rgb(236, 236, 236);
@@ -113,10 +120,24 @@ QScrollBar:vertical {
     margin: 21px 0 21px 0;
 	border-radius: 0px;
 }
+QScrollBar::handle:horizontal {
+	background: #409eff;
+    min-width: 25px;
+    border-radius: 4px
+}
 QScrollBar::handle:vertical {	
     background: #409eff;
     min-height: 25px;
     border-radius: 4px
+}
+QScrollBar::add-line:horizontal {
+	border: none;
+    background: rgb(100, 100, 100);
+    width: 20px;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    subcontrol-position: right;
+    subcontrol-origin: margin;
 }
 QScrollBar::add-line:vertical {
     border: none;
@@ -125,6 +146,15 @@ QScrollBar::add-line:vertical {
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
     subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+QScrollBar::sub-line:horizontal {
+	border: none;
+    background: rgb(100, 100, 100);
+    width: 20px;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    subcontrol-position: left;
     subcontrol-origin: margin;
 }
 QScrollBar::sub-line:vertical {
@@ -136,10 +166,10 @@ QScrollBar::sub-line:vertical {
     subcontrol-position: top;
     subcontrol-origin: margin;
 }
-QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
+QScrollBar::up-arrow:vertical, QScrollBar::up-arrow:horizontal, QScrollBar::down-arrow:vertical, QScrollBar::down-arrow:horizontal {
 	background: none;
 }
-QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+QScrollBar::add-page:vertical, QScrollBar::add-page:horizontal, QScrollBar::sub-page:vertical, QScrollBar::sub-page:horizontal {
 	background: none;
 }
 
@@ -1523,7 +1553,7 @@ Content Bottom Bar */
                 <item>
                  <widget class="QStackedWidget" name="stackedWidget">
                   <property name="currentIndex">
-                   <number>0</number>
+                   <number>1</number>
                   </property>
                   <widget class="QWidget" name="home"/>
                   <widget class="QWidget" name="server">
@@ -1775,7 +1805,7 @@ Content Bottom Bar */
                            <widget class="QLabel" name="shareFileLbael">
                             <property name="minimumSize">
                              <size>
-                              <width>70</width>
+                              <width>120</width>
                               <height>0</height>
                              </size>
                             </property>
@@ -1786,7 +1816,7 @@ Content Bottom Bar */
                              </size>
                             </property>
                             <property name="text">
-                             <string>选取文件：</string>
+                             <string>选取文件/文件夹：</string>
                             </property>
                            </widget>
                           </item>
@@ -1916,6 +1946,42 @@ Content Bottom Bar */
                          <property name="selectionBehavior">
                           <enum>QAbstractItemView::SelectRows</enum>
                          </property>
+                         <attribute name="horizontalHeaderVisible">
+                          <bool>true</bool>
+                         </attribute>
+                         <attribute name="horizontalHeaderCascadingSectionResizes">
+                          <bool>false</bool>
+                         </attribute>
+                         <attribute name="horizontalHeaderMinimumSectionSize">
+                          <number>50</number>
+                         </attribute>
+                         <attribute name="horizontalHeaderDefaultSectionSize">
+                          <number>215</number>
+                         </attribute>
+                         <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+                          <bool>true</bool>
+                         </attribute>
+                         <attribute name="horizontalHeaderStretchLastSection">
+                          <bool>true</bool>
+                         </attribute>
+                         <attribute name="verticalHeaderVisible">
+                          <bool>false</bool>
+                         </attribute>
+                         <attribute name="verticalHeaderCascadingSectionResizes">
+                          <bool>false</bool>
+                         </attribute>
+                         <attribute name="verticalHeaderMinimumSectionSize">
+                          <number>25</number>
+                         </attribute>
+                         <attribute name="verticalHeaderDefaultSectionSize">
+                          <number>30</number>
+                         </attribute>
+                         <attribute name="verticalHeaderShowSortIndicator" stdset="0">
+                          <bool>false</bool>
+                         </attribute>
+                         <attribute name="verticalHeaderStretchLastSection">
+                          <bool>false</bool>
+                         </attribute>
                          <row>
                           <property name="text">
                            <string>0</string>
@@ -1971,31 +2037,6 @@ Content Bottom Bar */
                            <string>10</string>
                           </property>
                          </row>
-                         <row>
-                          <property name="text">
-                           <string>11</string>
-                          </property>
-                         </row>
-                         <row>
-                          <property name="text">
-                           <string>12</string>
-                          </property>
-                         </row>
-                         <row>
-                          <property name="text">
-                           <string>13</string>
-                          </property>
-                         </row>
-                         <row>
-                          <property name="text">
-                           <string>14</string>
-                          </property>
-                         </row>
-                         <row>
-                          <property name="text">
-                           <string>15</string>
-                          </property>
-                         </row>
                          <column>
                           <property name="text">
                            <string>分享类型</string>
@@ -2003,12 +2044,7 @@ Content Bottom Bar */
                          </column>
                          <column>
                           <property name="text">
-                           <string>分享路径</string>
-                          </property>
-                         </column>
-                         <column>
-                          <property name="text">
-                           <string>分享文件</string>
+                           <string>分享文件/文件夹路径</string>
                           </property>
                          </column>
                          <column>
@@ -2023,22 +2059,17 @@ Content Bottom Bar */
                          </column>
                          <item row="0" column="0">
                           <property name="text">
-                           <string>HTTP</string>
+                           <string/>
                           </property>
                          </item>
                          <item row="0" column="1">
                           <property name="text">
-                           <string>/Users/mr.cheng/GitSourceCodes/file_sharer-LAN</string>
+                           <string/>
                           </property>
                          </item>
                          <item row="0" column="2">
                           <property name="text">
-                           <string>整个文件夹</string>
-                          </property>
-                         </item>
-                         <item row="0" column="3">
-                          <property name="text">
-                           <string>分享中</string>
+                           <string/>
                           </property>
                          </item>
                         </widget>

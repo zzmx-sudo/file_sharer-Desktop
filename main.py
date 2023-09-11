@@ -6,7 +6,8 @@ from typing import Union
 from PyQt5.QtWidgets import (
     QMainWindow, QFileDialog, QLineEdit, QCheckBox, QWidget
 )
-from PyQt5.Qt import QApplication
+from PyQt5.Qt import QApplication, QMessageBox
+from PyQt5 import QtGui
 from PyQt5.uic import loadUi
 
 from static.ui.main_ui import Ui_MainWindow
@@ -47,6 +48,7 @@ class MainWindow(QMainWindow):
 
         # show window
         # self.show()
+        self.ui.closeEvent = self.closeEvent
         self.ui.show()
 
     def _load_settings(self) -> None:
@@ -54,14 +56,13 @@ class MainWindow(QMainWindow):
         self._cancel_settings()
 
     def _load_sharing_backups(self) -> None:
-        self.ui.shareListTable.setRowCount(0)
         self._sharing_list = FuseSharingModel.load()
         for fileObj in self._sharing_list:
             self._add_share_table_item(fileObj)
 
     def _create_manager_and_watch_output(self) -> None:
         self._output_q = Queue()
-        self._process = ServiceProcessManager(self._output_q)
+        self._service_process = ServiceProcessManager(self._output_q)
 
     def _setup_event_connect(self) -> None:
         # settings elements
@@ -158,8 +159,9 @@ class MainWindow(QMainWindow):
                 target_path, uuid, pwd=shared_fileObj.ftp_pwd,
                 port=shared_fileObj.ftp_pwd, ftp_base_path=shared_fileObj.ftp_basePath
             )
-        self._add_share_table_item(fileObj, True)
         self._sharing_list.append(fileObj)
+        self._add_share_table_item(fileObj, True)
+        self._service_process.add_share(fileObj)
 
     def _remove_share(self, rowIndex: int) -> None:
         if rowIndex < 0 or rowIndex >= self._sharing_list.length:
@@ -172,6 +174,7 @@ class MainWindow(QMainWindow):
             )
             return
         self._sharing_list.remove(rowIndex)
+        self._service_process.remove_share(fileObj)
         del fileObj
         self._remove_share_table_item(rowIndex)
 
@@ -190,6 +193,14 @@ class MainWindow(QMainWindow):
 
     def _remove_share_table_item(self, rowIndex: int) -> None:
         self._ui_function.remove_share_table_item(rowIndex)
+
+    def closeEvent(self, event: QtGui.QCloseEvent) -> None:
+        result = self._ui_function.show_question_messageBox("是否退出？", "您正在退出程序，请确认是否退出？")
+        if result == 0:
+            self._service_process.close_all()
+            event.accept()
+        else:
+            event.ignore()
 
 
 if __name__ == '__main__':

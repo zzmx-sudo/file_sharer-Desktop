@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'main.ui'
+# Form implementation generated from reading ui file '.\main.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -108,6 +108,13 @@ class Ui_MainWindow(object):
 "\n"
 "/* ///////////////////////////////////////////////////////////////////////////////\n"
 "QScrollBar */\n"
+"QScrollBar:horizontal {\n"
+"    border: none;\n"
+"    background: rgb(236, 236, 236);\n"
+"    height: 8px;\n"
+"    margin: 0 21px 0 21px;\n"
+"    border-radius: 0px;\n"
+"}\n"
 "QScrollBar:vertical {\n"
 "    border: none;\n"
 "    background: rgb(236, 236, 236);\n"
@@ -115,10 +122,24 @@ class Ui_MainWindow(object):
 "    margin: 21px 0 21px 0;\n"
 "    border-radius: 0px;\n"
 "}\n"
+"QScrollBar::handle:horizontal {\n"
+"    background: #409eff;\n"
+"    min-width: 25px;\n"
+"    border-radius: 4px\n"
+"}\n"
 "QScrollBar::handle:vertical {    \n"
 "    background: #409eff;\n"
 "    min-height: 25px;\n"
 "    border-radius: 4px\n"
+"}\n"
+"QScrollBar::add-line:horizontal {\n"
+"    border: none;\n"
+"    background: rgb(100, 100, 100);\n"
+"    width: 20px;\n"
+"    border-top-right-radius: 4px;\n"
+"    border-bottom-right-radius: 4px;\n"
+"    subcontrol-position: right;\n"
+"    subcontrol-origin: margin;\n"
 "}\n"
 "QScrollBar::add-line:vertical {\n"
 "    border: none;\n"
@@ -127,6 +148,15 @@ class Ui_MainWindow(object):
 "    border-bottom-left-radius: 4px;\n"
 "    border-bottom-right-radius: 4px;\n"
 "    subcontrol-position: bottom;\n"
+"    subcontrol-origin: margin;\n"
+"}\n"
+"QScrollBar::sub-line:horizontal {\n"
+"    border: none;\n"
+"    background: rgb(100, 100, 100);\n"
+"    width: 20px;\n"
+"    border-top-left-radius: 4px;\n"
+"    border-bottom-left-radius: 4px;\n"
+"    subcontrol-position: left;\n"
 "    subcontrol-origin: margin;\n"
 "}\n"
 "QScrollBar::sub-line:vertical {\n"
@@ -138,10 +168,10 @@ class Ui_MainWindow(object):
 "    subcontrol-position: top;\n"
 "    subcontrol-origin: margin;\n"
 "}\n"
-"QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {\n"
+"QScrollBar::up-arrow:vertical, QScrollBar::up-arrow:horizontal, QScrollBar::down-arrow:vertical, QScrollBar::down-arrow:horizontal {\n"
 "    background: none;\n"
 "}\n"
-"QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {\n"
+"QScrollBar::add-page:vertical, QScrollBar::add-page:horizontal, QScrollBar::sub-page:vertical, QScrollBar::sub-page:horizontal {\n"
 "    background: none;\n"
 "}\n"
 "\n"
@@ -811,7 +841,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_11.setSpacing(0)
         self.horizontalLayout_11.setObjectName("horizontalLayout_11")
         self.shareFileLbael = QtWidgets.QLabel(self.shareFileFrame)
-        self.shareFileLbael.setMinimumSize(QtCore.QSize(70, 0))
+        self.shareFileLbael.setMinimumSize(QtCore.QSize(120, 0))
         self.shareFileLbael.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.shareFileLbael.setObjectName("shareFileLbael")
         self.horizontalLayout_11.addWidget(self.shareFileLbael)
@@ -855,8 +885,8 @@ class Ui_MainWindow(object):
         self.shareListTable.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.shareListTable.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.shareListTable.setObjectName("shareListTable")
-        self.shareListTable.setColumnCount(5)
-        self.shareListTable.setRowCount(16)
+        self.shareListTable.setColumnCount(4)
+        self.shareListTable.setRowCount(11)
         item = QtWidgets.QTableWidgetItem()
         self.shareListTable.setVerticalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
@@ -880,16 +910,6 @@ class Ui_MainWindow(object):
         item = QtWidgets.QTableWidgetItem()
         self.shareListTable.setVerticalHeaderItem(10, item)
         item = QtWidgets.QTableWidgetItem()
-        self.shareListTable.setVerticalHeaderItem(11, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.shareListTable.setVerticalHeaderItem(12, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.shareListTable.setVerticalHeaderItem(13, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.shareListTable.setVerticalHeaderItem(14, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.shareListTable.setVerticalHeaderItem(15, item)
-        item = QtWidgets.QTableWidgetItem()
         self.shareListTable.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
         self.shareListTable.setHorizontalHeaderItem(1, item)
@@ -898,15 +918,23 @@ class Ui_MainWindow(object):
         item = QtWidgets.QTableWidgetItem()
         self.shareListTable.setHorizontalHeaderItem(3, item)
         item = QtWidgets.QTableWidgetItem()
-        self.shareListTable.setHorizontalHeaderItem(4, item)
-        item = QtWidgets.QTableWidgetItem()
         self.shareListTable.setItem(0, 0, item)
         item = QtWidgets.QTableWidgetItem()
         self.shareListTable.setItem(0, 1, item)
         item = QtWidgets.QTableWidgetItem()
         self.shareListTable.setItem(0, 2, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.shareListTable.setItem(0, 3, item)
+        self.shareListTable.horizontalHeader().setVisible(True)
+        self.shareListTable.horizontalHeader().setCascadingSectionResizes(False)
+        self.shareListTable.horizontalHeader().setDefaultSectionSize(215)
+        self.shareListTable.horizontalHeader().setMinimumSectionSize(50)
+        self.shareListTable.horizontalHeader().setSortIndicatorShown(True)
+        self.shareListTable.horizontalHeader().setStretchLastSection(True)
+        self.shareListTable.verticalHeader().setVisible(False)
+        self.shareListTable.verticalHeader().setCascadingSectionResizes(False)
+        self.shareListTable.verticalHeader().setDefaultSectionSize(30)
+        self.shareListTable.verticalHeader().setMinimumSectionSize(25)
+        self.shareListTable.verticalHeader().setSortIndicatorShown(False)
+        self.shareListTable.verticalHeader().setStretchLastSection(False)
         self.horizontalLayout_15.addWidget(self.shareListTable)
         self.verticalLayout_16.addWidget(self.shareListFrame)
         self.stackedWidget.addWidget(self.server)
@@ -970,7 +998,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.styleSheet)
 
         self.retranslateUi(MainWindow)
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -1005,7 +1033,7 @@ class Ui_MainWindow(object):
         self.shareTypeCombo.setItemText(0, _translate("MainWindow", "HTTP"))
         self.shareTypeCombo.setItemText(1, _translate("MainWindow", "FTP"))
         self.sharePathLabel.setText(_translate("MainWindow", "分享路径："))
-        self.shareFileLbael.setText(_translate("MainWindow", "选取文件："))
+        self.shareFileLbael.setText(_translate("MainWindow", "选取文件/文件夹："))
         self.createShareButton.setText(_translate("MainWindow", "新建分享"))
         item = self.shareListTable.verticalHeaderItem(0)
         item.setText(_translate("MainWindow", "0"))
@@ -1029,36 +1057,16 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "9"))
         item = self.shareListTable.verticalHeaderItem(10)
         item.setText(_translate("MainWindow", "10"))
-        item = self.shareListTable.verticalHeaderItem(11)
-        item.setText(_translate("MainWindow", "11"))
-        item = self.shareListTable.verticalHeaderItem(12)
-        item.setText(_translate("MainWindow", "12"))
-        item = self.shareListTable.verticalHeaderItem(13)
-        item.setText(_translate("MainWindow", "13"))
-        item = self.shareListTable.verticalHeaderItem(14)
-        item.setText(_translate("MainWindow", "14"))
-        item = self.shareListTable.verticalHeaderItem(15)
-        item.setText(_translate("MainWindow", "15"))
         item = self.shareListTable.horizontalHeaderItem(0)
         item.setText(_translate("MainWindow", "分享类型"))
         item = self.shareListTable.horizontalHeaderItem(1)
-        item.setText(_translate("MainWindow", "分享路径"))
+        item.setText(_translate("MainWindow", "分享文件/文件夹路径"))
         item = self.shareListTable.horizontalHeaderItem(2)
-        item.setText(_translate("MainWindow", "分享文件"))
-        item = self.shareListTable.horizontalHeaderItem(3)
         item.setText(_translate("MainWindow", "分享状态"))
-        item = self.shareListTable.horizontalHeaderItem(4)
+        item = self.shareListTable.horizontalHeaderItem(3)
         item.setText(_translate("MainWindow", "操作"))
         __sortingEnabled = self.shareListTable.isSortingEnabled()
         self.shareListTable.setSortingEnabled(False)
-        item = self.shareListTable.item(0, 0)
-        item.setText(_translate("MainWindow", "HTTP"))
-        item = self.shareListTable.item(0, 1)
-        item.setText(_translate("MainWindow", "/Users/mr.cheng/GitSourceCodes/file_sharer-LAN"))
-        item = self.shareListTable.item(0, 2)
-        item.setText(_translate("MainWindow", "整个文件夹"))
-        item = self.shareListTable.item(0, 3)
-        item.setText(_translate("MainWindow", "分享中"))
         self.shareListTable.setSortingEnabled(__sortingEnabled)
         self.authorLabel.setText(_translate("MainWindow", "By: 大宝天天见丶"))
         self.versionLabel.setText(_translate("MainWindow", "v0.0.1"))

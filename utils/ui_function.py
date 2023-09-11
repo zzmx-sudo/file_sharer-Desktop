@@ -9,13 +9,14 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import (
     QPropertyAnimation, QEasingCurve, Qt, QEvent, QPoint
 )
-from PyQt5.Qt import QPushButton, QMessageBox
+from PyQt5.Qt import QPushButton, QMessageBox, QTableWidgetItem
 from PyQt5.QtGui import QMouseEvent
 import pyperclip as clip
 
 from main import MainWindow
 from . custom_grips import CustomGrip
 from model.file import FileModel, DirModel
+from model.public_types import ShareType as shareType
 
 class UiFunction:
 
@@ -196,17 +197,16 @@ class UiFunction:
     def show_info_messageBox(
             self,
             msg: str,
-            title: Union[str, None] = None,
+            title: str = "消息提示",
             msg_color: str = "black"
     ) -> None:
-        if title is None:
-            title = "消息提示"
         info = QMessageBox(
             QMessageBox.Information,
             title, msg,
             QMessageBox.Ok,
             parent=self._main_window
         )
+        info.setWindowFlag(Qt.FramelessWindowHint)
         info.setStyleSheet(self._messageBox_normal_style + f"""
             QLabel {{
                 color: {msg_color}
@@ -220,9 +220,56 @@ class UiFunction:
         """)
         info.exec_()
 
-    def add_share_table_item(self, fileObj: Union[FileModel, DirModel]) -> None:
+    def show_question_messageBox(
+            self,
+            title: str,
+            msg: str
+    ):
+        question = QMessageBox(
+            QMessageBox.Question,
+            title, msg,
+            parent=self._main_window
+        )
+        question.setWindowFlag(Qt.FramelessWindowHint)
+        yesButton = question.addButton(self._main_window.tr("确认"), QMessageBox.YesRole)
+        yesButton.setStyleSheet("""
+            QPushButton {
+                color: #ffffff;
+                background-color: #409eff;
+            }
+            QPushButton:hover {
+                border: 1px solid rgb(61, 13, 134);
+            }
+            QPushButton:pressed {
+                border: 3px solid rgb(61, 13, 134);
+            }
+        """)
+        noButton = question.addButton(self._main_window.tr("取消"), QMessageBox.NoRole)
+        noButton.setStyleSheet("""
+            QPushButton {
+                color: rgb(0, 0, 0);
+                background-color: rgb(222, 222, 222);
+            }
+            QPushButton:hover {
+                border: 1px solid rgb(61, 13, 134);
+            }
+            QPushButton:pressed {
+                border: 3px solid rgb(61, 13, 134);
+            }
+        """)
+        question.setDefaultButton(noButton)
+        question.setStyleSheet(self._messageBox_normal_style)
+        return question.exec_()
 
-        pass
+    def add_share_table_item(self, fileObj: Union[FileModel, DirModel]) -> None:
+        share_type = "FTP" if fileObj.shareType is shareType.ftp else "HTTP"
+        share_status = "分享中" if fileObj.isSharing else "已取消分享"
+        self._elements.shareListTable.setItem(fileObj.rowIndex, 0, QTableWidgetItem(share_type))
+        self._elements.shareListTable.setItem(fileObj.rowIndex, 1, QTableWidgetItem(fileObj.targetPath))
+        self._elements.shareListTable.setItem(fileObj.rowIndex, 2, QTableWidgetItem(share_status))
+        self._elements.shareListTable.setItem(
+            fileObj.rowIndex, 3, QTableWidgetItem("开启/取消分享 | 复制链接 | 移除分享记录")
+        )
 
     def remove_share_table_item(self, rowIndex: int) -> None:
 
