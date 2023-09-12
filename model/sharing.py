@@ -104,6 +104,9 @@ class FuseSharingModel(list):
 
         path_share_params: list[tuple[str, str]] = []
         for file_dict in backup_result:
+            targetPath = file_dict.get("path")
+            if not targetPath or not os.path.exists(targetPath):
+                continue
             path_share_param = (file_dict.get("path"), file_dict.get("share_type"))
             if path_share_param in path_share_params:
                 continue

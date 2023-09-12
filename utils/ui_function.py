@@ -264,34 +264,14 @@ class UiFunction:
         return question.exec_()
 
     def add_share_table_item(self: MainWindow, fileObj: Union[FileModel, DirModel]) -> None:
-        fileObj.isSharing = True
         if self.ui.shareListTable.rowCount() <= self._sharing_list.length:
             self.ui.shareListTable.setRowCount(self.ui.shareListTable.rowCount() + 5)
 
         share_type = "FTP" if fileObj.shareType is shareType.ftp else "HTTP"
         self.ui.shareListTable.setItem(fileObj.rowIndex, 0, QTableWidgetItem(share_type))
         self.ui.shareListTable.setItem(fileObj.rowIndex, 1, QTableWidgetItem(fileObj.targetPath))
-        share_status_item = QTableWidgetItem("分享中")
-        share_status_item.setBackground(QColor("#409eff"))
-        share_status_item.setForeground(QColor("#ffffff"))
-        self.ui.shareListTable.setItem(fileObj.rowIndex, 2, share_status_item)
 
-        open_close_button = QPushButton("取消分享")
-        open_close_button.setStyleSheet("""
-            QPushButton {
-                text-align: center;
-                background-color: rgb(200, 200, 200);
-                color: rgb(0, 0, 0);
-                height: 28px;
-                width: 60px;
-                font: 14px;
-                border-radius: 5%;
-            }
-            
-            QPushButton:hover {
-                background-color: rgb(100, 100, 100)
-            }
-        """)
+        open_close_button = QPushButton("")
         def _open_close_button_clicked(fileObj: Union[FileModel, DirModel], button: QPushButton) -> None:
             if fileObj.isSharing:
                 background_color = "rgb(126, 199, 255)"
@@ -300,7 +280,7 @@ class UiFunction:
                 button_text = "打开共享"
                 self.close_share(fileObj)
                 fileObj.isSharing = False
-                share_status_item = QTableWidgetItem("已经取消分享")
+                share_status_item = QTableWidgetItem("已取消分享")
                 share_status_item.setBackground(QColor(200, 200, 200))
                 share_status_item.setForeground(QColor(0, 0, 0))
                 self.ui.shareListTable.setItem(fileObj.rowIndex, 2, share_status_item)
@@ -326,11 +306,13 @@ class UiFunction:
                     font: 14px;
                     border-radius: 5%;
                 }}
-                
+
                 QPushButton:hover {{
                     background-color: {hover_background}
                 }}
             """)
+        fileObj.isSharing = not fileObj.isSharing
+        _open_close_button_clicked(fileObj, open_close_button)
         open_close_button.clicked.connect(lambda : _open_close_button_clicked(fileObj, open_close_button))
 
         copy_browse_button = QPushButton("复制分享链接")

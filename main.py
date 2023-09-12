@@ -59,7 +59,7 @@ class MainWindow(QMainWindow):
     def _load_sharing_backups(self) -> None:
         self._sharing_list = FuseSharingModel.load()
         for fileObj in self._sharing_list:
-            self._add_share_table_item(fileObj)
+            self._UIClass.add_share_table_item(self, fileObj)
 
     def _create_manager_and_watch_output(self) -> None:
         self._output_q = Queue()
@@ -161,6 +161,7 @@ class MainWindow(QMainWindow):
                 port=shared_fileObj.ftp_pwd, ftp_base_path=shared_fileObj.ftp_basePath
             )
         self._sharing_list.append(fileObj)
+        fileObj.isSharing = True
         self._UIClass.add_share_table_item(self, fileObj)
         self._service_process.add_share(fileObj)
 
@@ -185,7 +186,11 @@ class MainWindow(QMainWindow):
         if not fileObj.isSharing:
             sysLogger.error(f"操作异常,重复取消分享,分享路径: {fileObj.targetPath}, 分享类型:{fileObj.shareType.value}")
             return
-        self._service_process.remove_share(fileObj.uuid)
+        # 启动时加载历史分享记录,会调用此函数,理应不做处理,此时_service_process还未初始化
+        try:
+            self._service_process.remove_share(fileObj.uuid)
+        except AttributeError:
+            return
 
     def _open_folder(self, lineEdit: QLineEdit) -> None:
         folder_path = QFileDialog.getExistingDirectory(self, "选择文件夹", "./")
