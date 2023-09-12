@@ -1553,7 +1553,7 @@ Content Bottom Bar */
                 <item>
                  <widget class="QStackedWidget" name="stackedWidget">
                   <property name="currentIndex">
-                   <number>1</number>
+                   <number>0</number>
                   </property>
                   <widget class="QWidget" name="home"/>
                   <widget class="QWidget" name="server">
@@ -1959,11 +1959,14 @@ Content Bottom Bar */
                          <attribute name="horizontalHeaderCascadingSectionResizes">
                           <bool>false</bool>
                          </attribute>
-                         <attribute name="horizontalHeaderMinimumSectionSize">
-                          <number>50</number>
-                         </attribute>
                          <attribute name="horizontalHeaderDefaultSectionSize">
                           <number>215</number>
+                         </attribute>
+                         <attribute name="horizontalHeaderHighlightSections">
+                          <bool>true</bool>
+                         </attribute>
+                         <attribute name="horizontalHeaderMinimumSectionSize">
+                          <number>50</number>
                          </attribute>
                          <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
                           <bool>true</bool>
@@ -1977,11 +1980,11 @@ Content Bottom Bar */
                          <attribute name="verticalHeaderCascadingSectionResizes">
                           <bool>false</bool>
                          </attribute>
-                         <attribute name="verticalHeaderMinimumSectionSize">
-                          <number>25</number>
-                         </attribute>
                          <attribute name="verticalHeaderDefaultSectionSize">
                           <number>30</number>
+                         </attribute>
+                         <attribute name="verticalHeaderMinimumSectionSize">
+                          <number>25</number>
                          </attribute>
                          <attribute name="verticalHeaderShowSortIndicator" stdset="0">
                           <bool>false</bool>
@@ -2086,7 +2089,157 @@ Content Bottom Bar */
                     </item>
                    </layout>
                   </widget>
-                  <widget class="QWidget" name="client"/>
+                  <widget class="QWidget" name="client">
+                   <widget class="QFrame" name="clientFrame">
+                    <property name="geometry">
+                     <rect>
+                      <x>0</x>
+                      <y>0</y>
+                      <width>1001</width>
+                      <height>521</height>
+                     </rect>
+                    </property>
+                    <property name="frameShape">
+                     <enum>QFrame::StyledPanel</enum>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Raised</enum>
+                    </property>
+                    <layout class="QVBoxLayout" name="verticalLayout_20">
+                     <property name="spacing">
+                      <number>0</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QFrame" name="clientParamFeame">
+                       <property name="frameShape">
+                        <enum>QFrame::StyledPanel</enum>
+                       </property>
+                       <property name="frameShadow">
+                        <enum>QFrame::Raised</enum>
+                       </property>
+                       <layout class="QHBoxLayout" name="horizontalLayout_16">
+                        <property name="spacing">
+                         <number>10</number>
+                        </property>
+                        <property name="leftMargin">
+                         <number>10</number>
+                        </property>
+                        <property name="topMargin">
+                         <number>10</number>
+                        </property>
+                        <property name="rightMargin">
+                         <number>10</number>
+                        </property>
+                        <property name="bottomMargin">
+                         <number>10</number>
+                        </property>
+                        <item>
+                         <widget class="QLabel" name="shareLinkLabel">
+                          <property name="text">
+                           <string>分享链接：</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QLineEdit" name="shareLinkEdit"/>
+                        </item>
+                        <item>
+                         <widget class="QPushButton" name="shareLinkButton">
+                          <property name="text">
+                           <string>点击加载</string>
+                          </property>
+                         </widget>
+                        </item>
+                       </layout>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QFrame" name="fileListFrame">
+                       <property name="frameShape">
+                        <enum>QFrame::StyledPanel</enum>
+                       </property>
+                       <property name="frameShadow">
+                        <enum>QFrame::Raised</enum>
+                       </property>
+                       <layout class="QVBoxLayout" name="verticalLayout_19">
+                        <property name="spacing">
+                         <number>0</number>
+                        </property>
+                        <property name="leftMargin">
+                         <number>0</number>
+                        </property>
+                        <property name="topMargin">
+                         <number>0</number>
+                        </property>
+                        <property name="rightMargin">
+                         <number>0</number>
+                        </property>
+                        <property name="bottomMargin">
+                         <number>0</number>
+                        </property>
+                        <item>
+                         <widget class="QTableWidget" name="fileListTable">
+                          <attribute name="horizontalHeaderVisible">
+                           <bool>true</bool>
+                          </attribute>
+                          <attribute name="horizontalHeaderCascadingSectionResizes">
+                           <bool>false</bool>
+                          </attribute>
+                          <attribute name="horizontalHeaderDefaultSectionSize">
+                           <number>800</number>
+                          </attribute>
+                          <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+                           <bool>true</bool>
+                          </attribute>
+                          <attribute name="horizontalHeaderStretchLastSection">
+                           <bool>true</bool>
+                          </attribute>
+                          <attribute name="verticalHeaderVisible">
+                           <bool>false</bool>
+                          </attribute>
+                          <attribute name="verticalHeaderCascadingSectionResizes">
+                           <bool>false</bool>
+                          </attribute>
+                          <row>
+                           <property name="text">
+                            <string>New Row</string>
+                           </property>
+                          </row>
+                          <row>
+                           <property name="text">
+                            <string>New Row</string>
+                           </property>
+                          </row>
+                          <row>
+                           <property name="text">
+                            <string>New Row</string>
+                           </property>
+                          </row>
+                          <column>
+                           <property name="text">
+                            <string>文件列表(文件点击下载,文件夹点击展开)</string>
+                           </property>
+                          </column>
+                         </widget>
+                        </item>
+                       </layout>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </widget>
                   <widget class="QWidget" name="download"/>
                  </widget>
                 </item>
