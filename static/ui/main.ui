@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>988</width>
+    <width>1066</width>
     <height>580</height>
    </rect>
   </property>
@@ -1821,7 +1821,14 @@ Content Bottom Bar */
                            </widget>
                           </item>
                           <item>
-                           <widget class="QComboBox" name="shareFileCombo"/>
+                           <widget class="QComboBox" name="shareFileCombo">
+                            <property name="minimumSize">
+                             <size>
+                              <width>180</width>
+                              <height>0</height>
+                             </size>
+                            </property>
+                           </widget>
                           </item>
                          </layout>
                         </widget>

@@ -32,8 +32,9 @@ class MainWindow(QMainWindow):
 
         # setup ui_function
         from utils.ui_function import UiFunction
+        self._UIClass = UiFunction
         # self._ui_function = UiFunction(self)
-        self._ui_function = UiFunction(self.ui)
+        self._ui_function = self._UIClass(self.ui)
         self._ui_function.setup()
 
         # env load
@@ -95,14 +96,14 @@ class MainWindow(QMainWindow):
         save_system_log: bool = self.ui.saveSystemCheck.isChecked()
         if save_system_log != settings.SAVE_SYSTEM_LOG:
             settings.SAVE_SYSTEM_LOG = save_system_log
-            self._process.modify_settings("SAVE_SYSTEM_LOG", save_system_log)
+            self._service_process.modify_settings("SAVE_SYSTEM_LOG", save_system_log)
         save_share_log: bool = self.ui.saveShareCheck.isChecked()
         if save_share_log != settings.SAVE_SHARER_LOG:
             settings.SAVE_SHARER_LOG = save_share_log
-            self._process.modify_settings("SAVE_SHARER_LOG", save_share_log)
+            self._service_process.modify_settings("SAVE_SHARER_LOG", save_share_log)
         if settings.LOGS_PATH != logs_path:
             settings.LOGS_PATH = logs_path
-            self._process.modify_settings("LOGS_PATH", logs_path)
+            self._service_process.modify_settings("LOGS_PATH", logs_path)
             sysLogger.reload()
             sharerLogger.reload()
         settings.DOWNLOAD_DIR = download_path
@@ -160,39 +161,36 @@ class MainWindow(QMainWindow):
                 port=shared_fileObj.ftp_pwd, ftp_base_path=shared_fileObj.ftp_basePath
             )
         self._sharing_list.append(fileObj)
-        self._add_share_table_item(fileObj, True)
+        self._UIClass.add_share_table_item(self, fileObj)
         self._service_process.add_share(fileObj)
 
-    def _remove_share(self, rowIndex: int) -> None:
-        if rowIndex < 0 or rowIndex >= self._sharing_list.length:
-            sysLogger.error(f"移除分享记录异常,行号溢出,欲移除的行号:{rowIndex+1},总行数:{self._sharing_list.length}")
-            return
-        fileObj = self._sharing_list[rowIndex]
+    def remove_share(self, fileObj: Union[FileModel, DirModel]) -> None:
         if fileObj.isSharing:
             self._ui_function.show_info_messageBox(
                 "该分享未关闭,请先关闭分享后再移除哦～", msg_color="red"
             )
             return
-        self._sharing_list.remove(rowIndex)
-        self._service_process.remove_share(fileObj)
+        self._sharing_list.remove(fileObj.rowIndex)
+        self.ui.shareListTable.removeRow(fileObj.rowIndex)
         del fileObj
-        self._remove_share_table_item(rowIndex)
+        self._ui_function.show_info_messageBox("移除成功~")
+
+    def open_share(self, fileObj: Union[FileModel, DirModel]) -> None:
+        if fileObj.isSharing:
+            sysLogger.error(f"操作异常,重复打开分享,分享路径: {fileObj.targetPath}, 分享类型:{fileObj.shareType.value}")
+            return
+        self._service_process.add_share(fileObj)
+
+    def close_share(self, fileObj: Union[FileModel, DirModel]) -> None:
+        if not fileObj.isSharing:
+            sysLogger.error(f"操作异常,重复取消分享,分享路径: {fileObj.targetPath}, 分享类型:{fileObj.shareType.value}")
+            return
+        self._service_process.remove_share(fileObj.uuid)
 
     def _open_folder(self, lineEdit: QLineEdit) -> None:
         folder_path = QFileDialog.getExistingDirectory(self, "选择文件夹", "./")
         if folder_path:
             lineEdit.setText(folder_path)
-
-    def _add_share_table_item(
-        self,
-        fileObj: Union[FileModel, DirModel],
-        isSharing: bool = False
-    ) -> None:
-        fileObj.isSharing = isSharing
-        self._ui_function.add_share_table_item(fileObj)
-
-    def _remove_share_table_item(self, rowIndex: int) -> None:
-        self._ui_function.remove_share_table_item(rowIndex)
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         result = self._ui_function.show_question_messageBox("是否退出？", "您正在退出程序，请确认是否退出？")

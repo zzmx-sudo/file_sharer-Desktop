@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\main.ui'
+# Form implementation generated from reading ui file 'main.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -15,7 +15,7 @@ from . main_qrc import *
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(988, 580)
+        MainWindow.resize(1066, 580)
         self.styleSheet = QtWidgets.QWidget(MainWindow)
         self.styleSheet.setStyleSheet("/* ///////////////////////////////////////////////////////////////////////////////\n"
 "Global */\n"
@@ -846,6 +846,7 @@ class Ui_MainWindow(object):
         self.shareFileLbael.setObjectName("shareFileLbael")
         self.horizontalLayout_11.addWidget(self.shareFileLbael)
         self.shareFileCombo = QtWidgets.QComboBox(self.shareFileFrame)
+        self.shareFileCombo.setMinimumSize(QtCore.QSize(180, 0))
         self.shareFileCombo.setObjectName("shareFileCombo")
         self.horizontalLayout_11.addWidget(self.shareFileCombo)
         self.horizontalLayout_14.addWidget(self.shareFileFrame)

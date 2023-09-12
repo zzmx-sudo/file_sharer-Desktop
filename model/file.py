@@ -7,8 +7,6 @@ import os
 import random
 from typing import Any, Union
 
-from PyQt5.Qt import QPushButton
-
 from model import public_types as ptype
 from settings import settings
 from utils import public_func
@@ -203,16 +201,6 @@ class FileModel:
             })
 
         return normal
-
-    def add_buttons(
-        self,
-        start_close_button: QPushButton,
-        copy_browse_button: QPushButton,
-        ui_function,
-    ):
-        from utils.ui_function import UiFunction
-        ui_function: UiFunction
-        pass
 
     def __eq__(self, other: str) -> bool:
         return other.rstrip(os.sep) == self._target_path

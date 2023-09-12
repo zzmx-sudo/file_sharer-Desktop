@@ -9,8 +9,10 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import (
     QPropertyAnimation, QEasingCurve, Qt, QEvent, QPoint
 )
-from PyQt5.Qt import QPushButton, QMessageBox, QTableWidgetItem
-from PyQt5.QtGui import QMouseEvent
+from PyQt5.Qt import (
+    QPushButton, QMessageBox, QTableWidgetItem, QWidget, QHBoxLayout
+)
+from PyQt5.QtGui import QMouseEvent, QColor
 import pyperclip as clip
 
 from main import MainWindow
@@ -261,16 +263,127 @@ class UiFunction:
         question.setStyleSheet(self._messageBox_normal_style)
         return question.exec_()
 
-    def add_share_table_item(self, fileObj: Union[FileModel, DirModel]) -> None:
+    def add_share_table_item(self: MainWindow, fileObj: Union[FileModel, DirModel]) -> None:
+        fileObj.isSharing = True
+        if self.ui.shareListTable.rowCount() <= self._sharing_list.length:
+            self.ui.shareListTable.setRowCount(self.ui.shareListTable.rowCount() + 5)
+
         share_type = "FTP" if fileObj.shareType is shareType.ftp else "HTTP"
-        share_status = "分享中" if fileObj.isSharing else "已取消分享"
-        self._elements.shareListTable.setItem(fileObj.rowIndex, 0, QTableWidgetItem(share_type))
-        self._elements.shareListTable.setItem(fileObj.rowIndex, 1, QTableWidgetItem(fileObj.targetPath))
-        self._elements.shareListTable.setItem(fileObj.rowIndex, 2, QTableWidgetItem(share_status))
-        self._elements.shareListTable.setItem(
-            fileObj.rowIndex, 3, QTableWidgetItem("开启/取消分享 | 复制链接 | 移除分享记录")
-        )
+        self.ui.shareListTable.setItem(fileObj.rowIndex, 0, QTableWidgetItem(share_type))
+        self.ui.shareListTable.setItem(fileObj.rowIndex, 1, QTableWidgetItem(fileObj.targetPath))
+        share_status_item = QTableWidgetItem("分享中")
+        share_status_item.setBackground(QColor("#409eff"))
+        share_status_item.setForeground(QColor("#ffffff"))
+        self.ui.shareListTable.setItem(fileObj.rowIndex, 2, share_status_item)
 
-    def remove_share_table_item(self, rowIndex: int) -> None:
+        open_close_button = QPushButton("取消分享")
+        open_close_button.setStyleSheet("""
+            QPushButton {
+                text-align: center;
+                background-color: rgb(200, 200, 200);
+                color: rgb(0, 0, 0);
+                height: 28px;
+                width: 60px;
+                font: 14px;
+                border-radius: 5%;
+            }
+            
+            QPushButton:hover {
+                background-color: rgb(100, 100, 100)
+            }
+        """)
+        def _open_close_button_clicked(fileObj: Union[FileModel, DirModel], button: QPushButton) -> None:
+            if fileObj.isSharing:
+                background_color = "rgb(126, 199, 255)"
+                color = "#ffffff"
+                hover_background = "#409eff"
+                button_text = "打开共享"
+                self.close_share(fileObj)
+                fileObj.isSharing = False
+                share_status_item = QTableWidgetItem("已经取消分享")
+                share_status_item.setBackground(QColor(200, 200, 200))
+                share_status_item.setForeground(QColor(0, 0, 0))
+                self.ui.shareListTable.setItem(fileObj.rowIndex, 2, share_status_item)
+            else:
+                background_color = "rgb(200, 200, 200)"
+                color = "rgb(0, 0, 0)"
+                hover_background = "rgb(100, 100, 100)"
+                button_text = "取消共享"
+                self.open_share(fileObj)
+                fileObj.isSharing = True
+                share_status_item = QTableWidgetItem("分享中")
+                share_status_item.setBackground(QColor("#409eff"))
+                share_status_item.setForeground(QColor("#ffffff"))
+                self.ui.shareListTable.setItem(fileObj.rowIndex, 2, share_status_item)
+            button.setText(button_text)
+            button.setStyleSheet(f"""
+                QPushButton {{
+                    text-align: center;
+                    background-color: {background_color};
+                    color: {color};
+                    height: 28px;
+                    width: 60px;
+                    font: 14px;
+                    border-radius: 5%;
+                }}
+                
+                QPushButton:hover {{
+                    background-color: {hover_background}
+                }}
+            """)
+        open_close_button.clicked.connect(lambda : _open_close_button_clicked(fileObj, open_close_button))
 
-        pass
+        copy_browse_button = QPushButton("复制分享链接")
+        copy_browse_button.setStyleSheet("""
+            QPushButton {
+                text-align: center;
+                background-color: rgb(126, 199, 255);
+                color: #ffffff;
+                height: 28px;
+                width: 80px;
+                font: 14px;
+                border-radius: 5%;
+            }
+            
+            QPushButton:hover {
+                background-color: #409eff
+            }
+        """)
+        def _copy_browse_button_clicked(fileObj: Union[FileModel, DirModel]) -> None:
+            clip.copy(fileObj.browse_url)
+            if not fileObj.isSharing:
+                self._ui_function.show_info_messageBox(
+                    "复制成功\n该分享已被取消,请打开分享后再发送给小伙伴哦~", msg_color="red"
+                )
+            else:
+                self._ui_function.show_info_messageBox("复制成功,快去发送给小伙伴吧^_^")
+        copy_browse_button.clicked.connect(lambda : _copy_browse_button_clicked(fileObj))
+
+        remove_share_button = QPushButton("移除分享记录")
+        remove_share_button.setStyleSheet("""
+            QPushButton {
+                text-align: center;
+                background-color: rgb(200, 200, 200);
+                color: rgb(0, 0, 0);
+                height: 28px;
+                width: 80px;
+                font: 14px;
+                border-radius: 5%;
+            }
+
+            QPushButton:hover {
+                background-color: rgb(100, 100, 100)
+            }
+        """)
+        def _remove_share_button_clicked(fileObj: Union[FileModel, DirModel]) -> None:
+            self.remove_share(fileObj)
+        remove_share_button.clicked.connect(lambda: _remove_share_button_clicked(fileObj))
+
+        widget = QWidget()
+        hLayout = QHBoxLayout()
+        hLayout.addWidget(open_close_button)
+        hLayout.addWidget(copy_browse_button)
+        hLayout.addWidget(remove_share_button)
+        hLayout.setContentsMargins(5,2,5,2)
+        widget.setLayout(hLayout)
+        self.ui.shareListTable.setCellWidget(fileObj.rowIndex, 3, widget)
