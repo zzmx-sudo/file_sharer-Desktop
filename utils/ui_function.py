@@ -26,8 +26,8 @@ class UiFunction:
     def __init__(self, window: MainWindow) -> None:
 
         self._main_window = window
-        self._elements = self._main_window.ui
-        # self._elements = self._main_window
+        # self._elements = self._main_window.ui
+        self._elements = self._main_window
         self._maximize_flag: bool = False
         self._dragPos: Union[QPoint, None] = None
         self._select_menu_style = """
@@ -404,6 +404,20 @@ class UiFunction:
         table_item.setForeground(QColor(154, 96, 2))
         self.ui.fileListTable.setItem(0, 0, table_item)
 
-    def show_file_list(self: MainWindow, fileList: BrowseFileDictModel) -> None:
-        print(fileList)
+    def generate_file_item(self, fileDict: BrowseFileDictModel) -> QTableWidgetItem:
+        file_name = fileDict["fileName"]
+        share_type = fileDict["stareType"]
+        item = QTableWidgetItem(file_name)
+
+        return item
+
+    def show_file_list(self: MainWindow, fileDict: BrowseFileDictModel) -> None:
+        if not fileDict["isDir"]:
+            self.ui.fileListTable.setRowCount(1)
+            file_item = self._ui_function.generate_file_item(fileDict)
+            self.ui.fileListTable.setItem(0, 0, file_item)
+        else:
+            self._UIClass.set_dir_table(self, fileDict)
+
+    def generate_dir_item(self: MainWindow, fileDict: BrowseFileDictModel) -> QTableWidgetItem:
         pass

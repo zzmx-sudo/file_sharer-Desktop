@@ -33,7 +33,7 @@ class LoadBrowseUrlThread(QThread):
         result = {}
         try:
             response = requests.get(self._browse_url, timeout=2)
-        except requests.exceptions.Timeout:
+        except:
             self.signal.emit(result)
             return
 

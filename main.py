@@ -18,7 +18,7 @@ from model.sharing import FuseSharingModel
 from model.file import FileModel, DirModel
 from model.public_types import ShareType as shareType
 from model.qt_thread import LoadBrowseUrlThread
-from model.browse import BrowseFileListModel
+from model.browse import BrowseFileDictModel
 from utils.public_func import generate_uuid
 
 class MainWindow(QMainWindow):
@@ -27,16 +27,16 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
 
         # load ui
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
-        # ui_path = os.path.join(settings.BASE_DIR, "static", "ui", "main.ui")
-        # self.ui = loadUi(ui_path)
+        # self.ui = Ui_MainWindow()
+        # self.ui.setupUi(self)
+        ui_path = os.path.join(settings.BASE_DIR, "static", "ui", "main.ui")
+        self.ui = loadUi(ui_path)
 
         # setup ui_function
         from utils.ui_function import UiFunction
         self._UIClass = UiFunction
-        self._ui_function = UiFunction(self)
-        # self._ui_function = self._UIClass(self.ui)
+        # self._ui_function = UiFunction(self)
+        self._ui_function = self._UIClass(self.ui)
         self._ui_function.setup()
 
         # env load
@@ -54,8 +54,8 @@ class MainWindow(QMainWindow):
 
         # show window
         self.ui.closeEvent = self.closeEvent
-        self.show()
-        # self.ui.show()
+        # self.show()
+        self.ui.show()
 
     def _load_settings(self) -> None:
         settings.load()
@@ -72,7 +72,7 @@ class MainWindow(QMainWindow):
 
     def _setup_attr(self):
         self._prev_browse_url: str = ""
-        self._browse_data: BrowseFileListModel = BrowseFileListModel.load({})
+        self._browse_data: BrowseFileDictModel = BrowseFileDictModel.load({})
 
     def _setup_event_connect(self) -> None:
         # settings elements
@@ -197,24 +197,24 @@ class MainWindow(QMainWindow):
 
     def _show_file_list(self, browse_response: dict) -> None:
         if not browse_response or not isinstance(browse_response, dict) or not browse_response.get("errno"):
-            self._browse_data = BrowseFileListModel.load({})
+            self._browse_data = BrowseFileDictModel.load({})
             self._UIClass.show_error_browse(self)
         elif browse_response.get("errno", 0) == 404:
-            self._browse_data = BrowseFileListModel.load({})
+            self._browse_data = BrowseFileDictModel.load({})
             self._UIClass.show_not_found_browse(self)
         elif browse_response.get("errno", 0) == 500:
-            self._browse_data = BrowseFileListModel.load({})
+            self._browse_data = BrowseFileDictModel.load({})
             self._UIClass.show_server_error_browse(self)
         elif browse_response.get("errno", 0) == 200:
             browse_data: dict = browse_response.get("data", {})
             if not self._verify_data(browse_data):
-                self._browse_data = BrowseFileListModel.load({})
+                self._browse_data = BrowseFileDictModel.load({})
                 self._UIClass.show_server_error_browse(self)
             else:
-                self._browse_data = BrowseFileListModel.load(browse_data)
+                self._browse_data = BrowseFileDictModel.load(browse_data)
                 self._UIClass.show_file_list(self, self._browse_data)
         else:
-            self._browse_data = BrowseFileListModel.load({})
+            self._browse_data = BrowseFileDictModel.load({})
             self._UIClass.show_server_error_browse(self)
         self.ui.shareLinkButton.setText("点击加载")
         self.ui.shareLinkButton.setEnabled(True)
@@ -269,7 +269,9 @@ class MainWindow(QMainWindow):
         if isDir:
             for child in data["children"]:
                 try:
-                    for uuid, file_dict in child.items():
+                    if len(child) != 1:
+                        return False
+                    for file_dict in child.values():
                         status &= self._verify_data(file_dict)
                 except AttributeError:
                     return False
