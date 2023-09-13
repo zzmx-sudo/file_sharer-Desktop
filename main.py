@@ -158,7 +158,7 @@ class MainWindow(QMainWindow):
         else:
             fileObj = fileModel(
                 target_path, uuid, pwd=shared_fileObj.ftp_pwd,
-                port=shared_fileObj.ftp_pwd, ftp_base_path=shared_fileObj.ftp_basePath
+                port=shared_fileObj.ftp_port, ftp_base_path=shared_fileObj.ftp_basePath
             )
         self._sharing_list.append(fileObj)
         fileObj.isSharing = True

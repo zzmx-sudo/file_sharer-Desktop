@@ -53,9 +53,9 @@ class FtpService(BaseService):
                 self._uuid_ftpServer_params[fileObj.uuid] = ftpServer
                 break
 
-        del self._uuid_ftpServer_params[uuid]
         if need_close_server:
             self._uuid_ftpServer_params[uuid].close_when_done()
+        del self._uuid_ftpServer_params[uuid]
 
     def _start_new_server(self, fileObj: Union[FileModel, DirModel]) -> None:
 
