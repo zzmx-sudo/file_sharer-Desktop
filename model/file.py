@@ -26,7 +26,7 @@ class FileModel:
 
         self._uuid = f"{parent_uuid}>{uuid}" if parent_uuid else uuid
         self._target_path = path.rstrip(os.sep) if path.endswith(os.sep) else path
-        self._download_number = 0
+        self._browse_number = 0
         self._is_sharing = False
         self._row_index = None
         self._ftp_pwd = pwd
@@ -90,14 +90,14 @@ class FileModel:
         return os.path.exists(self._target_path)
 
     @property
-    def download_number(self) -> int:
+    def browse_number(self) -> int:
 
-        return self._download_number
+        return self._browse_number
 
-    @download_number.setter
-    def download_number(self, newValue: int) -> None:
+    @browse_number.setter
+    def browse_number(self, newValue: int) -> None:
 
-        self._download_number = newValue
+        self._browse_number = newValue
 
     @property
     def shareType(self) -> ptype.ShareType:
@@ -181,7 +181,8 @@ class FileModel:
             "targetPath": self._target_path,
             "ftpPwd": self._ftp_pwd,
             "ftpPort": self._ftp_port,
-            "ftpBasePath": self._ftp_base_path
+            "ftpBasePath": self._ftp_base_path,
+            "browseNumber": self._browse_number
         }
 
     def to_dump_backup(self) -> dict:

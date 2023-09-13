@@ -134,6 +134,7 @@ class HttpService(BaseService):
                 sharerLogger.info("用户IP: %s, 用户访问了文件列表, 文件链接: %s" % (
                     client_ip, fileObj.targetPath,
                 ))
+                self._output_q.put(param)
             elif uri == ptype.DOWNLOAD_URI:
                 # 是否为文件夹判断
                 if fileObj.isDir:
@@ -147,7 +148,6 @@ class HttpService(BaseService):
                     sharerLogger.info("用户IP: %s, 用户下载了文件, 文件链接: %s" % (
                         client_ip, fileObj.targetPath
                     ))
-                    self._output_q.put(param)
             else:
                 return JSONResponse({"errno": 404, "errmsg": "访问的链接不存在！"})
 
@@ -170,7 +170,8 @@ class HttpService(BaseService):
                 )
                 return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
 
-            return await fileObj.to_dict_client()
+            data = await fileObj.to_dict_client()
+            return {"errno": 200, "errmsg": "", "data": data}
 
         @self._app.get("%s/{uuid}" % ptype.DOWNLOAD_URI)
         async def download(uuid: str, request: Request) -> Any:

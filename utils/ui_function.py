@@ -19,14 +19,15 @@ from main import MainWindow
 from . custom_grips import CustomGrip
 from model.file import FileModel, DirModel
 from model.public_types import ShareType as shareType
+from model.browse import BrowseFileDictModel
 
 class UiFunction:
 
     def __init__(self, window: MainWindow) -> None:
 
         self._main_window = window
-        # self._elements = self._main_window.ui
-        self._elements = self._main_window
+        self._elements = self._main_window.ui
+        # self._elements = self._main_window
         self._maximize_flag: bool = False
         self._dragPos: Union[QPoint, None] = None
         self._select_menu_style = """
@@ -40,19 +41,19 @@ class UiFunction:
         QLabel {border: none; font-size: 14px;}
         QMessageBox QPushButton {width: 60px; height: 40px; border-radius: 10px;}
         """
+
+    def setup(self) -> None:
+        # main window scale
         self._left_grip = CustomGrip(self._main_window, Qt.LeftEdge)
         self._right_grip = CustomGrip(self._main_window, Qt.RightEdge)
         self._top_grip = CustomGrip(self._main_window, Qt.TopEdge)
         self._bottom_grip = CustomGrip(self._main_window, Qt.BottomEdge)
-
-    def setup(self) -> None:
         # main window event connect
         self._main_window.setWindowFlags(Qt.FramelessWindowHint)
         self._main_window.mousePressEvent = self._mousePressEvent
         self._main_window.resizeEvent = self._resize_grips
         # elements event connect
         self._setup_event_connect()
-        # main window scale
 
     def _setup_event_connect(self) -> None:
         # window elements
@@ -72,7 +73,8 @@ class UiFunction:
         # content elements
         self._elements.contentTopBox.mouseDoubleClickEvent = self._contentTopDpubleClicked
         self._elements.contentTopBox.mouseMoveEvent = self._moveWindow
-        self._elements.shareListTable.verticalHeader().setVisible(False)
+        self._setup_share_list_table()
+        self._elements.backupButton.setEnabled(False)
 
     def _maximize_restore(self) -> None:
         maximize_image = "background-image: url(:/icons/images/icon/maximize.png);"
@@ -121,6 +123,16 @@ class UiFunction:
         self.animation.setEndValue(widthExtended)
         self.animation.setEasingCurve(QEasingCurve.InOutQuart)
         self.animation.start()
+
+    def _setup_share_list_table(self):
+        self._elements.shareListTable.verticalHeader().setVisible(False)
+        header = self._elements.shareListTable.horizontalHeader()
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Fixed)
+        header.resizeSection(0, 80)
+        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Fixed)
+        header.resizeSection(2, 120)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
 
     def _mousePressEvent(self, event: QMouseEvent) -> None:
 
@@ -268,8 +280,12 @@ class UiFunction:
             self.ui.shareListTable.setRowCount(self.ui.shareListTable.rowCount() + 5)
 
         share_type = "FTP" if fileObj.shareType is shareType.ftp else "HTTP"
-        self.ui.shareListTable.setItem(fileObj.rowIndex, 0, QTableWidgetItem(share_type))
-        self.ui.shareListTable.setItem(fileObj.rowIndex, 1, QTableWidgetItem(fileObj.targetPath))
+        share_type_item = QTableWidgetItem(share_type)
+        share_type_item.setTextAlignment(Qt.AlignCenter)
+        self.ui.shareListTable.setItem(fileObj.rowIndex, 0, share_type_item)
+        target_path_item = QTableWidgetItem(fileObj.targetPath)
+        target_path_item.setTextAlignment(Qt.AlignCenter)
+        self.ui.shareListTable.setItem(fileObj.rowIndex, 1, target_path_item)
 
         open_close_button = QPushButton("")
         def _open_close_button_clicked(fileObj: Union[FileModel, DirModel], button: QPushButton) -> None:
@@ -281,6 +297,7 @@ class UiFunction:
                 self.close_share(fileObj)
                 fileObj.isSharing = False
                 share_status_item = QTableWidgetItem("已取消分享")
+                share_status_item.setTextAlignment(Qt.AlignCenter)
                 share_status_item.setBackground(QColor(200, 200, 200))
                 share_status_item.setForeground(QColor(0, 0, 0))
                 self.ui.shareListTable.setItem(fileObj.rowIndex, 2, share_status_item)
@@ -292,6 +309,7 @@ class UiFunction:
                 self.open_share(fileObj)
                 fileObj.isSharing = True
                 share_status_item = QTableWidgetItem("分享中")
+                share_status_item.setTextAlignment(Qt.AlignCenter)
                 share_status_item.setBackground(QColor("#409eff"))
                 share_status_item.setForeground(QColor("#ffffff"))
                 self.ui.shareListTable.setItem(fileObj.rowIndex, 2, share_status_item)
@@ -302,7 +320,6 @@ class UiFunction:
                     background-color: {background_color};
                     color: {color};
                     height: 28px;
-                    width: 60px;
                     font: 14px;
                     border-radius: 5%;
                 }}
@@ -322,7 +339,6 @@ class UiFunction:
                 background-color: rgb(126, 199, 255);
                 color: #ffffff;
                 height: 28px;
-                width: 80px;
                 font: 14px;
                 border-radius: 5%;
             }
@@ -348,7 +364,6 @@ class UiFunction:
                 background-color: rgb(200, 200, 200);
                 color: rgb(0, 0, 0);
                 height: 28px;
-                width: 80px;
                 font: 14px;
                 border-radius: 5%;
             }
@@ -366,6 +381,29 @@ class UiFunction:
         hLayout.addWidget(open_close_button)
         hLayout.addWidget(copy_browse_button)
         hLayout.addWidget(remove_share_button)
-        hLayout.setContentsMargins(5,2,5,2)
+        hLayout.setContentsMargins(0,1,0,1)
+        hLayout.setSpacing(2)
         widget.setLayout(hLayout)
         self.ui.shareListTable.setCellWidget(fileObj.rowIndex, 3, widget)
+
+    def show_error_browse(self: MainWindow) -> None:
+        self.ui.fileListTable.setRowCount(1)
+        table_item = QTableWidgetItem("加载失败,请输入正确的分享链接后再加载哦~")
+        table_item.setForeground(QColor(255, 0, 0))
+        self.ui.fileListTable.setItem(0, 0, table_item)
+
+    def show_not_found_browse(self: MainWindow) -> None:
+        self.ui.fileListTable.setRowCount(1)
+        table_item = QTableWidgetItem("目标的文件/文件夹不存在,请确认对方有开启分享后再加载哦~")
+        table_item.setForeground(QColor(255, 0, 0))
+        self.ui.fileListTable.setItem(0, 0, table_item)
+
+    def show_server_error_browse(self: MainWindow) -> None:
+        self.ui.fileListTable.setRowCount(1)
+        table_item = QTableWidgetItem("对方分享服务异常,请确认对方分享服务正常后再加载哦~")
+        table_item.setForeground(QColor(154, 96, 2))
+        self.ui.fileListTable.setItem(0, 0, table_item)
+
+    def show_file_list(self: MainWindow, fileList: BrowseFileDictModel) -> None:
+        print(fileList)
+        pass

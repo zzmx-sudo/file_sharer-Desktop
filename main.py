@@ -17,6 +17,8 @@ from command.manage import ServiceProcessManager
 from model.sharing import FuseSharingModel
 from model.file import FileModel, DirModel
 from model.public_types import ShareType as shareType
+from model.qt_thread import LoadBrowseUrlThread
+from model.browse import BrowseFileListModel
 from utils.public_func import generate_uuid
 
 class MainWindow(QMainWindow):
@@ -25,16 +27,16 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
 
         # load ui
-        # self.ui = Ui_MainWindow()
-        # self.ui.setupUi(self)
-        ui_path = os.path.join(settings.BASE_DIR, "static", "ui", "main.ui")
-        self.ui = loadUi(ui_path)
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+        # ui_path = os.path.join(settings.BASE_DIR, "static", "ui", "main.ui")
+        # self.ui = loadUi(ui_path)
 
         # setup ui_function
         from utils.ui_function import UiFunction
         self._UIClass = UiFunction
-        # self._ui_function = UiFunction(self)
-        self._ui_function = self._UIClass(self.ui)
+        self._ui_function = UiFunction(self)
+        # self._ui_function = self._UIClass(self.ui)
         self._ui_function.setup()
 
         # env load
@@ -44,13 +46,16 @@ class MainWindow(QMainWindow):
         # process manage and start watch output thread
         self._create_manager_and_watch_output()
 
+        # attr setup
+        self._setup_attr()
+
         # event connect
         self._setup_event_connect()
 
         # show window
-        # self.show()
         self.ui.closeEvent = self.closeEvent
-        self.ui.show()
+        self.show()
+        # self.ui.show()
 
     def _load_settings(self) -> None:
         settings.load()
@@ -65,6 +70,10 @@ class MainWindow(QMainWindow):
         self._output_q = Queue()
         self._service_process = ServiceProcessManager(self._output_q)
 
+    def _setup_attr(self):
+        self._prev_browse_url: str = ""
+        self._browse_data: BrowseFileListModel = BrowseFileListModel.load({})
+
     def _setup_event_connect(self) -> None:
         # settings elements
         self.ui.logPathButton.clicked.connect(lambda : self._open_folder(self.ui.logPathEdit))
@@ -75,6 +84,8 @@ class MainWindow(QMainWindow):
         self.ui.sharePathButton.clicked.connect(lambda : self._open_folder(self.ui.sharePathEdit))
         self.ui.sharePathButton.clicked.connect(lambda : self._update_file_combo())
         self.ui.createShareButton.clicked.connect(lambda : self._create_share())
+        # client elements
+        self.ui.shareLinkButton.clicked.connect(lambda : self._load_browse_url())
 
     def _save_settings(self) -> None:
         logs_path: str = self.ui.logPathEdit.text()
@@ -165,14 +176,59 @@ class MainWindow(QMainWindow):
         self._UIClass.add_share_table_item(self, fileObj)
         self._service_process.add_share(fileObj)
 
+    def _load_browse_url(self) -> None:
+        browse_url: str = self.ui.shareLinkEdit.text()
+        if not browse_url or not browse_url.startswith("http://"):
+            self._ui_function.show_info_messageBox(
+                "不支持的分享链接!\n请确认分享链接无误后再点击加载哦~", msg_color="rgb(154, 96, 2)"
+            )
+            return
+        # 简单提高下效率
+        if browse_url == self._prev_browse_url:
+            if self._browse_data:
+                self._UIClass.show_file_list(self, self._browse_data)
+            return
+        self._prev_browse_url = browse_url
+        self.ui.shareLinkButton.setText("加载中...")
+        self.ui.shareLinkButton.setEnabled(False)
+        self.browse_thread = LoadBrowseUrlThread(browse_url)
+        self.browse_thread.signal.connect(self._show_file_list)
+        self.browse_thread.start()
+
+    def _show_file_list(self, browse_response: dict) -> None:
+        if not browse_response or not isinstance(browse_response, dict) or not browse_response.get("errno"):
+            self._browse_data = BrowseFileListModel.load({})
+            self._UIClass.show_error_browse(self)
+        elif browse_response.get("errno", 0) == 404:
+            self._browse_data = BrowseFileListModel.load({})
+            self._UIClass.show_not_found_browse(self)
+        elif browse_response.get("errno", 0) == 500:
+            self._browse_data = BrowseFileListModel.load({})
+            self._UIClass.show_server_error_browse(self)
+        elif browse_response.get("errno", 0) == 200:
+            browse_data: dict = browse_response.get("data", {})
+            if not self._verify_data(browse_data):
+                self._browse_data = BrowseFileListModel.load({})
+                self._UIClass.show_server_error_browse(self)
+            else:
+                self._browse_data = BrowseFileListModel.load(browse_data)
+                self._UIClass.show_file_list(self, self._browse_data)
+        else:
+            self._browse_data = BrowseFileListModel.load({})
+            self._UIClass.show_server_error_browse(self)
+        self.ui.shareLinkButton.setText("点击加载")
+        self.ui.shareLinkButton.setEnabled(True)
+
     def remove_share(self, fileObj: Union[FileModel, DirModel]) -> None:
         if fileObj.isSharing:
             self._ui_function.show_info_messageBox(
-                "该分享未关闭,请先关闭分享后再移除哦～", msg_color="red"
+                "该分享未关闭,请先关闭分享后再移除哦~", msg_color="red"
             )
             return
         self._sharing_list.remove(fileObj.rowIndex)
         self.ui.shareListTable.removeRow(fileObj.rowIndex)
+        if not self._sharing_list or self._sharing_list.length == 0:
+            self._service_process.close_all()
         del fileObj
         self._ui_function.show_info_messageBox("移除成功~")
 
@@ -196,6 +252,29 @@ class MainWindow(QMainWindow):
         folder_path = QFileDialog.getExistingDirectory(self, "选择文件夹", "./")
         if folder_path:
             lineEdit.setText(folder_path)
+
+    def _verify_data(self, data: dict) -> bool:
+        if not data or not isinstance(data, dict):
+            return False
+        status = True
+        isDir = data.get("isDir")
+        if isDir is None:
+            return False
+        if isDir:
+            other_full_keys = ["uuid", "downloadUrl", "fileName", "stareType", "children"]
+        else:
+             other_full_keys = ["uuid", "downloadUrl", "fileName", "stareType"]
+        if not all(key in data for key in other_full_keys):
+            return False
+        if isDir:
+            for child in data["children"]:
+                try:
+                    for uuid, file_dict in child.items():
+                        status &= self._verify_data(file_dict)
+                except AttributeError:
+                    return False
+
+        return status
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         result = self._ui_function.show_question_messageBox("是否退出？", "您正在退出程序，请确认是否退出？")
