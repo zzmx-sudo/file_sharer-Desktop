@@ -92,6 +92,7 @@ class MainWindow(QMainWindow):
         self.ui.createShareButton.clicked.connect(lambda : self._create_share())
         # client elements
         self.ui.shareLinkButton.clicked.connect(lambda : self._load_browse_url())
+        self.ui.backupButton.clicked.connect(lambda : self._backup_button_clicked())
 
     def _save_settings(self) -> None:
         logs_path: str = self.ui.logPathEdit.text()
@@ -209,6 +210,11 @@ class MainWindow(QMainWindow):
         self._browse_thread.signal.connect(self._show_file_list)
         self._browse_thread.start()
 
+    def _backup_button_clicked(self):
+        self._browse_data.prev()
+        self._UIClass.show_file_list(self, self._browse_data.currentDict)
+        self.ui.backupButton.setEnabled(not self._browse_data.isRoot)
+
     def _show_file_list(self, browse_response: dict) -> None:
         if not browse_response or not isinstance(browse_response, dict) or not browse_response.get("errno"):
             self._browse_data = BrowseFileDictModel.load({})
@@ -234,9 +240,14 @@ class MainWindow(QMainWindow):
         self.ui.shareLinkButton.setText("点击加载")
         self.ui.shareLinkButton.setEnabled(True)
 
-    def create_download_record_and_start(self, fileDict: dict):
+    def create_download_record_and_start(self, fileDict: dict) -> None:
 
         self._ui_function.show_info_messageBox("加入下载成功")
+
+    def enter_dir(self, fileDict: dict) -> None:
+        self._browse_data.currentDict = fileDict
+        self._UIClass.show_file_list(self, self._browse_data.currentDict)
+        self.ui.backupButton.setEnabled(True)
 
     def remove_share(self, fileObj: Union[FileModel, DirModel]) -> None:
         if fileObj.isSharing:

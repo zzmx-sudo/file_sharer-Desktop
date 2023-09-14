@@ -22,7 +22,7 @@ class BrowseFileDictModel(dict):
     @currentDict.setter
     def currentDict(self, newVaule: dict):
 
-        self._current_list = newVaule
+        self._current_dict = newVaule
 
     @property
     def isRoot(self) -> bool:
@@ -45,8 +45,12 @@ class BrowseFileDictModel(dict):
 
     @classmethod
     def _load_dict_recursive(cls, data: dict) -> dict:
-        for child in data["children"]:
+
+        children = data["children"]
+        data["children"] = []
+        for child in children:
             child = [x for x in child.values()][0]
+            data["children"].append(child)
             if child["isDir"]:
                 child["prev"] = data
                 cls._load_dict_recursive(child)

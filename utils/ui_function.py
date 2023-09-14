@@ -5,14 +5,14 @@ __all__ = [
 import webbrowser
 from typing import Union
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import (
     QPropertyAnimation, QEasingCurve, Qt, QEvent, QPoint
 )
 from PyQt5.Qt import (
     QPushButton, QMessageBox, QTableWidgetItem, QWidget, QHBoxLayout
 )
-from PyQt5.QtGui import QMouseEvent, QColor
+from PyQt5.QtGui import QMouseEvent, QColor, QIcon
 import pyperclip as clip
 
 from main import MainWindow
@@ -414,7 +414,7 @@ class UiFunction:
         table_item.setForeground(QColor(154, 96, 2))
         self.ui.fileListTable.setItem(0, 0, table_item)
 
-    def show_file_list(self: MainWindow, fileDict: BrowseFileDictModel) -> None:
+    def show_file_list(self: MainWindow, fileDict: Union[dict, BrowseFileDictModel]) -> None:
         if not fileDict["isDir"]:
             self.ui.fileListTable.setRowCount(0)
             self.ui.fileListTable.setRowCount(1)
@@ -423,14 +423,17 @@ class UiFunction:
         else:
             self._UIClass.set_dir_table(self, fileDict)
 
-    def generate_file_button(self: MainWindow, fileDict: BrowseFileDictModel) -> QPushButton:
+    def generate_file_button(self: MainWindow, fileDict: Union[dict, BrowseFileDictModel]) -> QPushButton:
         file_name = fileDict["fileName"]
         button = QPushButton(file_name)
         button.setStyleSheet(self._ui_function._file_dir_button_style)
+        file_icon = QIcon()
+        file_icon.addPixmap(QtGui.QPixmap(":/icons/images/icon/file.png"), QIcon.Normal, QIcon.Off)
+        button.setIcon(file_icon)
         button.clicked.connect(lambda: self.create_download_record_and_start(fileDict))
         return button
 
-    def set_dir_table(self: MainWindow, fileDict: dict) -> None:
+    def set_dir_table(self: MainWindow, fileDict: Union[dict, BrowseFileDictModel]) -> None:
         self.ui.fileListTable.setRowCount(0)
         children = fileDict.get("children")
         if not children:
@@ -441,7 +444,19 @@ class UiFunction:
             return
         else:
             self.ui.fileListTable.setRowCount(len(children))
-        pass
+            for index, childDict in enumerate(children):
+                if childDict["isDir"]:
+                    table_item = self._UIClass.generate_dir_button(self, childDict)
+                else:
+                    table_item = self._UIClass.generate_file_button(self, childDict)
+                self.ui.fileListTable.setCellWidget(index, 0 ,table_item)
 
-    def generate_dir_button(self: MainWindow, fileDict: BrowseFileDictModel) -> QPushButton:
-        pass
+    def generate_dir_button(self: MainWindow, fileDict: dict) -> QPushButton:
+        dir_name = fileDict["fileName"]
+        button = QPushButton(dir_name)
+        button.setStyleSheet(self._ui_function._file_dir_button_style)
+        dir_icon = QIcon()
+        dir_icon.addPixmap(QtGui.QPixmap(":/icons/images/icon/folder.png"), QIcon.Normal, QIcon.Off)
+        button.setIcon(dir_icon)
+        button.clicked.connect(lambda : self.enter_dir(fileDict))
+        return button
