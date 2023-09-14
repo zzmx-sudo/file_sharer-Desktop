@@ -28,6 +28,7 @@ class LoadBrowseUrlThread(QThread):
     def __init__(self, browse_url: str) -> None:
         super(LoadBrowseUrlThread, self).__init__()
         self._browse_url = browse_url
+        self.run_flag = True
 
     def run(self) -> None:
         result = {}
@@ -42,4 +43,6 @@ class LoadBrowseUrlThread(QThread):
         except json.JSONDecodeError:
             pass
 
+        if not self.run_flag:
+            return
         self.signal.emit(result)

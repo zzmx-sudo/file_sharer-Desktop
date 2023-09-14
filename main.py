@@ -73,6 +73,7 @@ class MainWindow(QMainWindow):
     def _setup_attr(self):
         self._prev_browse_url: str = ""
         self._browse_data: BrowseFileDictModel = BrowseFileDictModel.load({})
+        self._browse_thread: Union[None, LoadBrowseUrlThread] = None
 
     def _setup_event_connect(self) -> None:
         # settings elements
@@ -191,9 +192,12 @@ class MainWindow(QMainWindow):
         self._prev_browse_url = browse_url
         self.ui.shareLinkButton.setText("加载中...")
         self.ui.shareLinkButton.setEnabled(False)
-        self.browse_thread = LoadBrowseUrlThread(browse_url)
-        self.browse_thread.signal.connect(self._show_file_list)
-        self.browse_thread.start()
+        if self._browse_thread is not None:
+            self._browse_thread.run_flag = False
+            self._browse_thread.quit()
+        self._browse_thread = LoadBrowseUrlThread(browse_url)
+        self._browse_thread.signal.connect(self._show_file_list)
+        self._browse_thread.start()
 
     def _show_file_list(self, browse_response: dict) -> None:
         if not browse_response or not isinstance(browse_response, dict) or not browse_response.get("errno"):
@@ -216,6 +220,7 @@ class MainWindow(QMainWindow):
         else:
             self._browse_data = BrowseFileDictModel.load({})
             self._UIClass.show_server_error_browse(self)
+        self._browse_thread = None
         self.ui.shareLinkButton.setText("点击加载")
         self.ui.shareLinkButton.setEnabled(True)
 

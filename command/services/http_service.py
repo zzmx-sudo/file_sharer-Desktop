@@ -2,11 +2,16 @@ __all__ = [
     "HttpService"
 ]
 
-from typing import Union, Any
+import os
+import re
+from typing import Union, Any, AsyncGenerator
 from multiprocessing import Queue
+from urllib.parse import quote
+from email.utils import formatdate
 
+import aiofiles
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse, FileResponse, Response
+from fastapi.responses import JSONResponse, StreamingResponse, Response
 from starlette.types import Scope
 
 from . _base_service import BaseService
@@ -157,6 +162,51 @@ class HttpService(BaseService):
 
     def _setup_router(self) -> None:
 
+        async def file_generator(
+                file_path: str,
+                offset: int,
+                chunk_size: int
+        ) -> AsyncGenerator:
+            async with aiofiles.open(file_path, "rb") as f:
+                await f.seek(offset, os.SEEK_SET)
+                while True:
+                    chunk = await f.read(chunk_size)
+                    if chunk:
+                        yield chunk
+                    else:
+                        break
+
+        async def generate_file_stream_response(
+                request: Request,
+                fileObj: FileModel
+        ) -> StreamingResponse:
+            stat_result = os.stat(fileObj.targetPath)
+            st_size = stat_result.st_size
+            range_str = request.headers.get("range", "")
+            range_match = re.match(r"bytes=(\d+)-", range_str) or re.match(r"bytes=(\d+)-(\d+)", range_str)
+            if range_match:
+                start = int(range_match.group(1))
+                end = int(range_match.group(2)) if range_match.lastindex == 2 else st_size - 1
+            else:
+                start = 0
+                end = st_size - 1
+            file_name = quote(fileObj.file_name)
+            content_length = st_size - start
+            content_type = "application/octet-stream"
+            return StreamingResponse(
+                file_generator(fileObj.targetPath, start, 1048576),
+                media_type=content_type,
+                headers={
+                    "content-disposition": f"attachment; filename={file_name}",
+                    "accept-ranges": "bytes",
+                    "connection": "keep-alive",
+                    "content-length": str(content_length),
+                    "content-range": f"{start}-{end}/{st_size}",
+                    "last-modified": formatdate(stat_result.st_mtime, usegmt=True)
+                },
+                status_code=206 if start > 0 else 200
+            )
+
         @self._app.get("%s/{uuid}" % ptype.FILE_LIST_URI)
         async def file_list(uuid: str, request: Request) -> dict:
 
@@ -187,7 +237,7 @@ class HttpService(BaseService):
                 return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
 
             if fileObj.shareType is ptype.ShareType.http:
-                return FileResponse(path=fileObj.targetPath, filename=fileObj.file_name)
+                return await generate_file_stream_response(request, fileObj)
             elif fileObj.shareType is ptype.ShareType.ftp:
                 ftp_data = await fileObj.to_ftp_data()
                 return {"errno": 200, "errmsg": "", "data": ftp_data}
