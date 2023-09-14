@@ -5,7 +5,7 @@ __all__ = [
 
 import os
 import json
-from typing import Union, TypeVar
+from typing import Union
 
 from . file import FileModel, DirModel
 from . public_types import ShareType as shareType
@@ -31,8 +31,6 @@ class SharingModel(dict):
     def isEmpty(self) -> bool:
 
         return not self
-
-FuseSharingType = TypeVar("FuseSharingType", bound="FuseSharingModel")
 
 class FuseSharingModel(list):
 
@@ -87,7 +85,7 @@ class FuseSharingModel(list):
         sysLogger.info("保存历史分享记录成功")
 
     @classmethod
-    def load(cls) -> FuseSharingType:
+    def load(cls) -> "FuseSharingModel":
 
         model = cls()
         backup_file_path: str = os.path.join(settings.BASE_DIR, "file_sharing_backups.json")
@@ -107,6 +105,12 @@ class FuseSharingModel(list):
             targetPath = file_dict.get("path")
             if not targetPath or not os.path.exists(targetPath):
                 continue
+            # 路径整好看一点
+            if settings.IS_WINDOWS:
+                targetPath = targetPath.replace("/", "\\")
+            else:
+                targetPath = targetPath.replace("\\", "/")
+            file_dict.update({"path": targetPath})
             path_share_param = (file_dict.get("path"), file_dict.get("share_type"))
             if path_share_param in path_share_params:
                 continue

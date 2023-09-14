@@ -17,8 +17,9 @@ from command.manage import ServiceProcessManager
 from model.sharing import FuseSharingModel
 from model.file import FileModel, DirModel
 from model.public_types import ShareType as shareType
-from model.qt_thread import LoadBrowseUrlThread
+from model.qt_thread import LoadBrowseUrlThread, DownloadHttpFileThread, DownloadFtpFileThread
 from model.browse import BrowseFileDictModel
+from model.download import DownloadFileDictModel
 from utils.public_func import generate_uuid
 
 class MainWindow(QMainWindow):
@@ -43,8 +44,8 @@ class MainWindow(QMainWindow):
         self._load_settings()
         self._load_sharing_backups()
 
-        # process manage and start watch output thread
-        self._create_manager_and_watch_output()
+        # Initialize service process manage
+        self._create_service_manager()
 
         # attr setup
         self._setup_attr()
@@ -66,14 +67,18 @@ class MainWindow(QMainWindow):
         for fileObj in self._sharing_list:
             self._UIClass.add_share_table_item(self, fileObj)
 
-    def _create_manager_and_watch_output(self) -> None:
-        self._output_q = Queue()
-        self._service_process = ServiceProcessManager(self._output_q)
+    def _create_service_manager(self) -> None:
+        self._browse_record_q = Queue()
+        self._service_process = ServiceProcessManager(self._browse_record_q)
 
     def _setup_attr(self):
         self._prev_browse_url: str = ""
         self._browse_data: BrowseFileDictModel = BrowseFileDictModel.load({})
+        self._download_data: DownloadFileDictModel = DownloadFileDictModel()
+
         self._browse_thread: Union[None, LoadBrowseUrlThread] = None
+        self._download_http_thread: Union[None, DownloadHttpFileThread] = None
+        self._download_ftp_thread: Union[None, DownloadFtpFileThread] = None
 
     def _setup_event_connect(self) -> None:
         # settings elements
@@ -145,6 +150,11 @@ class MainWindow(QMainWindow):
             )
             return
         target_path: str = os.path.join(base_path, self.ui.shareFileCombo.currentText())
+        # 路径整好看一点
+        if settings.IS_WINDOWS:
+            target_path = target_path.replace("/", "\\")
+        else:
+            target_path = target_path.replace("\\", "/")
         if not os.path.exists(target_path):
             self._ui_function.show_info_messageBox(
                 "分享的路径不存在！\n请确认后再新建", msg_color="red"
@@ -223,6 +233,10 @@ class MainWindow(QMainWindow):
         self._browse_thread = None
         self.ui.shareLinkButton.setText("点击加载")
         self.ui.shareLinkButton.setEnabled(True)
+
+    def create_download_record(self, fileList: list):
+        print(fileList)
+        self._ui_function.show_info_messageBox("加入下载成功")
 
     def remove_share(self, fileObj: Union[FileModel, DirModel]) -> None:
         if fileObj.isSharing:

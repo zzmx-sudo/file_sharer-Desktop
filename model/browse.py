@@ -2,9 +2,7 @@ __all__ = [
     "BrowseFileDictModel"
 ]
 
-from typing import TypeVar, Union
-
-BrowseFileDictType = TypeVar("BrowseFileDictType", bound="BrowseFileDictModel")
+from typing import Union
 
 class BrowseFileDictModel(dict):
     
@@ -32,7 +30,7 @@ class BrowseFileDictModel(dict):
         return self._current_dict == self
 
     @classmethod
-    def load(cls, data: dict) -> BrowseFileDictType:
+    def load(cls, data: dict) -> "BrowseFileDictModel":
         model = cls()
         if not data:
             return model

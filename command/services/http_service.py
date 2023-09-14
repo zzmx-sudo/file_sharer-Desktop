@@ -142,8 +142,8 @@ class HttpService(BaseService):
                 self._output_q.put(param)
             elif uri == ptype.DOWNLOAD_URI:
                 # 是否为文件夹判断
-                if fileObj.isDir:
-                    sharerLogger.warning("用户使用非客户端无法下载分享的文件夹, 用户IP: %s" % client_ip)
+                if fileObj.isDir and fileObj.shareType is ptype.ShareType.http:
+                    sharerLogger.warning("用户使用非客户端无法直接下载分享的文件夹, 用户IP: %s" % client_ip)
                     return JSONResponse({"errno": 400, "errmsg": "无法直接下载文件夹, 请使用客户端进行下载！"})
                 # 下载的若为FTP分享文件, 需进行是否为客户端判断
                 if await is_download_ftp_without_client(fileObj.shareType, _request):
