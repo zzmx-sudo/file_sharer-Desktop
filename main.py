@@ -234,8 +234,8 @@ class MainWindow(QMainWindow):
         self.ui.shareLinkButton.setText("点击加载")
         self.ui.shareLinkButton.setEnabled(True)
 
-    def create_download_record(self, fileList: list):
-        print(fileList)
+    def create_download_record_and_start(self, fileDict: dict):
+
         self._ui_function.show_info_messageBox("加入下载成功")
 
     def remove_share(self, fileObj: Union[FileModel, DirModel]) -> None:

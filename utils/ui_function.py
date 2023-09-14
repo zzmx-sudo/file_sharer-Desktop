@@ -41,6 +41,12 @@ class UiFunction:
         QLabel {border: none; font-size: 14px;}
         QMessageBox QPushButton {width: 60px; height: 40px; border-radius: 10px;}
         """
+        self._file_dir_button_style = """
+        QPushButton {background-color: rgb(247, 247, 247); color: rgb(0, 0, 0); 
+                    text-align: left; border: none; margin: 0; padding-left: 10px;}
+        QPushButton:hover {border: 1px solid #409eff;}
+        QPushButton:pressed {border: 3px solid #409eff;}
+        """
 
     def setup(self) -> None:
         # main window scale
@@ -387,37 +393,55 @@ class UiFunction:
         self.ui.shareListTable.setCellWidget(fileObj.rowIndex, 3, widget)
 
     def show_error_browse(self: MainWindow) -> None:
+        # TODO:单元格配置为CellWidget后,不能通过setItem设置为普通单元格,暂用以下方法解决,后续再寻找更合适方案
+        self.ui.fileListTable.setRowCount(0)
         self.ui.fileListTable.setRowCount(1)
         table_item = QTableWidgetItem("加载失败,请输入正确的分享链接后再加载哦~")
         table_item.setForeground(QColor(255, 0, 0))
         self.ui.fileListTable.setItem(0, 0, table_item)
 
     def show_not_found_browse(self: MainWindow) -> None:
+        self.ui.fileListTable.setRowCount(0)
         self.ui.fileListTable.setRowCount(1)
         table_item = QTableWidgetItem("目标的文件/文件夹不存在,请确认对方有开启分享后再加载哦~")
         table_item.setForeground(QColor(255, 0, 0))
         self.ui.fileListTable.setItem(0, 0, table_item)
 
     def show_server_error_browse(self: MainWindow) -> None:
+        self.ui.fileListTable.setRowCount(0)
         self.ui.fileListTable.setRowCount(1)
         table_item = QTableWidgetItem("对方分享服务异常,请确认对方分享服务正常后再加载哦~")
         table_item.setForeground(QColor(154, 96, 2))
         self.ui.fileListTable.setItem(0, 0, table_item)
 
-    def generate_file_item(self, fileDict: BrowseFileDictModel) -> QTableWidgetItem:
-        file_name = fileDict["fileName"]
-        share_type = fileDict["stareType"]
-        item = QTableWidgetItem(file_name)
-
-        return item
-
     def show_file_list(self: MainWindow, fileDict: BrowseFileDictModel) -> None:
         if not fileDict["isDir"]:
+            self.ui.fileListTable.setRowCount(0)
             self.ui.fileListTable.setRowCount(1)
-            file_item = self._ui_function.generate_file_item(fileDict)
-            self.ui.fileListTable.setItem(0, 0, file_item)
+            file_button = self._UIClass.generate_file_button(self, fileDict)
+            self.ui.fileListTable.setCellWidget(0, 0, file_button)
         else:
             self._UIClass.set_dir_table(self, fileDict)
 
-    def generate_dir_item(self: MainWindow, fileDict: BrowseFileDictModel) -> QTableWidgetItem:
+    def generate_file_button(self: MainWindow, fileDict: BrowseFileDictModel) -> QPushButton:
+        file_name = fileDict["fileName"]
+        button = QPushButton(file_name)
+        button.setStyleSheet(self._ui_function._file_dir_button_style)
+        button.clicked.connect(lambda: self.create_download_record_and_start(fileDict))
+        return button
+
+    def set_dir_table(self: MainWindow, fileDict: dict) -> None:
+        self.ui.fileListTable.setRowCount(0)
+        children = fileDict.get("children")
+        if not children:
+            self.ui.fileListTable.setRowCount(1)
+            table_item = QTableWidgetItem("该文件夹下空空如也~")
+            table_item.setForeground(QColor(154, 96, 2))
+            self.ui.fileListTable.setItem(0, 0, table_item)
+            return
+        else:
+            self.ui.fileListTable.setRowCount(len(children))
+        pass
+
+    def generate_dir_button(self: MainWindow, fileDict: BrowseFileDictModel) -> QPushButton:
         pass
