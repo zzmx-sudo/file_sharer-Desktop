@@ -194,7 +194,7 @@ class MainWindow(QMainWindow):
             return
         if file_count > 10000:
             self._ui_function.show_info_messageBox(
-                f"分享已被取消\n该文件夹内文件数量大于10000, 加载会造成界面严重卡顿, 请按需对文件夹进行打包后再分享",
+                f"分享已被取消\n该文件夹内文件数量大于10000, 直接分享它不是一个好的选择, 请按需对文件夹进行打包后再分享",
                 "分享被取消",
                 msg_color="red"
             )
