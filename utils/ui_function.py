@@ -26,8 +26,8 @@ class UiFunction:
     def __init__(self, window: MainWindow) -> None:
 
         self._main_window = window
-        # self._elements = self._main_window.ui
-        self._elements = self._main_window
+        self._elements = self._main_window.ui
+        # self._elements = self._main_window
         self._maximize_flag: bool = False
         self._dragPos: Union[QPoint, None] = None
         self._select_menu_style = """
@@ -47,6 +47,12 @@ class UiFunction:
         QPushButton:hover {border: 1px solid #409eff;}
         QPushButton:pressed {border: 3px solid #409eff;}
         """
+        self._share_number_col = 0
+        self._share_type_col = 1
+        self._share_targetPath_col = 2
+        self._browse_number_col = 3
+        self._share_status_col = 4
+        self._share_options_col = 5
 
     def setup(self) -> None:
         # main window scale
@@ -79,8 +85,9 @@ class UiFunction:
         # content elements
         self._elements.contentTopBox.mouseDoubleClickEvent = self._contentTopDpubleClicked
         self._elements.contentTopBox.mouseMoveEvent = self._moveWindow
-        self._setup_share_list_table()
+        self._setup_table_widget()
         self._elements.backupButton.setEnabled(False)
+        self._elements.downloadDirButton.setEnabled(False)
 
     def _maximize_restore(self) -> None:
         maximize_image = "background-image: url(:/icons/images/icon/maximize.png);"
@@ -130,15 +137,22 @@ class UiFunction:
         self.animation.setEasingCurve(QEasingCurve.InOutQuart)
         self.animation.start()
 
-    def _setup_share_list_table(self):
+    def _setup_table_widget(self):
         self._elements.shareListTable.verticalHeader().setVisible(False)
         header = self._elements.shareListTable.horizontalHeader()
-        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Fixed)
-        header.resizeSection(0, 80)
-        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Fixed)
-        header.resizeSection(2, 120)
-        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(self._share_number_col, QtWidgets.QHeaderView.Fixed)
+        header.resizeSection(self._share_number_col, 40)
+        header.setSectionResizeMode(self._share_type_col, QtWidgets.QHeaderView.Fixed)
+        header.resizeSection(self._share_type_col, 80)
+        header.setSectionResizeMode(self._browse_number_col, QtWidgets.QHeaderView.Fixed)
+        header.resizeSection(self._browse_number_col, 80)
+        header.setSectionResizeMode(self._share_status_col, QtWidgets.QHeaderView.Fixed)
+        header.resizeSection(self._share_status_col, 120)
+        header.setSectionResizeMode(self._share_targetPath_col, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(self._share_options_col, QtWidgets.QHeaderView.Stretch)
+        self._elements.shareListTable.setRowCount(0)
+
+        self._elements.fileListTable.setRowCount(0)
 
     def _mousePressEvent(self, event: QMouseEvent) -> None:
 
@@ -218,14 +232,17 @@ class UiFunction:
             self,
             msg: str,
             title: str = "消息提示",
-            msg_color: str = "black"
+            msg_color: str = "black",
+            ok_button_text: str = "好的"
     ) -> None:
         info = QMessageBox(
             QMessageBox.Information,
             title, msg,
-            QMessageBox.Ok,
             parent=self._main_window
         )
+        okButton = info.addButton(self._main_window.tr(ok_button_text), QMessageBox.YesRole)
+        okButton.setCursor(QtGui.QCursor(Qt.PointingHandCursor))
+        okButtonWidth = max(len(ok_button_text), 60)
         info.setWindowFlag(Qt.FramelessWindowHint)
         info.setStyleSheet(self._messageBox_normal_style + f"""
             QLabel {{
@@ -233,6 +250,7 @@ class UiFunction:
             }}
             QMessageBox QPushButton {{
                 border: 1px solid #409eff;
+                width: {okButtonWidth}
             }}
             QMessageBox QPushButton:hover {{
                 background-color: #ffffff;
@@ -242,8 +260,10 @@ class UiFunction:
 
     def show_question_messageBox(
             self,
+            msg: str,
             title: str,
-            msg: str
+            yes_button_text: str = "确认",
+            no_button_text: str = "取消"
     ):
         question = QMessageBox(
             QMessageBox.Question,
@@ -251,31 +271,37 @@ class UiFunction:
             parent=self._main_window
         )
         question.setWindowFlag(Qt.FramelessWindowHint)
-        yesButton = question.addButton(self._main_window.tr("确认"), QMessageBox.YesRole)
-        yesButton.setStyleSheet("""
-            QPushButton {
+        yesButton = question.addButton(self._main_window.tr(yes_button_text), QMessageBox.YesRole)
+        yesButton.setCursor(QtGui.QCursor(Qt.PointingHandCursor))
+        yesButtonWidth = max(len(yes_button_text) * 15, 60)
+        yesButton.setStyleSheet(f"""
+            QPushButton {{
                 color: #ffffff;
                 background-color: #409eff;
-            }
-            QPushButton:hover {
+                width: {yesButtonWidth}
+            }}
+            QPushButton:hover {{
                 border: 1px solid rgb(61, 13, 134);
-            }
-            QPushButton:pressed {
+            }}
+            QPushButton:pressed {{
                 border: 3px solid rgb(61, 13, 134);
-            }
+            }}
         """)
-        noButton = question.addButton(self._main_window.tr("取消"), QMessageBox.NoRole)
-        noButton.setStyleSheet("""
-            QPushButton {
+        noButton = question.addButton(self._main_window.tr(no_button_text), QMessageBox.NoRole)
+        noButton.setCursor(QtGui.QCursor(Qt.PointingHandCursor))
+        noButtonWidth = max(len(no_button_text) * 15, 60)
+        noButton.setStyleSheet(f"""
+            QPushButton {{
                 color: rgb(0, 0, 0);
                 background-color: rgb(222, 222, 222);
-            }
-            QPushButton:hover {
+                width: {noButtonWidth}
+            }}
+            QPushButton:hover {{
                 border: 1px solid rgb(61, 13, 134);
-            }
-            QPushButton:pressed {
+            }}
+            QPushButton:pressed {{
                 border: 3px solid rgb(61, 13, 134);
-            }
+            }}
         """)
         question.setDefaultButton(noButton)
         question.setStyleSheet(self._messageBox_normal_style)
@@ -283,15 +309,22 @@ class UiFunction:
 
     def add_share_table_item(self: MainWindow, fileObj: Union[FileModel, DirModel]) -> None:
         if self.ui.shareListTable.rowCount() <= self._sharing_list.length:
-            self.ui.shareListTable.setRowCount(self.ui.shareListTable.rowCount() + 5)
+            self.ui.shareListTable.setRowCount(self.ui.shareListTable.rowCount() + 1)
 
+        share_number = fileObj.rowIndex + 1
+        share_number_item = QTableWidgetItem(str(share_number))
+        share_number_item.setTextAlignment(Qt.AlignCenter)
+        self.ui.shareListTable.setItem(fileObj.rowIndex, self._ui_function._share_number_col, share_number_item)
         share_type = "FTP" if fileObj.shareType is shareType.ftp else "HTTP"
         share_type_item = QTableWidgetItem(share_type)
         share_type_item.setTextAlignment(Qt.AlignCenter)
-        self.ui.shareListTable.setItem(fileObj.rowIndex, 0, share_type_item)
+        self.ui.shareListTable.setItem(fileObj.rowIndex, self._ui_function._share_type_col, share_type_item)
         target_path_item = QTableWidgetItem(fileObj.targetPath)
         target_path_item.setTextAlignment(Qt.AlignCenter)
-        self.ui.shareListTable.setItem(fileObj.rowIndex, 1, target_path_item)
+        self.ui.shareListTable.setItem(fileObj.rowIndex, self._ui_function._share_targetPath_col, target_path_item)
+        browse_number_item = QTableWidgetItem("0")
+        browse_number_item.setTextAlignment(Qt.AlignCenter)
+        self.ui.shareListTable.setItem(fileObj.rowIndex, self._ui_function._browse_number_col, browse_number_item)
 
         open_close_button = QPushButton("")
         def _open_close_button_clicked(fileObj: Union[FileModel, DirModel], button: QPushButton) -> None:
@@ -306,7 +339,7 @@ class UiFunction:
                 share_status_item.setTextAlignment(Qt.AlignCenter)
                 share_status_item.setBackground(QColor(200, 200, 200))
                 share_status_item.setForeground(QColor(0, 0, 0))
-                self.ui.shareListTable.setItem(fileObj.rowIndex, 2, share_status_item)
+                self.ui.shareListTable.setItem(fileObj.rowIndex, self._ui_function._share_status_col, share_status_item)
             else:
                 background_color = "rgb(200, 200, 200)"
                 color = "rgb(0, 0, 0)"
@@ -318,7 +351,7 @@ class UiFunction:
                 share_status_item.setTextAlignment(Qt.AlignCenter)
                 share_status_item.setBackground(QColor("#409eff"))
                 share_status_item.setForeground(QColor("#ffffff"))
-                self.ui.shareListTable.setItem(fileObj.rowIndex, 2, share_status_item)
+                self.ui.shareListTable.setItem(fileObj.rowIndex, self._ui_function._share_status_col, share_status_item)
             button.setText(button_text)
             button.setStyleSheet(f"""
                 QPushButton {{
@@ -390,7 +423,13 @@ class UiFunction:
         hLayout.setContentsMargins(0,1,0,1)
         hLayout.setSpacing(2)
         widget.setLayout(hLayout)
-        self.ui.shareListTable.setCellWidget(fileObj.rowIndex, 3, widget)
+        self.ui.shareListTable.setCellWidget(fileObj.rowIndex, self._ui_function._share_options_col, widget)
+
+    def remove_share_row(self: MainWindow, rowIndex: int) -> None:
+        self.ui.shareListTable.removeRow(rowIndex)
+        share_row_count = self.ui.shareListTable.rowCount()
+        for row in range(rowIndex, share_row_count):
+            self.ui.shareListTable.item(row, self._ui_function._share_number_col).setText(str(row + 1))
 
     def show_error_browse(self: MainWindow) -> None:
         # TODO:单元格配置为CellWidget后,不能通过setItem设置为普通单元格,暂用以下方法解决,后续再寻找更合适方案
@@ -420,8 +459,10 @@ class UiFunction:
             self.ui.fileListTable.setRowCount(1)
             file_button = self._UIClass.generate_file_button(self, fileDict)
             self.ui.fileListTable.setCellWidget(0, 0, file_button)
+            self.ui.downloadDirButton.setEnabled(False)
         else:
             self._UIClass.set_dir_table(self, fileDict)
+            self.ui.downloadDirButton.setEnabled(True)
 
     def generate_file_button(self: MainWindow, fileDict: Union[dict, BrowseFileDictModel]) -> QPushButton:
         file_name = fileDict["fileName"]

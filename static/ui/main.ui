@@ -230,6 +230,10 @@ QPushButton:hover {
 QPushButton:pressed {
 	background-color: #409eff;
 }
+QPushButton:disabled {
+	background-color: rgb(200, 200, 200);
+	border: none;
+}
 
 /* ///////////////////////////////////////////////////////////////////////////////
 Top Logo */
@@ -394,6 +398,9 @@ Content client Box */
 	border: 1px solid #409eff;
 	border-radius: 5%;
 	padding-left: 10px;
+}
+#fileListFrame .QTableWidget::item:selected {
+	background-color: rgb(247, 247, 247);
 }
 /* ///////////////////////////////////////////////////////////////////////////////
 Content Bottom Bar */
@@ -581,6 +588,9 @@ Content Bottom Bar */
                     <height>50</height>
                    </size>
                   </property>
+                  <property name="cursor">
+                   <cursorShape>PointingHandCursor</cursorShape>
+                  </property>
                   <property name="toolTip">
                    <string>首页</string>
                   </property>
@@ -605,6 +615,9 @@ Content Bottom Bar */
                     <width>16777215</width>
                     <height>50</height>
                    </size>
+                  </property>
+                  <property name="cursor">
+                   <cursorShape>PointingHandCursor</cursorShape>
                   </property>
                   <property name="toolTip">
                    <string>服务端</string>
@@ -631,6 +644,9 @@ Content Bottom Bar */
                     <height>50</height>
                    </size>
                   </property>
+                  <property name="cursor">
+                   <cursorShape>PointingHandCursor</cursorShape>
+                  </property>
                   <property name="toolTip">
                    <string>客户端</string>
                   </property>
@@ -655,6 +671,9 @@ Content Bottom Bar */
                     <width>16777215</width>
                     <height>50</height>
                    </size>
+                  </property>
+                  <property name="cursor">
+                   <cursorShape>PointingHandCursor</cursorShape>
                   </property>
                   <property name="toolTip">
                    <string>下载记录</string>
@@ -719,6 +738,9 @@ Content Bottom Bar */
                     <width>16777215</width>
                     <height>45</height>
                    </size>
+                  </property>
+                  <property name="cursor">
+                   <cursorShape>PointingHandCursor</cursorShape>
                   </property>
                   <property name="toolTip">
                    <string>打开/关闭设置窗口</string>
@@ -821,6 +843,9 @@ Content Bottom Bar */
                  <height>28</height>
                 </size>
                </property>
+               <property name="cursor">
+                <cursorShape>PointingHandCursor</cursorShape>
+               </property>
                <property name="toolTip">
                 <string>关闭设置窗口</string>
                </property>
@@ -897,6 +922,9 @@ Content Bottom Bar */
                 </property>
                 <item>
                  <widget class="QCheckBox" name="saveSystemCheck">
+                  <property name="cursor">
+                   <cursorShape>PointingHandCursor</cursorShape>
+                  </property>
                   <property name="toolTip">
                    <string>勾选保存系统日志</string>
                   </property>
@@ -946,6 +974,9 @@ Content Bottom Bar */
                 </property>
                 <item>
                  <widget class="QCheckBox" name="saveShareCheck">
+                  <property name="cursor">
+                   <cursorShape>PointingHandCursor</cursorShape>
+                  </property>
                   <property name="toolTip">
                    <string>勾选保存分享日志</string>
                   </property>
@@ -1044,6 +1075,9 @@ Content Bottom Bar */
                        <width>40</width>
                        <height>20</height>
                       </size>
+                     </property>
+                     <property name="cursor">
+                      <cursorShape>PointingHandCursor</cursorShape>
                      </property>
                      <property name="toolTip">
                       <string>打开资源管理器选择路径</string>
@@ -1146,6 +1180,9 @@ Content Bottom Bar */
                        <height>20</height>
                       </size>
                      </property>
+                     <property name="cursor">
+                      <cursorShape>PointingHandCursor</cursorShape>
+                     </property>
                      <property name="toolTip">
                       <string>打开资源管理器选择路径</string>
                      </property>
@@ -1201,6 +1238,9 @@ Content Bottom Bar */
                     <height>26</height>
                    </size>
                   </property>
+                  <property name="cursor">
+                   <cursorShape>PointingHandCursor</cursorShape>
+                  </property>
                   <property name="text">
                    <string>分享软件</string>
                   </property>
@@ -1223,6 +1263,9 @@ Content Bottom Bar */
                     <width>100</width>
                     <height>26</height>
                    </size>
+                  </property>
+                  <property name="cursor">
+                   <cursorShape>PointingHandCursor</cursorShape>
                   </property>
                   <property name="text">
                    <string>打开项目</string>
@@ -1268,6 +1311,9 @@ Content Bottom Bar */
                  <height>30</height>
                 </size>
                </property>
+               <property name="cursor">
+                <cursorShape>PointingHandCursor</cursorShape>
+               </property>
                <property name="toolTip">
                 <string>保存配置</string>
                </property>
@@ -1289,6 +1335,9 @@ Content Bottom Bar */
                  <width>120</width>
                  <height>30</height>
                 </size>
+               </property>
+               <property name="cursor">
+                <cursorShape>PointingHandCursor</cursorShape>
                </property>
                <property name="toolTip">
                 <string>撤回配置</string>
@@ -1439,6 +1488,9 @@ Content Bottom Bar */
                     <height>28</height>
                    </size>
                   </property>
+                  <property name="cursor">
+                   <cursorShape>PointingHandCursor</cursorShape>
+                  </property>
                   <property name="toolTip">
                    <string>最小化窗口</string>
                   </property>
@@ -1464,6 +1516,9 @@ Content Bottom Bar */
                     <height>28</height>
                    </size>
                   </property>
+                  <property name="cursor">
+                   <cursorShape>PointingHandCursor</cursorShape>
+                  </property>
                   <property name="toolTip">
                    <string>窗口全屏</string>
                   </property>
@@ -1488,6 +1543,9 @@ Content Bottom Bar */
                     <width>28</width>
                     <height>28</height>
                    </size>
+                  </property>
+                  <property name="cursor">
+                   <cursorShape>PointingHandCursor</cursorShape>
                   </property>
                   <property name="toolTip">
                    <string>关闭应用</string>
@@ -1560,7 +1618,7 @@ Content Bottom Bar */
                 <item>
                  <widget class="QStackedWidget" name="stackedWidget">
                   <property name="currentIndex">
-                   <number>2</number>
+                   <number>0</number>
                   </property>
                   <widget class="QWidget" name="home"/>
                   <widget class="QWidget" name="server">
@@ -1673,6 +1731,9 @@ Content Bottom Bar */
                           </item>
                           <item>
                            <widget class="QComboBox" name="shareTypeCombo">
+                            <property name="cursor">
+                             <cursorShape>PointingHandCursor</cursorShape>
+                            </property>
                             <item>
                              <property name="text">
                               <string>HTTP</string>
@@ -1767,6 +1828,9 @@ Content Bottom Bar */
                               <height>30</height>
                              </size>
                             </property>
+                            <property name="cursor">
+                             <cursorShape>PointingHandCursor</cursorShape>
+                            </property>
                             <property name="styleSheet">
                              <string notr="true">background-image: url(:/icons/images/icon/folder.png);</string>
                             </property>
@@ -1835,6 +1899,9 @@ Content Bottom Bar */
                               <height>0</height>
                              </size>
                             </property>
+                            <property name="cursor">
+                             <cursorShape>PointingHandCursor</cursorShape>
+                            </property>
                            </widget>
                           </item>
                          </layout>
@@ -1886,6 +1953,9 @@ Content Bottom Bar */
                            <width>16777215</width>
                            <height>26</height>
                           </size>
+                         </property>
+                         <property name="cursor">
+                          <cursorShape>PointingHandCursor</cursorShape>
                          </property>
                          <property name="text">
                           <string>新建分享</string>
@@ -1939,6 +2009,9 @@ Content Bottom Bar */
                            <height>16777215</height>
                           </size>
                          </property>
+                         <property name="cursor" stdset="0">
+                          <cursorShape>PointingHandCursor</cursorShape>
+                         </property>
                          <property name="frameShape">
                           <enum>QFrame::NoFrame</enum>
                          </property>
@@ -1970,7 +2043,7 @@ Content Bottom Bar */
                           <number>50</number>
                          </attribute>
                          <attribute name="horizontalHeaderDefaultSectionSize">
-                          <number>215</number>
+                          <number>150</number>
                          </attribute>
                          <attribute name="horizontalHeaderHighlightSections">
                           <bool>true</bool>
@@ -2056,12 +2129,22 @@ Content Bottom Bar */
                          </row>
                          <column>
                           <property name="text">
+                           <string>编号</string>
+                          </property>
+                         </column>
+                         <column>
+                          <property name="text">
                            <string>分享类型</string>
                           </property>
                          </column>
                          <column>
                           <property name="text">
                            <string>分享文件/文件夹路径</string>
+                          </property>
+                         </column>
+                         <column>
+                          <property name="text">
+                           <string>浏览数量</string>
                           </property>
                          </column>
                          <column>
@@ -2074,17 +2157,17 @@ Content Bottom Bar */
                            <string>操作</string>
                           </property>
                          </column>
-                         <item row="0" column="0">
-                          <property name="text">
-                           <string/>
-                          </property>
-                         </item>
                          <item row="0" column="1">
                           <property name="text">
                            <string/>
                           </property>
                          </item>
                          <item row="0" column="2">
+                          <property name="text">
+                           <string/>
+                          </property>
+                         </item>
+                         <item row="0" column="4">
                           <property name="text">
                            <string/>
                           </property>
@@ -2222,6 +2305,9 @@ Content Bottom Bar */
                               <height>30</height>
                              </size>
                             </property>
+                            <property name="cursor">
+                             <cursorShape>PointingHandCursor</cursorShape>
+                            </property>
                             <property name="text">
                              <string>点击加载</string>
                             </property>
@@ -2254,7 +2340,7 @@ Content Bottom Bar */
                           <property name="bottomMargin">
                            <number>2</number>
                           </property>
-                          <item>
+                          <item alignment="Qt::AlignLeft">
                            <widget class="QFrame" name="backupButtonFrame">
                             <property name="minimumSize">
                              <size>
@@ -2268,9 +2354,9 @@ Content Bottom Bar */
                             <property name="frameShadow">
                              <enum>QFrame::Raised</enum>
                             </property>
-                            <layout class="QVBoxLayout" name="verticalLayout_22">
+                            <layout class="QHBoxLayout" name="horizontalLayout_17">
                              <property name="spacing">
-                              <number>0</number>
+                              <number>10</number>
                              </property>
                              <property name="leftMargin">
                               <number>10</number>
@@ -2284,7 +2370,7 @@ Content Bottom Bar */
                              <property name="bottomMargin">
                               <number>0</number>
                              </property>
-                             <item>
+                             <item alignment="Qt::AlignLeft">
                               <widget class="QPushButton" name="backupButton">
                                <property name="minimumSize">
                                 <size>
@@ -2297,6 +2383,9 @@ Content Bottom Bar */
                                  <width>130</width>
                                  <height>30</height>
                                 </size>
+                               </property>
+                               <property name="cursor">
+                                <cursorShape>PointingHandCursor</cursorShape>
                                </property>
                                <property name="text">
                                 <string>返回上一级目录</string>
@@ -2313,19 +2402,50 @@ Content Bottom Bar */
                                </property>
                               </widget>
                              </item>
+                             <item alignment="Qt::AlignLeft">
+                              <widget class="QPushButton" name="downloadDirButton">
+                               <property name="minimumSize">
+                                <size>
+                                 <width>150</width>
+                                 <height>30</height>
+                                </size>
+                               </property>
+                               <property name="maximumSize">
+                                <size>
+                                 <width>150</width>
+                                 <height>30</height>
+                                </size>
+                               </property>
+                               <property name="text">
+                                <string>下载当前整个文件夹</string>
+                               </property>
+                              </widget>
+                             </item>
                             </layout>
                            </widget>
                           </item>
                           <item>
                            <widget class="QTableWidget" name="fileListTable">
+                            <property name="cursor" stdset="0">
+                             <cursorShape>PointingHandCursor</cursorShape>
+                            </property>
+                            <property name="editTriggers">
+                             <set>QAbstractItemView::NoEditTriggers</set>
+                            </property>
+                            <property name="selectionBehavior">
+                             <enum>QAbstractItemView::SelectRows</enum>
+                            </property>
                             <attribute name="horizontalHeaderVisible">
                              <bool>true</bool>
                             </attribute>
                             <attribute name="horizontalHeaderCascadingSectionResizes">
                              <bool>false</bool>
                             </attribute>
+                            <attribute name="horizontalHeaderMinimumSectionSize">
+                             <number>50</number>
+                            </attribute>
                             <attribute name="horizontalHeaderDefaultSectionSize">
-                             <number>800</number>
+                             <number>215</number>
                             </attribute>
                             <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
                              <bool>true</bool>
@@ -2338,6 +2458,9 @@ Content Bottom Bar */
                             </attribute>
                             <attribute name="verticalHeaderCascadingSectionResizes">
                              <bool>false</bool>
+                            </attribute>
+                            <attribute name="verticalHeaderMinimumSectionSize">
+                             <number>25</number>
                             </attribute>
                             <row>
                              <property name="text">

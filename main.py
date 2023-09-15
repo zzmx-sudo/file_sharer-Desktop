@@ -17,7 +17,7 @@ from command.manage import ServiceProcessManager
 from model.sharing import FuseSharingModel
 from model.file import FileModel, DirModel
 from model.public_types import ShareType as shareType
-from model.qt_thread import LoadBrowseUrlThread, DownloadHttpFileThread, DownloadFtpFileThread
+from model.qt_thread import *
 from model.browse import BrowseFileDictModel
 from model.download import DownloadFileDictModel
 from utils.public_func import generate_uuid
@@ -28,23 +28,23 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
 
         # load ui
-        # self.ui = Ui_MainWindow()
-        # self.ui.setupUi(self)
-        ui_path = os.path.join(settings.BASE_DIR, "static", "ui", "main.ui")
-        self.ui = loadUi(ui_path)
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+        # ui_path = os.path.join(settings.BASE_DIR, "static", "ui", "main.ui")
+        # self.ui = loadUi(ui_path)
 
         # setup ui_function
         from utils.ui_function import UiFunction
         self._UIClass = UiFunction
-        # self._ui_function = UiFunction(self)
-        self._ui_function = self._UIClass(self.ui)
+        self._ui_function = UiFunction(self)
+        # self._ui_function = self._UIClass(self.ui)
         self._ui_function.setup()
 
         # env load
         self._load_settings()
         self._load_sharing_backups()
 
-        # Initialize service process manage
+        # Initialize service process manage and watch thread
         self._create_service_manager()
 
         # attr setup
@@ -55,8 +55,8 @@ class MainWindow(QMainWindow):
 
         # show window
         self.ui.closeEvent = self.closeEvent
-        # self.show()
-        self.ui.show()
+        self.show()
+        # self.ui.show()
 
     def _load_settings(self) -> None:
         settings.load()
@@ -69,6 +69,10 @@ class MainWindow(QMainWindow):
 
     def _create_service_manager(self) -> None:
         self._browse_record_q = Queue()
+        self._watch_browse_thread = WatchResultThread(self._browse_record_q)
+        self._watch_browse_thread.signal.connect(self._update_browse_number)
+        self._watch_browse_thread.start()
+
         self._service_process = ServiceProcessManager(self._browse_record_q)
 
     def _setup_attr(self):
@@ -92,7 +96,9 @@ class MainWindow(QMainWindow):
         self.ui.createShareButton.clicked.connect(lambda : self._create_share())
         # client elements
         self.ui.shareLinkButton.clicked.connect(lambda : self._load_browse_url())
+        self.ui.shareLinkEdit.returnPressed.connect(lambda : self._load_browse_url())
         self.ui.backupButton.clicked.connect(lambda : self._backup_button_clicked())
+        self.ui.downloadDirButton.clicked.connect(lambda : self.create_download_record_and_start())
 
     def _save_settings(self) -> None:
         logs_path: str = self.ui.logPathEdit.text()
@@ -170,6 +176,36 @@ class MainWindow(QMainWindow):
                 msg_color="red"
             )
             return
+        try:
+            file_count = self._calc_file_count(target_path)
+        except FileNotFoundError as e:
+            self._ui_function.show_info_messageBox(
+                f"文件路径解析错误, 原始错误信息: {e}",
+                "分享异常",
+                msg_color="red"
+            )
+            return
+        except Exception as e:
+            self._ui_function.show_info_messageBox(
+                f"分享出现错误, 原始错误信息: {e}",
+                "分享异常",
+                msg_color="red"
+            )
+            return
+        if file_count > 10000:
+            self._ui_function.show_info_messageBox(
+                f"分享已被取消\n该文件夹内文件数量大于10000, 加载会造成界面严重卡顿, 请按需对文件夹进行打包后再分享",
+                "分享被取消",
+                msg_color="red"
+            )
+            return
+        elif file_count > 100:
+            if self._ui_function.show_question_messageBox(
+                "文件夹内文件数量大于100, 会影响下载速度, 若无浏览文件需求, 建议打包成压缩包后再分享",
+                "文件数量大",
+                "好的, 打包后再分享", "无视直接分享"
+            ) == 0:
+                return
         uuid: str = f"{share_type.value[0]}{generate_uuid()}"
         fileModel = DirModel if os.path.isdir(target_path) else FileModel
         if share_type is shareType.ftp:
@@ -240,7 +276,16 @@ class MainWindow(QMainWindow):
         self.ui.shareLinkButton.setText("点击加载")
         self.ui.shareLinkButton.setEnabled(True)
 
-    def create_download_record_and_start(self, fileDict: dict) -> None:
+    def create_download_record_and_start(self, fileDict: Union[None, dict] = None) -> None:
+        if fileDict:
+            if self._ui_function.show_question_messageBox(
+                f"当前正要下载文件: {fileDict.get('fileName', '未知文件名')}, 暂未实现取消下载功能, 确认是否下载？",
+                "确认是否下载",
+                "没错, 我就要下载它", "点错了"
+            ) != 0:
+                return
+        else:
+            fileDict = self._browse_data.currentDict
 
         self._ui_function.show_info_messageBox("加入下载成功")
 
@@ -256,7 +301,7 @@ class MainWindow(QMainWindow):
             )
             return
         self._sharing_list.remove(fileObj.rowIndex)
-        self.ui.shareListTable.removeRow(fileObj.rowIndex)
+        self._UIClass.remove_share_row(self, fileObj.rowIndex)
         if not self._sharing_list or self._sharing_list.length == 0:
             self._service_process.close_all()
         del fileObj
@@ -277,6 +322,13 @@ class MainWindow(QMainWindow):
             self._service_process.remove_share(fileObj.uuid)
         except AttributeError:
             return
+
+    def _update_browse_number(self, file_uuid: str) -> None:
+        for fileObj in self._sharing_list:
+            if fileObj.uuid == file_uuid and fileObj.rowIndex < self.ui.shareListTable.rowCount():
+                fileObj.browse_number += 1
+                self.ui.shareListTable.item(fileObj.rowIndex, 3).setText(str(fileObj.browse_number))
+                break
 
     def _open_folder(self, lineEdit: QLineEdit) -> None:
         folder_path = QFileDialog.getExistingDirectory(self, "选择文件夹", "./")
@@ -308,8 +360,25 @@ class MainWindow(QMainWindow):
 
         return status
 
+    def _calc_file_count(self, base_path: str, initial_count: int = 0) -> int:
+        if not os.path.isdir(base_path):
+            return 1
+        else:
+            for file_name in os.listdir(base_path):
+                file_path = os.path.join(base_path, file_name)
+                try:
+                    initial_count += self._calc_file_count(file_path)
+                except:
+                    raise
+                else:
+                    if initial_count > 10000: return initial_count
+
+                QApplication.processEvents()
+
+        return initial_count
+
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
-        result = self._ui_function.show_question_messageBox("是否退出？", "您正在退出程序，请确认是否退出？")
+        result = self._ui_function.show_question_messageBox("您正在退出程序，请确认是否退出？", "是否退出？")
         if result == 0:
             self._service_process.close_all()
             event.accept()
