@@ -26,8 +26,8 @@ class UiFunction:
     def __init__(self, window: MainWindow) -> None:
 
         self._main_window = window
-        self._elements = self._main_window.ui
-        # self._elements = self._main_window
+        # self._elements = self._main_window.ui
+        self._elements = self._main_window
         self._maximize_flag: bool = False
         self._dragPos: Union[QPoint, None] = None
         self._select_menu_style = """
@@ -53,6 +53,8 @@ class UiFunction:
         self._browse_number_col = 3
         self._share_status_col = 4
         self._share_options_col = 5
+        self._download_fileName_col = 0
+        self._download_status_col = 1
 
     def setup(self) -> None:
         # main window scale
@@ -88,6 +90,7 @@ class UiFunction:
         self._setup_table_widget()
         self._elements.backupButton.setEnabled(False)
         self._elements.downloadDirButton.setEnabled(False)
+        self._elements.removeDownloadsButton.setEnabled(False)
 
     def _maximize_restore(self) -> None:
         maximize_image = "background-image: url(:/icons/images/icon/maximize.png);"
@@ -152,7 +155,14 @@ class UiFunction:
         header.setSectionResizeMode(self._share_options_col, QtWidgets.QHeaderView.Stretch)
         self._elements.shareListTable.setRowCount(0)
 
+        self._elements.fileListTable.verticalHeader().setVisible(False)
         self._elements.fileListTable.setRowCount(0)
+
+        self._elements.downloadListTable.verticalHeader().setVisible(False)
+        header = self._elements.downloadListTable.horizontalHeader()
+        header.setSectionResizeMode(self._download_fileName_col, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(self._download_status_col, QtWidgets.QHeaderView.Stretch)
+        self._elements.downloadListTable.setRowCount(0)
 
     def _mousePressEvent(self, event: QMouseEvent) -> None:
 

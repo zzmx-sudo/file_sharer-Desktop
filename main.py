@@ -28,16 +28,16 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
 
         # load ui
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
-        # ui_path = os.path.join(settings.BASE_DIR, "static", "ui", "main.ui")
-        # self.ui = loadUi(ui_path)
+        # self.ui = Ui_MainWindow()
+        # self.ui.setupUi(self)
+        ui_path = os.path.join(settings.BASE_DIR, "static", "ui", "main.ui")
+        self.ui = loadUi(ui_path)
 
         # setup ui_function
         from utils.ui_function import UiFunction
         self._UIClass = UiFunction
-        self._ui_function = UiFunction(self)
-        # self._ui_function = self._UIClass(self.ui)
+        # self._ui_function = UiFunction(self)
+        self._ui_function = self._UIClass(self.ui)
         self._ui_function.setup()
 
         # env load
@@ -55,8 +55,8 @@ class MainWindow(QMainWindow):
 
         # show window
         self.ui.closeEvent = self.closeEvent
-        self.show()
-        # self.ui.show()
+        # self.show()
+        self.ui.show()
 
     def _load_settings(self) -> None:
         settings.load()
@@ -149,80 +149,87 @@ class MainWindow(QMainWindow):
         for item in fileList:
             self.ui.shareFileCombo.addItem(item)
 
-    def _create_share(self) -> None:
-        base_path: str = self.ui.sharePathEdit.text()
-        if not os.path.isdir(base_path):
-            self._ui_function.show_info_messageBox(
-                "分享的路径不存在！\n建议用按钮打开资源管理器选择路径", msg_color="red"
-            )
-            return
-        target_path: str = os.path.join(base_path, self.ui.shareFileCombo.currentText())
-        # 路径整好看一点
-        if settings.IS_WINDOWS:
-            target_path = target_path.replace("/", "\\")
-        else:
-            target_path = target_path.replace("\\", "/")
-        if not os.path.exists(target_path):
-            self._ui_function.show_info_messageBox(
-                "分享的路径不存在！\n请确认后再新建", msg_color="red"
-            )
-            return
-        share_type: Union[str, shareType] = self.ui.shareTypeCombo.currentText()
-        share_type = shareType.ftp if share_type == "FTP" else shareType.http
-        shared_row_number: Union[None, int] = self._sharing_list.contains(target_path, share_type)
-        if shared_row_number is not None:
-            self._ui_function.show_info_messageBox(
-                f"该路径已被分享过, 他在分享记录的第 [{shared_row_number + 1}] 行",
-                msg_color="red"
-            )
-            return
-        try:
-            file_count = self._calc_file_count(target_path)
-        except FileNotFoundError as e:
-            self._ui_function.show_info_messageBox(
-                f"文件路径解析错误, 原始错误信息: {e}",
-                "分享异常",
-                msg_color="red"
-            )
-            return
-        except Exception as e:
-            self._ui_function.show_info_messageBox(
-                f"分享出现错误, 原始错误信息: {e}",
-                "分享异常",
-                msg_color="red"
-            )
-            return
-        if file_count > 10000:
-            self._ui_function.show_info_messageBox(
-                f"分享已被取消\n该文件夹内文件数量大于10000, 直接分享它不是一个好的选择, 请按需对文件夹进行打包后再分享",
-                "分享被取消",
-                msg_color="red"
-            )
-            return
-        elif file_count > 100:
-            if self._ui_function.show_question_messageBox(
-                "文件夹内文件数量大于100, 会影响下载速度, 若无浏览文件需求, 建议打包成压缩包后再分享",
-                "文件数量大",
-                "好的, 打包后再分享", "无视直接分享"
-            ) == 0:
+    def _create_share(self):
+        def _create_share_inner():
+            base_path: str = self.ui.sharePathEdit.text()
+            if not os.path.isdir(base_path):
+                self._ui_function.show_info_messageBox(
+                    "分享的路径不存在！\n建议用按钮打开资源管理器选择路径", msg_color="red"
+                )
                 return
-        uuid: str = f"{share_type.value[0]}{generate_uuid()}"
-        fileModel = DirModel if os.path.isdir(target_path) else FileModel
-        if share_type is shareType.ftp:
-            shared_fileObj = self._sharing_list.get_ftp_shared(target_path)
-        else:
-            shared_fileObj = None
-        if shared_fileObj is None:
-            fileObj = fileModel(target_path, uuid)
-        else:
-            fileObj = fileModel(
-                target_path, uuid, pwd=shared_fileObj.ftp_pwd,
-                port=shared_fileObj.ftp_port, ftp_base_path=shared_fileObj.ftp_basePath
-            )
-        self._sharing_list.append(fileObj)
-        fileObj.isSharing = True
-        self._UIClass.add_share_table_item(self, fileObj)
-        self._service_process.add_share(fileObj)
+            target_path: str = os.path.join(base_path, self.ui.shareFileCombo.currentText())
+            # 路径整好看一点
+            if settings.IS_WINDOWS:
+                target_path = target_path.replace("/", "\\")
+            else:
+                target_path = target_path.replace("\\", "/")
+            if not os.path.exists(target_path):
+                self._ui_function.show_info_messageBox(
+                    "分享的路径不存在！\n请确认后再新建", msg_color="red"
+                )
+                return
+            share_type: Union[str, shareType] = self.ui.shareTypeCombo.currentText()
+            share_type = shareType.ftp if share_type == "FTP" else shareType.http
+            shared_row_number: Union[None, int] = self._sharing_list.contains(target_path, share_type)
+            if shared_row_number is not None:
+                self._ui_function.show_info_messageBox(
+                    f"该路径已被分享过, 他在分享记录的第 [{shared_row_number + 1}] 行",
+                    msg_color="red"
+                )
+                return
+            try:
+                file_count = self._calc_file_count(target_path)
+            except FileNotFoundError as e:
+                self._ui_function.show_info_messageBox(
+                    f"文件路径解析错误, 原始错误信息: {e}",
+                    "分享异常",
+                    msg_color="red"
+                )
+                return
+            except Exception as e:
+                self._ui_function.show_info_messageBox(
+                    f"分享出现错误, 原始错误信息: {e}",
+                    "分享异常",
+                    msg_color="red"
+                )
+                return
+            if file_count > 10000:
+                self._ui_function.show_info_messageBox(
+                    f"分享已被取消\n该文件夹内文件数量大于10000, 直接分享它不是一个好的选择, 请按需对文件夹进行打包后再分享",
+                    "分享被取消",
+                    msg_color="red"
+                )
+                return
+            elif file_count > 100:
+                if self._ui_function.show_question_messageBox(
+                        "文件夹内文件数量大于100, 会影响下载速度, 若无浏览文件需求, 建议打包成压缩包后再分享",
+                        "文件数量大",
+                        "好的, 打包后再分享", "无视直接分享"
+                ) == 0:
+                    return
+            uuid: str = f"{share_type.value[0]}{generate_uuid()}"
+            fileModel = DirModel if os.path.isdir(target_path) else FileModel
+            if share_type is shareType.ftp:
+                shared_fileObj = self._sharing_list.get_ftp_shared(target_path)
+            else:
+                shared_fileObj = None
+            if shared_fileObj is None:
+                fileObj = fileModel(target_path, uuid)
+            else:
+                fileObj = fileModel(
+                    target_path, uuid, pwd=shared_fileObj.ftp_pwd,
+                    port=shared_fileObj.ftp_port, ftp_base_path=shared_fileObj.ftp_basePath
+                )
+            self._sharing_list.append(fileObj)
+            fileObj.isSharing = True
+            self._UIClass.add_share_table_item(self, fileObj)
+            self._service_process.add_share(fileObj)
+
+        self.ui.createShareButton.setEnabled(False)
+        self.ui.createShareButton.setText("创建中。。。")
+        _create_share_inner()
+        self.ui.createShareButton.setText("新建分享")
+        self.ui.createShareButton.setEnabled(True)
 
     def _load_browse_url(self) -> None:
         browse_url: str = self.ui.shareLinkEdit.text()

@@ -7,6 +7,7 @@ from multiprocessing import Queue
 import requests
 import aiohttp
 from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.Qt import QApplication
 
 from settings import settings
 from utils.logger import sysLogger
@@ -112,6 +113,7 @@ class DownloadHttpFileThread(QThread):
             if self._file_list:
                 downloading_list = self._append_up_to_five_files()
                 self._loop.run_until_complete(self._main(downloading_list))
+                QApplication.processEvents()
             else:
                 time.sleep(3)
 
@@ -140,7 +142,18 @@ class DownloadFtpFileThread(QThread):
         while self.run_flag:
             if self._file_list:
                 download_list = self._file_list.pop(0)
-                ftp_param = self._get_ftp_param(download_list[0])
+                # 若下载单文件, 将该文件信息作为唯一元素存储在列表内
+                # 若下载文件夹, 将文件夹信息存储在列表第一个元素, 仅用其获取FTP参数
+                if len(download_list) == 1:
+                    ftp_param = self._get_ftp_param(download_list[0])
+                else:
+                    ftp_param = self._get_ftp_param(download_list.pop(0))
+                if not ftp_param:
+                    for fileDict in download_list:
+                        downloadUrl = fileDict["downloadUrl"]
+                        self.signal.emit((downloadUrl, False, "下载失败, 获取FTP必要参数错误"))
+                    continue
+
                 for fileDict in download_list:
                     errmsg = self._download_file(ftp_param, fileDict)
                     downloadUrl = fileDict["downloadUrl"]
@@ -148,6 +161,7 @@ class DownloadFtpFileThread(QThread):
                         self.signal.emit((downloadUrl, False, errmsg))
                     else:
                         self.signal.emit((downloadUrl, True, "下载成功"))
+                    QApplication.processEvents()
             else:
                 time.sleep(3)
 
@@ -167,10 +181,33 @@ class DownloadFtpFileThread(QThread):
 
 
     def _get_ftp_param(self, fileDict: dict) -> dict:
-        pass
+        os.environ["NO_PROXY"] = "127.0.0.1"
+        headers = {"X-Client": "file-sharer client"}
+        try:
+            response = requests.get(fileDict.get("downloadUrl"), headers=headers, timeout=2)
+        except:
+            return {}
+
+        try:
+            result = json.loads(response.text)
+        except json.JSONDecodeError:
+            return {}
+
+        if isinstance(result, dict):
+            return result.get("data", {})
+        else:
+            return {}
 
     def _calc_cwd(self, cwd: str, relativePath: str) -> str:
-        pass
+        if "\\" not in relativePath and "/" not in relativePath:
+            result =  cwd
+        else:
+            result = os.path.join(cwd, os.path.dirname(relativePath))
+        result = result.replace("\\", "/")
+        if not result.startswith("/"):
+            result = "/" + result
+
+        return result
 
     def append(self, fileList: list) -> None:
 
