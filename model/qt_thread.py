@@ -3,11 +3,13 @@ import json
 import os
 import asyncio
 from multiprocessing import Queue
+from typing import Union
 
 import requests
 import aiohttp
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.Qt import QApplication
+from ftplib import FTP
 
 from settings import settings
 from utils.logger import sysLogger
@@ -60,7 +62,6 @@ class DownloadHttpFileThread(QThread):
     def __init__(self, fileList: list) -> None:
         super(DownloadHttpFileThread, self).__init__()
         self._file_list = fileList
-        self._loop = asyncio.get_running_loop()
         self._chunk_size = 1048576
         self.run_flag = True
 
@@ -112,7 +113,8 @@ class DownloadHttpFileThread(QThread):
         while self.run_flag:
             if self._file_list:
                 downloading_list = self._append_up_to_five_files()
-                self._loop.run_until_complete(self._main(downloading_list))
+                loop = asyncio.get_event_loop()
+                loop.run_until_complete(self._main(downloading_list))
                 QApplication.processEvents()
             else:
                 time.sleep(3)
@@ -148,37 +150,77 @@ class DownloadFtpFileThread(QThread):
                     ftp_param = self._get_ftp_param(download_list[0])
                 else:
                     ftp_param = self._get_ftp_param(download_list.pop(0))
-                if not ftp_param:
+                ftp_status, ftp_client = self._generate_ftp_client(ftp_param)
+                if not ftp_status:
                     for fileDict in download_list:
                         downloadUrl = fileDict["downloadUrl"]
-                        self.signal.emit((downloadUrl, False, "下载失败, 获取FTP必要参数错误"))
+                        self.signal.emit((downloadUrl, False, ftp_client))
                     continue
 
                 for fileDict in download_list:
-                    errmsg = self._download_file(ftp_param, fileDict)
+                    errmsg = self._download_file(ftp_param["cwd"], ftp_client, fileDict)
                     downloadUrl = fileDict["downloadUrl"]
                     if errmsg:
                         self.signal.emit((downloadUrl, False, errmsg))
                     else:
                         self.signal.emit((downloadUrl, True, "下载成功"))
                     QApplication.processEvents()
+                ftp_client.close()
             else:
                 time.sleep(3)
 
-    def _download_file(self, ftp_param: dict, fileDict: dict) -> str:
+    def _generate_ftp_client(self, ftp_param: dict) -> tuple[bool, Union[str, FTP]]:
+        if not ftp_param:
+            return (False, "获取FTP必要参数失败")
         host = ftp_param.get("host")
         port = ftp_param.get("port")
         user = ftp_param.get("user")
         passwd = ftp_param.get("passwd")
         cwd = ftp_param.get("cwd")
         if not all([host, port, user, passwd, cwd]):
-            return "对方系统异常"
+            return (False, "对方系统异常")
+        ftp = FTP()
+        try:
+            ftp.connect(host, port)
+        except:
+            return (False, "FTP服务连失败, 请确认对方FTP服务有开启")
 
+        try:
+            ftp.login(user, passwd)
+        except:
+            return (False, "FTP登录失败, 请确认对方服务状态")
+        else:
+            ftp.encoding = "utf-8"
+            return (True, ftp)
+
+    def _download_file(self, cwd: str, ftp_client: FTP, fileDict: dict) -> str:
         relativePath = fileDict["relativePath"]
+        fileName = fileDict["fileName"]
         cwd = self._calc_cwd(cwd, relativePath)
         local_path = os.path.join(settings.DOWNLOAD_DIR, relativePath)
-        base_path = os.path.dirname(local_path)
+        if os.path.exists(local_path):
+            local_size = os.path.getsize(local_path)
+            mode = "ab"
+        else:
+            mode = "wb"
+            local_size = 0
+            base_path = os.path.dirname(local_path)
+            if not os.path.isdir(base_path):
+                os.makedirs(base_path)
 
+        with open(local_path, mode) as r_f:
+            ftp_client.sendcmd("TYPE I")
+            try:
+                ftp_client.cwd(cwd)
+            except:
+                return "文件所在目录已不存在"
+            ftp_client.sendcmd(f"REST {local_size}")
+            try:
+                ftp_client.retrbinary(f"RETR {fileName}", r_f.write)
+            except:
+                return "文件已找到,但下载中出现异常"
+            else:
+                return ""
 
     def _get_ftp_param(self, fileDict: dict) -> dict:
         os.environ["NO_PROXY"] = "127.0.0.1"

@@ -1,5 +1,6 @@
 import os
 import sys
+import copy
 from multiprocessing import Queue
 from typing import Union
 
@@ -99,6 +100,7 @@ class MainWindow(QMainWindow):
         self.ui.shareLinkEdit.returnPressed.connect(lambda : self._load_browse_url())
         self.ui.backupButton.clicked.connect(lambda : self._backup_button_clicked())
         self.ui.downloadDirButton.clicked.connect(lambda : self.create_download_record_and_start())
+        self.ui.removeDownloadsButton.clicked.connect(lambda : self._remove_download_list())
 
     def _save_settings(self) -> None:
         logs_path: str = self.ui.logPathEdit.text()
@@ -284,6 +286,7 @@ class MainWindow(QMainWindow):
         self.ui.shareLinkButton.setEnabled(True)
 
     def create_download_record_and_start(self, fileDict: Union[None, dict] = None) -> None:
+        self.ui.downloadDirButton.setEnabled(False)
         if fileDict:
             if self._ui_function.show_question_messageBox(
                 f"当前正要下载文件: {fileDict.get('fileName', '未知文件名')}, 暂未实现取消下载功能, 确认是否下载？",
@@ -291,10 +294,16 @@ class MainWindow(QMainWindow):
                 "没错, 我就要下载它", "点错了"
             ) != 0:
                 return
+            fileList = [fileDict]
         else:
-            fileDict = self._browse_data.currentDict
+            fileList = self._generare_fileList_recursive()
+        self._append_download_fileList(fileList)
 
         self._ui_function.show_info_messageBox("加入下载成功")
+        self.ui.removeDownloadsButton.setEnabled(True)
+
+        if not fileDict:
+            self.ui.downloadDirButton.setEnabled(True)
 
     def enter_dir(self, fileDict: dict) -> None:
         self._browse_data.currentDict = fileDict
@@ -383,6 +392,61 @@ class MainWindow(QMainWindow):
                 QApplication.processEvents()
 
         return initial_count
+
+    def _generare_fileList_recursive(self) -> list:
+        def _generare_fileList_recursive_inner(
+                fileList: Union[None, list] = None,
+                fileDict: Union[None, dict] = None
+        ) -> list:
+            fileList = fileList or []
+            fileDict = fileDict or self._browse_data.currentDict
+            copy_fileDict = copy.copy(fileDict)
+            dir_name = copy_fileDict["fileName"]
+            for children in copy_fileDict["children"]:
+                relativePath = os.path.join(dir_name, children["fileName"])
+                if children["isDir"]:
+                    children.update({"fineName": relativePath})
+                    _generare_fileList_recursive_inner(fileList, children)
+                else:
+                    children.update({"relativePath": relativePath})
+                    fileList.append(children)
+
+            return fileList
+
+        current_fileDict = self._browse_data.currentDict
+        if current_fileDict["stareType"] == "ftp":
+            parent_fileDict = copy.copy(current_fileDict)
+            del parent_fileDict["children"]
+            fileList = [parent_fileDict]
+        else:
+            fileList = None
+
+        return _generare_fileList_recursive_inner(fileList)
+
+    def _append_download_fileList(self, fileList: list) -> None:
+        self._UIClass.add_download_table_item(self, fileList)
+
+        if fileList[0]["stareType"] == "ftp":
+            if self._download_ftp_thread is None:
+                self._download_ftp_thread = DownloadFtpFileThread(fileList)
+                self._download_ftp_thread.signal.connect(self._update_download_status)
+                self._download_ftp_thread.start()
+            else:
+                self._download_ftp_thread.append(fileList)
+        else:
+            if self._download_http_thread is None:
+                self._download_http_thread = DownloadHttpFileThread(fileList)
+                self._download_http_thread.signal.connect(self._update_download_status)
+                self._download_http_thread.start()
+            else:
+                self._download_http_thread.append(fileList)
+
+    def _update_download_status(self, status_tuple: [str, bool, str]):
+        self._download_data.update_download_status(status_tuple)
+
+    def _remove_download_list(self):
+        self._download_data.remove_download_list(self.ui.downloadListTable)
+        self.ui.removeDownloadsButton.setEnabled(not self._download_data.is_empty())
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         result = self._ui_function.show_question_messageBox("您正在退出程序，请确认是否退出？", "是否退出？")

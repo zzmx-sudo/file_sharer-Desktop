@@ -18,7 +18,7 @@ class DownloadFileDictModel(OrderedDict):
             return
         url, status, msg = status_tuple
         if url not in self:
-            sysLogger.warning(f"未被存储的下载状态数据对象, url: {url}, 原始信息: {status_tuple}")
+            sysLogger.warning(f"未被存储的下载状态数据对象, 可能是重复下载的, url: {url}, 原始信息: {status_tuple}")
             return
 
         item: QTableWidgetItem = self[url]
@@ -44,3 +44,8 @@ class DownloadFileDictModel(OrderedDict):
     def is_empty(self):
 
         return not self
+
+    @property
+    def length(self):
+
+        return len(self)

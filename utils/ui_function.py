@@ -10,7 +10,8 @@ from PyQt5.QtCore import (
     QPropertyAnimation, QEasingCurve, Qt, QEvent, QPoint
 )
 from PyQt5.Qt import (
-    QPushButton, QMessageBox, QTableWidgetItem, QWidget, QHBoxLayout
+    QPushButton, QMessageBox, QTableWidgetItem, QWidget, QHBoxLayout,
+    QApplication
 )
 from PyQt5.QtGui import QMouseEvent, QColor, QIcon
 import pyperclip as clip
@@ -511,3 +512,36 @@ class UiFunction:
         button.setIcon(dir_icon)
         button.clicked.connect(lambda : self.enter_dir(fileDict))
         return button
+
+    def add_download_table_item(self: MainWindow, fileList: list) -> None:
+        if fileList[0]["isDir"]:
+            table_fileList = fileList[1:]
+        else:
+            table_fileList = fileList
+
+        row_count = self._download_data.length
+        urls = [x for x in self._download_data.keys()]
+        for fileObj in table_fileList:
+            url = fileObj["downloadUrl"]
+            fileName = fileObj["fileName"]
+            if url in urls:
+                row_index = urls.index(url)
+                self.ui.downloadListTable.item(row_index, self._ui_function._download_fileName_col).setText(fileName)
+                table_item: QTableWidgetItem = self._download_data[url]
+                table_item.setText("下载中...")
+                table_item.setForeground(QColor(0, 0, 0))
+            else:
+                row_index = row_count
+                row_count += 1
+                self.ui.downloadListTable.setRowCount(row_count)
+                fileName_item = QTableWidgetItem(fileName)
+                fileName_item.setForeground(QColor(0, 0, 0))
+                fileName_item.setTextAlignment(Qt.AlignLeft)
+                self.ui.downloadListTable.setItem(row_index, self._ui_function._download_fileName_col, fileName_item)
+
+                table_item = QTableWidgetItem("下载中...")
+                fileName_item.setForeground(QColor(0, 0, 0))
+                fileName_item.setTextAlignment(Qt.AlignLeft)
+                self.ui.downloadListTable.setItem(row_index, self._ui_function._download_status_col, table_item)
+                self._download_data[url] = table_item
+            QApplication.processEvents()
