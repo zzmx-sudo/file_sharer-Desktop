@@ -60,7 +60,6 @@ class MainWindow(QMainWindow):
         self.ui.show()
 
     def _load_settings(self) -> None:
-        settings.load()
         self._cancel_settings()
 
     def _load_sharing_backups(self) -> None:

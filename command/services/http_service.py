@@ -65,7 +65,6 @@ class HttpService(BaseService):
         self._app = FastAPI()
         self.watch()
         self._setup()
-        # port = generate_http_port(settings.WSGI_PORT)
         uvicorn.run(
             app=self._app,
             host=settings.LOCAL_HOST,

@@ -9,6 +9,7 @@ from typing import Any
 
 from exceptions import OperationException
 from settings import _base
+from utils.public_func import generate_http_port
 
 empty = object()
 class configurable(object): pass
@@ -56,6 +57,8 @@ class FuseSettings:
     def __getattr__(self, item: str) -> Any:
         if self._wrapper is empty:
             self._setup()
+            self._load()
+            self._available_http_port()
         val = getattr(self._wrapper, item)
         self.__dict__[item] = val
 
@@ -88,7 +91,7 @@ class FuseSettings:
         if not os.path.isdir(logs_path):
             raise OperationException(f"配置的日志文件夹路径不存在, LOGS_PATH: {logs_path}")
 
-    def load(self) -> None:
+    def _load(self) -> None:
         settings_file = os.path.join(self.BASE_DIR, "settings.json")
         if not os.path.exists(settings_file):
             return
@@ -100,14 +103,20 @@ class FuseSettings:
         if not isinstance(settings_config, dict):
             return
 
-        self.__dict__["SAVE_SYSTEM_LOG"] = settings_config.get("saveSystemLog", True)
-        self.__dict__["SAVE_SHARER_LOG"] = settings_config.get("saveShareLog", True)
+        self._wrapper.SAVE_SYSTEM_LOG = settings_config.get("saveSystemLog", True)
+        self._wrapper.SAVE_SHARER_LOG = settings_config.get("saveShareLog", True)
         logsPath = settings_config.get("logsPath")
         if logsPath and os.path.isdir(logsPath):
-            self.__dict__["LOGS_PATH"] = logsPath
+            self._wrapper.LOGS_PATH = logsPath
         downloadPath = settings_config.get("downloadPath")
         if downloadPath and os.path.isdir(downloadPath):
-            self.__dict__["DOWNLOAD_DIR"] = downloadPath
+            self._wrapper.DOWNLOAD_DIR = downloadPath
+
+    def _available_http_port(self):
+        http_port = self._wrapper.__dict__.get("WSGI_PORT", 8080)
+        available_http_port = generate_http_port(http_port)
+
+        self._wrapper.WSGI_PORT = available_http_port
 
     def dump(self) -> None:
         settings_file = os.path.join(self.BASE_DIR, "settings.json")

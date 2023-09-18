@@ -37,7 +37,7 @@ def generate_http_port(start_port: int) -> int:
     if start_port <= 1024:
         start_port = 8080
 
-    if not exists_port(start_port):
+    if exists_port(start_port):
         start_port += 1
         return generate_http_port(start_port)
     else:
