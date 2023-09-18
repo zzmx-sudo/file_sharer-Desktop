@@ -10,3 +10,7 @@ logs/
 
 # mac ignore file
 .DS_Store
+
+# backup files
+settings.json
+file_sharing_backups.json

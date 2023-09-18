@@ -460,6 +460,7 @@ class MainWindow(QMainWindow):
         result = self._ui_function.show_question_messageBox("您正在退出程序，请确认是否退出？", "是否退出？")
         if result == 0:
             self._service_process.close_all()
+            self._sharing_list.dump()
             event.accept()
         else:
             event.ignore()
