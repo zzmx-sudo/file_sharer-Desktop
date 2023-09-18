@@ -29,16 +29,16 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
 
         # load ui
-        # self.ui = Ui_MainWindow()
-        # self.ui.setupUi(self)
-        ui_path = os.path.join(settings.BASE_DIR, "static", "ui", "main.ui")
-        self.ui = loadUi(ui_path)
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+        # ui_path = os.path.join(settings.BASE_DIR, "static", "ui", "main.ui")
+        # self.ui = loadUi(ui_path)
 
         # setup ui_function
         from utils.ui_function import UiFunction
         self._UIClass = UiFunction
-        # self._ui_function = UiFunction(self)
-        self._ui_function = self._UIClass(self.ui)
+        self._ui_function = UiFunction(self)
+        # self._ui_function = self._UIClass(self.ui)
         self._ui_function.setup()
 
         # env load
@@ -56,8 +56,8 @@ class MainWindow(QMainWindow):
 
         # show window
         self.ui.closeEvent = self.closeEvent
-        # self.show()
-        self.ui.show()
+        self.show()
+        # self.ui.show()
 
     def _load_settings(self) -> None:
         self._cancel_settings()
@@ -74,6 +74,13 @@ class MainWindow(QMainWindow):
         self._watch_browse_thread.start()
 
         self._service_process = ServiceProcessManager(self._browse_record_q)
+
+    def _update_browse_number(self, file_uuid: str) -> None:
+        for fileObj in self._sharing_list:
+            if fileObj.uuid == file_uuid and fileObj.rowIndex < self.ui.shareListTable.rowCount():
+                fileObj.browse_number += 1
+                self.ui.shareListTable.item(fileObj.rowIndex, 3).setText(str(fileObj.browse_number))
+                break
 
     def _setup_attr(self):
         self._prev_browse_url: str = ""
@@ -242,6 +249,7 @@ class MainWindow(QMainWindow):
         # 简单提高下效率
         if browse_url == self._prev_browse_url:
             if self._browse_data:
+                self._load_browse_url_reload()
                 self._UIClass.show_file_list(self, self._browse_data)
             return
         self._prev_browse_url = browse_url
@@ -254,10 +262,9 @@ class MainWindow(QMainWindow):
         self._browse_thread.signal.connect(self._show_file_list)
         self._browse_thread.start()
 
-    def _backup_button_clicked(self):
-        self._browse_data.prev()
-        self._UIClass.show_file_list(self, self._browse_data.currentDict)
-        self.ui.backupButton.setEnabled(not self._browse_data.isRoot)
+    def _load_browse_url_reload(self):
+        self._browse_data.reload()
+        self.ui.backupButton.setEnabled(False)
 
     def _show_file_list(self, browse_response: dict) -> None:
         if not browse_response or not isinstance(browse_response, dict) or not browse_response.get("errno"):
@@ -284,6 +291,11 @@ class MainWindow(QMainWindow):
         self.ui.shareLinkButton.setText("点击加载")
         self.ui.shareLinkButton.setEnabled(True)
 
+    def _backup_button_clicked(self):
+        self._browse_data.prev()
+        self._UIClass.show_file_list(self, self._browse_data.currentDict)
+        self.ui.backupButton.setEnabled(not self._browse_data.isRoot)
+
     def create_download_record_and_start(self, fileDict: Union[None, dict] = None) -> None:
         self.ui.downloadDirButton.setEnabled(False)
         if fileDict:
@@ -293,7 +305,9 @@ class MainWindow(QMainWindow):
                 "没错, 我就要下载它", "点错了"
             ) != 0:
                 return
-            fileList = [fileDict]
+            copy_fileDict = copy.copy(fileDict)
+            copy_fileDict.update({"relativePath": copy_fileDict["fileName"]})
+            fileList = [copy_fileDict]
         else:
             fileList = self._generare_fileList_recursive()
         self._append_download_fileList(fileList)
@@ -303,6 +317,56 @@ class MainWindow(QMainWindow):
 
         if not fileDict:
             self.ui.downloadDirButton.setEnabled(True)
+
+    def _generare_fileList_recursive(self) -> list:
+        def _generare_fileList_recursive_inner(
+                fileList: Union[None, list] = None,
+                fileDict: Union[None, dict] = None
+        ) -> list:
+            fileList = fileList or []
+            fileDict = fileDict or self._browse_data.currentDict
+            copy_fileDict = copy.deepcopy(fileDict)
+            dir_name = copy_fileDict["fileName"]
+            for children in copy_fileDict["children"]:
+                relativePath = os.path.join(dir_name, children["fileName"])
+                if children["isDir"]:
+                    children.update({"fileName": relativePath})
+                    _generare_fileList_recursive_inner(fileList, children)
+                else:
+                    children.update({"relativePath": relativePath})
+                    fileList.append(children)
+
+                QApplication.processEvents()
+
+            return fileList
+
+        current_fileDict = self._browse_data.currentDict
+        if current_fileDict["stareType"] == "ftp":
+            parent_fileDict = copy.copy(current_fileDict)
+            del parent_fileDict["children"]
+            fileList = [parent_fileDict]
+        else:
+            fileList = None
+
+        return _generare_fileList_recursive_inner(fileList)
+
+    def _append_download_fileList(self, fileList: list) -> None:
+        self._UIClass.add_download_table_item(self, fileList)
+
+        if fileList[0]["stareType"] == "ftp":
+            if self._download_ftp_thread is None:
+                self._download_ftp_thread = DownloadFtpFileThread(fileList)
+                self._download_ftp_thread.signal.connect(self._update_download_status)
+                self._download_ftp_thread.start()
+            else:
+                self._download_ftp_thread.append(fileList)
+        else:
+            if self._download_http_thread is None:
+                self._download_http_thread = DownloadHttpFileThread(fileList)
+                self._download_http_thread.signal.connect(self._update_download_status)
+                self._download_http_thread.start()
+            else:
+                self._download_http_thread.append(fileList)
 
     def enter_dir(self, fileDict: dict) -> None:
         self._browse_data.currentDict = fileDict
@@ -337,13 +401,6 @@ class MainWindow(QMainWindow):
             self._service_process.remove_share(fileObj.uuid)
         except AttributeError:
             return
-
-    def _update_browse_number(self, file_uuid: str) -> None:
-        for fileObj in self._sharing_list:
-            if fileObj.uuid == file_uuid and fileObj.rowIndex < self.ui.shareListTable.rowCount():
-                fileObj.browse_number += 1
-                self.ui.shareListTable.item(fileObj.rowIndex, 3).setText(str(fileObj.browse_number))
-                break
 
     def _open_folder(self, lineEdit: QLineEdit) -> None:
         folder_path = QFileDialog.getExistingDirectory(self, "选择文件夹", "./")
@@ -391,54 +448,6 @@ class MainWindow(QMainWindow):
                 QApplication.processEvents()
 
         return initial_count
-
-    def _generare_fileList_recursive(self) -> list:
-        def _generare_fileList_recursive_inner(
-                fileList: Union[None, list] = None,
-                fileDict: Union[None, dict] = None
-        ) -> list:
-            fileList = fileList or []
-            fileDict = fileDict or self._browse_data.currentDict
-            copy_fileDict = copy.copy(fileDict)
-            dir_name = copy_fileDict["fileName"]
-            for children in copy_fileDict["children"]:
-                relativePath = os.path.join(dir_name, children["fileName"])
-                if children["isDir"]:
-                    children.update({"fineName": relativePath})
-                    _generare_fileList_recursive_inner(fileList, children)
-                else:
-                    children.update({"relativePath": relativePath})
-                    fileList.append(children)
-
-            return fileList
-
-        current_fileDict = self._browse_data.currentDict
-        if current_fileDict["stareType"] == "ftp":
-            parent_fileDict = copy.copy(current_fileDict)
-            del parent_fileDict["children"]
-            fileList = [parent_fileDict]
-        else:
-            fileList = None
-
-        return _generare_fileList_recursive_inner(fileList)
-
-    def _append_download_fileList(self, fileList: list) -> None:
-        self._UIClass.add_download_table_item(self, fileList)
-
-        if fileList[0]["stareType"] == "ftp":
-            if self._download_ftp_thread is None:
-                self._download_ftp_thread = DownloadFtpFileThread(fileList)
-                self._download_ftp_thread.signal.connect(self._update_download_status)
-                self._download_ftp_thread.start()
-            else:
-                self._download_ftp_thread.append(fileList)
-        else:
-            if self._download_http_thread is None:
-                self._download_http_thread = DownloadHttpFileThread(fileList)
-                self._download_http_thread.signal.connect(self._update_download_status)
-                self._download_http_thread.start()
-            else:
-                self._download_http_thread.append(fileList)
 
     def _update_download_status(self, status_tuple: [str, bool, str]):
         self._download_data.update_download_status(status_tuple)

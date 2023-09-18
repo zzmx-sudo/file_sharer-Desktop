@@ -14,6 +14,10 @@ class BrowseFileDictModel(dict):
 
         self._current_dict = self._current_dict["prev"]
 
+    def reload(self):
+
+        self._current_dict = self
+
     @property
     def currentDict(self) -> dict[str: Union[str, list, dict]]:
 

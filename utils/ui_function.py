@@ -27,8 +27,8 @@ class UiFunction:
     def __init__(self, window: MainWindow) -> None:
 
         self._main_window = window
-        # self._elements = self._main_window.ui
-        self._elements = self._main_window
+        self._elements = self._main_window.ui
+        # self._elements = self._main_window
         self._maximize_flag: bool = False
         self._dragPos: Union[QPoint, None] = None
         self._select_menu_style = """
@@ -155,15 +155,18 @@ class UiFunction:
         header.setSectionResizeMode(self._share_targetPath_col, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(self._share_options_col, QtWidgets.QHeaderView.Stretch)
         self._elements.shareListTable.setRowCount(0)
+        self._elements.shareListTable.horizontalHeader().setSectionsClickable(False)
 
         self._elements.fileListTable.verticalHeader().setVisible(False)
         self._elements.fileListTable.setRowCount(0)
+        self._elements.fileListTable.horizontalHeader().setSectionsClickable(False)
 
         self._elements.downloadListTable.verticalHeader().setVisible(False)
         header = self._elements.downloadListTable.horizontalHeader()
         header.setSectionResizeMode(self._download_fileName_col, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(self._download_status_col, QtWidgets.QHeaderView.Stretch)
         self._elements.downloadListTable.setRowCount(0)
+        self._elements.downloadListTable.horizontalHeader().setSectionsClickable(False)
 
     def _mousePressEvent(self, event: QMouseEvent) -> None:
 

@@ -78,7 +78,7 @@ class DownloadHttpFileThread(QThread):
         else:
             headers = {}
             mode = "wb"
-            base_path = os.path.basename(file_path)
+            base_path = os.path.dirname(file_path)
             if not os.path.isdir(base_path):
                 os.makedirs(base_path)
         try:
@@ -110,14 +110,17 @@ class DownloadHttpFileThread(QThread):
 
     def run(self) -> None:
         os.environ["NO_PROXY"] = "127.0.0.1"
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
         while self.run_flag:
             if self._file_list:
                 downloading_list = self._append_up_to_five_files()
-                loop = asyncio.get_event_loop()
                 loop.run_until_complete(self._main(downloading_list))
                 QApplication.processEvents()
             else:
                 time.sleep(3)
+
+        loop.close()
 
     def _append_up_to_five_files(self) -> list:
         downloading_list = []
@@ -176,8 +179,9 @@ class DownloadFtpFileThread(QThread):
         port = ftp_param.get("port")
         user = ftp_param.get("user")
         passwd = ftp_param.get("passwd")
-        cwd = ftp_param.get("cwd")
-        if not all([host, port, user, passwd, cwd]):
+        if not all([host, port, user, passwd]):
+            return (False, "对方系统异常")
+        if "cwd" not in ftp_param:
             return (False, "对方系统异常")
         ftp = FTP()
         try:
@@ -236,7 +240,10 @@ class DownloadFtpFileThread(QThread):
             return {}
 
         if isinstance(result, dict):
-            return result.get("data", {})
+            if result.get("errno", "") == 200:
+                return result.get("data", {})
+            else:
+                return {}
         else:
             return {}
 
@@ -244,7 +251,11 @@ class DownloadFtpFileThread(QThread):
         if "\\" not in relativePath and "/" not in relativePath:
             result =  cwd
         else:
+            if not cwd:
+                step = "/" if not settings.IS_WINDOWS else "\\"
+                relativePath = relativePath[relativePath.find(step):]
             result = os.path.join(cwd, os.path.dirname(relativePath))
+
         result = result.replace("\\", "/")
         if not result.startswith("/"):
             result = "/" + result
