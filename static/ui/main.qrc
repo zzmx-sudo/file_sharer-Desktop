@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>../images/icon/folder_new.png</file>
     <file>../images/icon/browse.png</file>
     <file>../images/icon/browse-active.png</file>
     <file>../images/icon/down.png</file>

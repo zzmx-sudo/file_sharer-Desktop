@@ -511,7 +511,7 @@ class UiFunction:
         button = QPushButton(dir_name)
         button.setStyleSheet(self._ui_function._file_dir_button_style)
         dir_icon = QIcon()
-        dir_icon.addPixmap(QtGui.QPixmap(":/icons/images/icon/folder.png"), QIcon.Normal, QIcon.Off)
+        dir_icon.addPixmap(QtGui.QPixmap(":/icons/images/icon/folder_new.png"), QIcon.Normal, QIcon.Off)
         button.setIcon(dir_icon)
         button.clicked.connect(lambda : self.enter_dir(fileDict))
         return button
@@ -526,7 +526,7 @@ class UiFunction:
         urls = [x for x in self._download_data.keys()]
         for fileObj in table_fileList:
             url = fileObj["downloadUrl"]
-            fileName = fileObj["fileName"]
+            fileName = fileObj["relativePath"]
             if url in urls:
                 row_index = urls.index(url)
                 self.ui.downloadListTable.item(row_index, self._ui_function._download_fileName_col).setText(fileName)

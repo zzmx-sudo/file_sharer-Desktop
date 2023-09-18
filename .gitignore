@@ -14,3 +14,6 @@ logs/
 # backup files
 settings.json
 file_sharing_backups.json
+
+# download
+Download/
