@@ -2,14 +2,14 @@ import os
 import platform
 import sys
 
-from utils.public_func import get_local_ip
+from utils.public_func import get_local_ip, generate_project_path
 
 """
 请移步 `development.py` 或 `production.py` 修改配置, 配置名称字母均大写才有效
 """
 
 # 项目主目录
-BASE_DIR: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR: str = generate_project_path()
 sys.path.insert(0, BASE_DIR)
 
 # 当前操作系统

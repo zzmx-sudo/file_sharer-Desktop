@@ -821,7 +821,6 @@ Content Bottom Bar */
                <property name="font">
                 <font>
                  <family>KaiTi</family>
-                 <pointsize>-1</pointsize>
                 </font>
                </property>
                <property name="text">
@@ -1430,7 +1429,6 @@ Content Bottom Bar */
                   <property name="font">
                    <font>
                     <family>JetBrains Mono</family>
-                    <pointsize>-1</pointsize>
                     <weight>50</weight>
                     <italic>false</italic>
                     <bold>false</bold>
@@ -2656,7 +2654,6 @@ Content Bottom Bar */
                <property name="font">
                 <font>
                  <family>KaiTi</family>
-                 <pointsize>-1</pointsize>
                 </font>
                </property>
                <property name="frameShape">
@@ -2686,7 +2683,6 @@ Content Bottom Bar */
                   <property name="font">
                    <font>
                     <family>KaiTi</family>
-                    <pointsize>-1</pointsize>
                    </font>
                   </property>
                   <property name="frameShape">
@@ -2716,7 +2712,6 @@ Content Bottom Bar */
                      <property name="font">
                       <font>
                        <family>KaiTi</family>
-                       <pointsize>-1</pointsize>
                       </font>
                      </property>
                      <property name="text">

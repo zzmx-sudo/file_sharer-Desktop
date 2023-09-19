@@ -517,6 +517,7 @@ class UiFunction:
         return button
 
     def add_download_table_item(self: MainWindow, fileList: list) -> None:
+        print(fileList)
         if fileList[0]["isDir"]:
             table_fileList = fileList[1:]
         else:
@@ -539,12 +540,12 @@ class UiFunction:
                 self.ui.downloadListTable.setRowCount(row_count)
                 fileName_item = QTableWidgetItem(fileName)
                 fileName_item.setForeground(QColor(0, 0, 0))
-                fileName_item.setTextAlignment(Qt.AlignLeft)
+                fileName_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
                 self.ui.downloadListTable.setItem(row_index, self._ui_function._download_fileName_col, fileName_item)
 
-                table_item = QTableWidgetItem("下载中...")
-                fileName_item.setForeground(QColor(0, 0, 0))
-                fileName_item.setTextAlignment(Qt.AlignLeft)
-                self.ui.downloadListTable.setItem(row_index, self._ui_function._download_status_col, table_item)
-                self._download_data[url] = table_item
+                status_item = QTableWidgetItem("下载中...")
+                status_item.setForeground(QColor(0, 0, 0))
+                status_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+                self.ui.downloadListTable.setItem(row_index, self._ui_function._download_status_col, status_item)
+                self._download_data[url] = status_item
             QApplication.processEvents()

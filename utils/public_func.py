@@ -1,6 +1,8 @@
 import time
 import socket
 import random
+import os
+import sys
 
 import uuid
 
@@ -42,3 +44,10 @@ def generate_http_port(start_port: int) -> int:
         return generate_http_port(start_port)
     else:
         return start_port
+
+def generate_project_path() -> str:
+
+    if getattr(sys, "frozen", False):
+        return os.path.dirname(sys.executable)
+    else:
+        return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

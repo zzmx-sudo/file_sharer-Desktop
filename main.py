@@ -315,15 +315,13 @@ class MainWindow(QMainWindow):
         self._ui_function.show_info_messageBox("加入下载成功")
         self.ui.removeDownloadsButton.setEnabled(True)
 
-        if not fileDict:
-            self.ui.downloadDirButton.setEnabled(True)
+        self.ui.downloadDirButton.setEnabled(self._browse_data.isDir)
 
     def _generare_fileList_recursive(self) -> list:
         def _generare_fileList_recursive_inner(
-                fileList: Union[None, list] = None,
+                fileList: list,
                 fileDict: Union[None, dict] = None
         ) -> list:
-            fileList = fileList or []
             fileDict = fileDict or self._browse_data.currentDict
             copy_fileDict = copy.deepcopy(fileDict)
             dir_name = copy_fileDict["fileName"]
@@ -346,7 +344,7 @@ class MainWindow(QMainWindow):
             del parent_fileDict["children"]
             fileList = [parent_fileDict]
         else:
-            fileList = None
+            fileList = []
 
         return _generare_fileList_recursive_inner(fileList)
 
@@ -467,6 +465,8 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == '__main__':
+    import multiprocessing
+    multiprocessing.freeze_support()
     app = QApplication(sys.argv)
     window = MainWindow()
     sys.exit(app.exec_())

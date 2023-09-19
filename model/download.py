@@ -5,7 +5,7 @@ __all__ = [
 from collections import OrderedDict
 
 from utils.logger import sysLogger
-from PyQt5.Qt import QTableWidgetItem, QColor, QTableWidget
+from PyQt5.Qt import QTableWidgetItem, QColor, QTableWidget, QApplication
 
 class DownloadFileDictModel(OrderedDict):
 
@@ -37,6 +37,8 @@ class DownloadFileDictModel(OrderedDict):
                 need_remove_urls.append(url)
             else:
                 row_index += 1
+
+            QApplication.processEvents()
 
         for need_remove_url in need_remove_urls:
             del self[need_remove_url]

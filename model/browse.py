@@ -33,6 +33,11 @@ class BrowseFileDictModel(dict):
 
         return self._current_dict == self
 
+    @property
+    def isDir(self) -> bool:
+
+        return bool(self["isDir"])
+
     @classmethod
     def load(cls, data: dict) -> "BrowseFileDictModel":
         model = cls()
