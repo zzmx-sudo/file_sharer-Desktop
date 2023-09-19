@@ -504,7 +504,7 @@ Content Bottom Bar */
              </size>
             </property>
             <property name="styleSheet">
-             <string notr="true">background-image: url(:/icons/images/icon/share.png);</string>
+             <string notr="true">background-image: url(:/icons/images/icon/logo.png);</string>
             </property>
             <property name="frameShape">
              <enum>QFrame::StyledPanel</enum>
@@ -1618,7 +1618,28 @@ Content Bottom Bar */
                   <property name="currentIndex">
                    <number>0</number>
                   </property>
-                  <widget class="QWidget" name="home"/>
+                  <widget class="QWidget" name="home">
+                   <property name="styleSheet">
+                    <string notr="true">background-image: url(:/images/images/img/home.jpg);</string>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_24">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                   </layout>
+                  </widget>
                   <widget class="QWidget" name="server">
                    <layout class="QVBoxLayout" name="verticalLayout_16">
                     <property name="spacing">

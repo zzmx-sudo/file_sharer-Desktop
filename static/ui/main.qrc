@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icon.ico</file>
+    <file>../images/icon/logo.png</file>
     <file>../images/icon/folder_new.png</file>
     <file>../images/icon/browse.png</file>
     <file>../images/icon/browse-active.png</file>
@@ -36,5 +38,7 @@
     <file>../images/icon/setting.png</file>
     <file>../images/icon/share.png</file>
   </qresource>
-  <qresource prefix="images"/>
+  <qresource prefix="images">
+    <file>../images/img/home.jpg</file>
+  </qresource>
 </RCC>

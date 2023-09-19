@@ -7,7 +7,7 @@ from typing import Union
 from PyQt5.QtWidgets import (
     QMainWindow, QFileDialog, QLineEdit, QCheckBox, QWidget
 )
-from PyQt5.Qt import QApplication, QMessageBox
+from PyQt5.Qt import QApplication, QMessageBox, QIcon
 from PyQt5 import QtGui
 from PyQt5.uic import loadUi
 
@@ -468,5 +468,6 @@ if __name__ == '__main__':
     import multiprocessing
     multiprocessing.freeze_support()
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon(":/icons/icon.ico"))
     window = MainWindow()
     sys.exit(app.exec_())
