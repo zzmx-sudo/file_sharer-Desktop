@@ -19,7 +19,6 @@ from model import public_types as ptype
 from model.file import FileModel, DirModel
 from settings import settings
 from utils.logger import sharerLogger, sysLogger
-from utils.public_func import generate_http_port
 
 class MyRequest:
 

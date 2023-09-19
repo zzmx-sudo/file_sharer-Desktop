@@ -28,7 +28,6 @@ class UiFunction:
 
         self._main_window = window
         self._elements = self._main_window.ui
-        # self._elements = self._main_window
         self._maximize_flag: bool = False
         self._dragPos: Union[QPoint, None] = None
         self._select_menu_style = """
@@ -517,7 +516,6 @@ class UiFunction:
         return button
 
     def add_download_table_item(self: MainWindow, fileList: list) -> None:
-        print(fileList)
         if fileList[0]["isDir"]:
             table_fileList = fileList[1:]
         else:

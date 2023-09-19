@@ -4,12 +4,9 @@ import copy
 from multiprocessing import Queue
 from typing import Union
 
-from PyQt5.QtWidgets import (
-    QMainWindow, QFileDialog, QLineEdit, QCheckBox, QWidget
-)
-from PyQt5.Qt import QApplication, QMessageBox, QIcon
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit
+from PyQt5.Qt import QApplication, QIcon
 from PyQt5 import QtGui
-from PyQt5.uic import loadUi
 
 from static.ui.main_ui import Ui_MainWindow
 from settings import settings
@@ -31,14 +28,11 @@ class MainWindow(QMainWindow):
         # load ui
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        # ui_path = os.path.join(settings.BASE_DIR, "static", "ui", "main.ui")
-        # self.ui = loadUi(ui_path)
 
         # setup ui_function
         from utils.ui_function import UiFunction
         self._UIClass = UiFunction
         self._ui_function = UiFunction(self)
-        # self._ui_function = self._UIClass(self.ui)
         self._ui_function.setup()
 
         # env load
@@ -57,10 +51,10 @@ class MainWindow(QMainWindow):
         # show window
         self.ui.closeEvent = self.closeEvent
         self.show()
-        # self.ui.show()
 
     def _load_settings(self) -> None:
         self._cancel_settings()
+        sysLogger.info("加载配置完成")
 
     def _load_sharing_backups(self) -> None:
         self._sharing_list = FuseSharingModel.load()
@@ -112,17 +106,23 @@ class MainWindow(QMainWindow):
         logs_path: str = self.ui.logPathEdit.text()
         download_path: str = self.ui.downloadPathEdit.text()
         if not logs_path or not download_path:
-            self._ui_function.show_info_messageBox("保存设置错误,日志路径或下载路径不可为空！", msg_color="red")
+            errmsg = "保存设置错误,日志路径或下载路径不可为空！"
+            self._ui_function.show_info_messageBox(errmsg, msg_color="red")
+            sysLogger.warning(errmsg + f"欲设置的日志路径: {logs_path}, 下载路径: {download_path}")
             return
         if not os.path.isdir(logs_path):
+            errmsg = "保存设置错误,日志路径不存在！\n建议用按钮打开资源管理器选择路径"
             self._ui_function.show_info_messageBox(
-                "保存设置错误,日志路径不存在！\n建议用按钮打开资源管理器选择路径", msg_color="red"
+                errmsg, msg_color="red"
             )
+            sysLogger.warning(errmsg + f"欲设置的日志路径: {logs_path}")
             return
         if not os.path.isdir(download_path):
+            errmsg = "保存设置错误,下载路径不存在！\n建议用按钮打开资源管理器选择路径"
             self._ui_function.show_info_messageBox(
-                "保存设置错误,下载路径不存在！\n建议用按钮打开资源管理器选择路径", msg_color="red"
+                errmsg, msg_color="red"
             )
+            sysLogger.warning(errmsg + f"欲设置的下载路径: {download_path}")
             return
 
         save_system_log: bool = self.ui.saveSystemCheck.isChecked()
@@ -141,12 +141,14 @@ class MainWindow(QMainWindow):
         settings.DOWNLOAD_DIR = download_path
         settings.dump()
         self._ui_function.show_info_messageBox("保存配置成功")
+        sysLogger.info("保存配置成功")
 
     def _cancel_settings(self) -> None:
         self.ui.saveSystemCheck.setChecked(settings.SAVE_SYSTEM_LOG)
         self.ui.saveShareCheck.setChecked(settings.SAVE_SHARER_LOG)
         self.ui.logPathEdit.setText(settings.LOGS_PATH)
         self.ui.downloadPathEdit.setText(settings.DOWNLOAD_DIR)
+        sysLogger.info("撤回配置成功")
 
     def _update_file_combo(self) -> None:
         share_path: str = self.ui.sharePathEdit.text()
@@ -161,9 +163,11 @@ class MainWindow(QMainWindow):
         def _create_share_inner():
             base_path: str = self.ui.sharePathEdit.text()
             if not os.path.isdir(base_path):
+                errmsg = "分享的路径不存在！\n建议用按钮打开资源管理器选择路径"
                 self._ui_function.show_info_messageBox(
-                    "分享的路径不存在！\n建议用按钮打开资源管理器选择路径", msg_color="red"
+                    errmsg, msg_color="red"
                 )
+                sysLogger.warning(errmsg + f"欲分享的文件夹路径: {base_path}")
                 return
             target_path: str = os.path.join(base_path, self.ui.shareFileCombo.currentText())
             # 路径整好看一点
@@ -172,9 +176,11 @@ class MainWindow(QMainWindow):
             else:
                 target_path = target_path.replace("\\", "/")
             if not os.path.exists(target_path):
+                errmsg = "分享的路径不存在！\n请确认后再新建"
                 self._ui_function.show_info_messageBox(
-                    "分享的路径不存在！\n请确认后再新建", msg_color="red"
+                    errmsg, msg_color="red"
                 )
+                sysLogger.warning(errmsg + f"欲分享的路径: {target_path}")
                 return
             share_type: Union[str, shareType] = self.ui.shareTypeCombo.currentText()
             share_type = shareType.ftp if share_type == "FTP" else shareType.http
@@ -184,6 +190,7 @@ class MainWindow(QMainWindow):
                     f"该路径已被分享过, 他在分享记录的第 [{shared_row_number + 1}] 行",
                     msg_color="red"
                 )
+                sysLogger.warning(f"重复分享被取消, 分享的路径: {target_path}, 分享类型: {share_type}")
                 return
             try:
                 file_count = self._calc_file_count(target_path)
@@ -193,6 +200,7 @@ class MainWindow(QMainWindow):
                     "分享异常",
                     msg_color="red"
                 )
+                sysLogger.warning(f"分享文件中含无法打开路径, 尝试打开发生的错误信息: {e}")
                 return
             except Exception as e:
                 self._ui_function.show_info_messageBox(
@@ -200,6 +208,7 @@ class MainWindow(QMainWindow):
                     "分享异常",
                     msg_color="red"
                 )
+                sysLogger.warning(f"分享异常, 尝试分享发生的错误信息: {e}")
                 return
             if file_count > 10000:
                 self._ui_function.show_info_messageBox(
@@ -207,6 +216,7 @@ class MainWindow(QMainWindow):
                     "分享被取消",
                     msg_color="red"
                 )
+                sysLogger.warning("分享被取消, 因为分享的文件夹中文件个数超过10000, 建议打包后分享压缩文件")
                 return
             elif file_count > 100:
                 if self._ui_function.show_question_messageBox(
@@ -214,6 +224,7 @@ class MainWindow(QMainWindow):
                         "文件数量大",
                         "好的, 打包后再分享", "无视直接分享"
                 ) == 0:
+                    sysLogger.info("成功取消文件个数大于100的文件夹的分享")
                     return
             uuid: str = f"{share_type.value[0]}{generate_uuid()}"
             fileModel = DirModel if os.path.isdir(target_path) else FileModel
@@ -232,6 +243,7 @@ class MainWindow(QMainWindow):
             fileObj.isSharing = True
             self._UIClass.add_share_table_item(self, fileObj)
             self._service_process.add_share(fileObj)
+            sysLogger.info(f"创建分享成功, 分享路径: {target_path}, 分享类型: {share_type}")
 
         self.ui.createShareButton.setEnabled(False)
         self.ui.createShareButton.setText("创建中。。。")
@@ -242,15 +254,18 @@ class MainWindow(QMainWindow):
     def _load_browse_url(self) -> None:
         browse_url: str = self.ui.shareLinkEdit.text()
         if not browse_url or not browse_url.startswith("http://"):
+            errmsg = "不支持的分享链接!\n请确认分享链接无误后再点击加载哦~"
             self._ui_function.show_info_messageBox(
-                "不支持的分享链接!\n请确认分享链接无误后再点击加载哦~", msg_color="rgb(154, 96, 2)"
+                errmsg, msg_color="rgb(154, 96, 2)"
             )
+            sysLogger.warning(errmsg + f"输入的链接地址: {browse_url}")
             return
         # 简单提高下效率
         if browse_url == self._prev_browse_url:
             if self._browse_data:
                 self._load_browse_url_reload()
                 self._UIClass.show_file_list(self, self._browse_data)
+                sysLogger.info("相同的链接使用缓存加载完成")
             return
         self._prev_browse_url = browse_url
         self.ui.shareLinkButton.setText("加载中...")
@@ -290,6 +305,7 @@ class MainWindow(QMainWindow):
         self._browse_thread = None
         self.ui.shareLinkButton.setText("点击加载")
         self.ui.shareLinkButton.setEnabled(True)
+        sysLogger.info("加载文件列表完成")
 
     def _backup_button_clicked(self):
         self._browse_data.prev()
@@ -308,16 +324,18 @@ class MainWindow(QMainWindow):
             copy_fileDict = copy.copy(fileDict)
             copy_fileDict.update({"relativePath": copy_fileDict["fileName"]})
             fileList = [copy_fileDict]
+            fileCount = 1
         else:
-            fileList = self._generare_fileList_recursive()
+            fileList, fileCount = self._generare_fileList_recursive()
         self._append_download_fileList(fileList)
 
+        sysLogger.info(f"加入下载成功, 此次下载文件个数: {fileCount}")
         self._ui_function.show_info_messageBox("加入下载成功")
         self.ui.removeDownloadsButton.setEnabled(True)
 
         self.ui.downloadDirButton.setEnabled(self._browse_data.isDir)
 
-    def _generare_fileList_recursive(self) -> list:
+    def _generare_fileList_recursive(self) -> tuple[list, int]:
         def _generare_fileList_recursive_inner(
                 fileList: list,
                 fileDict: Union[None, dict] = None
@@ -343,10 +361,13 @@ class MainWindow(QMainWindow):
             parent_fileDict = copy.copy(current_fileDict)
             del parent_fileDict["children"]
             fileList = [parent_fileDict]
+            ignore_count = 1
         else:
             fileList = []
+            ignore_count = 0
 
-        return _generare_fileList_recursive_inner(fileList)
+        fileList = _generare_fileList_recursive_inner(fileList)
+        return fileList, len(fileList) - ignore_count
 
     def _append_download_fileList(self, fileList: list) -> None:
         self._UIClass.add_download_table_item(self, fileList)

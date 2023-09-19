@@ -129,4 +129,4 @@ class FuseSettings:
             }, f, indent=4, separators=(",", ": "), ensure_ascii=False)
 
 
-settings = FuseSettings("develop")
+settings = FuseSettings("prod")
