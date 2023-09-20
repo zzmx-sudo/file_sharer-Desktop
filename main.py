@@ -320,6 +320,7 @@ class MainWindow(QMainWindow):
                 "确认是否下载",
                 "没错, 我就要下载它", "点错了"
             ) != 0:
+                self.ui.downloadDirButton.setEnabled(self._browse_data.isDir)
                 return
             copy_fileDict = copy.copy(fileDict)
             copy_fileDict.update({"relativePath": copy_fileDict["fileName"]})

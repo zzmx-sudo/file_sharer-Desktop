@@ -1615,12 +1615,15 @@ Content Bottom Bar */
                 </property>
                 <item>
                  <widget class="QStackedWidget" name="stackedWidget">
+                  <property name="styleSheet">
+                   <string notr="true"/>
+                  </property>
                   <property name="currentIndex">
                    <number>0</number>
                   </property>
                   <widget class="QWidget" name="home">
                    <property name="styleSheet">
-                    <string notr="true">background-image: url(:/images/images/img/home.jpg);</string>
+                    <string notr="true">background-image: url(:/images/images/img/home.png);</string>
                    </property>
                    <layout class="QVBoxLayout" name="verticalLayout_24">
                     <property name="spacing">
