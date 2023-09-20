@@ -115,14 +115,14 @@ class MainWindow(QMainWindow):
             self._ui_function.show_info_messageBox(
                 errmsg, msg_color="red"
             )
-            sysLogger.warning(errmsg + f"欲设置的日志路径: {logs_path}")
+            sysLogger.warning(errmsg.replace("\n", "") + f", 欲设置的日志路径: {logs_path}")
             return
         if not os.path.isdir(download_path):
             errmsg = "保存设置错误,下载路径不存在！\n建议用按钮打开资源管理器选择路径"
             self._ui_function.show_info_messageBox(
                 errmsg, msg_color="red"
             )
-            sysLogger.warning(errmsg + f"欲设置的下载路径: {download_path}")
+            sysLogger.warning(errmsg.replace("\n", "") + f", 欲设置的下载路径: {download_path}")
             return
 
         save_system_log: bool = self.ui.saveSystemCheck.isChecked()
@@ -148,7 +148,6 @@ class MainWindow(QMainWindow):
         self.ui.saveShareCheck.setChecked(settings.SAVE_SHARER_LOG)
         self.ui.logPathEdit.setText(settings.LOGS_PATH)
         self.ui.downloadPathEdit.setText(settings.DOWNLOAD_DIR)
-        sysLogger.info("撤回配置成功")
 
     def _update_file_combo(self) -> None:
         share_path: str = self.ui.sharePathEdit.text()
@@ -167,7 +166,7 @@ class MainWindow(QMainWindow):
                 self._ui_function.show_info_messageBox(
                     errmsg, msg_color="red"
                 )
-                sysLogger.warning(errmsg + f"欲分享的文件夹路径: {base_path}")
+                sysLogger.warning(errmsg.replace("\n", "") + f", 欲分享的文件夹路径: {base_path}")
                 return
             target_path: str = os.path.join(base_path, self.ui.shareFileCombo.currentText())
             # 路径整好看一点
@@ -180,7 +179,7 @@ class MainWindow(QMainWindow):
                 self._ui_function.show_info_messageBox(
                     errmsg, msg_color="red"
                 )
-                sysLogger.warning(errmsg + f"欲分享的路径: {target_path}")
+                sysLogger.warning(errmsg.replace("\n", "") + f", 欲分享的路径: {target_path}")
                 return
             share_type: Union[str, shareType] = self.ui.shareTypeCombo.currentText()
             share_type = shareType.ftp if share_type == "FTP" else shareType.http
@@ -258,7 +257,7 @@ class MainWindow(QMainWindow):
             self._ui_function.show_info_messageBox(
                 errmsg, msg_color="rgb(154, 96, 2)"
             )
-            sysLogger.warning(errmsg + f"输入的链接地址: {browse_url}")
+            sysLogger.warning(errmsg.replace("\n", "") + f"输入的链接地址: {browse_url}")
             return
         # 简单提高下效率
         if browse_url == self._prev_browse_url:

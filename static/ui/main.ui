@@ -1339,10 +1339,10 @@ Content Bottom Bar */
                 <cursorShape>PointingHandCursor</cursorShape>
                </property>
                <property name="toolTip">
-                <string>撤回配置</string>
+                <string>取消配置</string>
                </property>
                <property name="text">
-                <string>撤回</string>
+                <string>取消</string>
                </property>
               </widget>
              </item>
