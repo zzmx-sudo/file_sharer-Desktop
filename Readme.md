@@ -31,7 +31,7 @@
 
 ### UI界面
 
-<p><a href="https://github.com/zzmx-sudo/file_sharer-LAN"><img src=""></a> </p>
+<p><a href="https://github.com/zzmx-sudo/file_sharer-LAN"><img src="https://github.com/zzmx-sudo/file_sharer-LAN/blob/develop/docs/app.png"></a> </p>
 
 ### 常见问题
 
