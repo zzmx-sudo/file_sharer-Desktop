@@ -59,10 +59,11 @@ class HttpService(BaseService):
             del self._sharing_dict[uuid]
 
     def run(self) -> None:
+        self.watch()
+        super(HttpService, self).run()
 
         import uvicorn
         self._app = FastAPI()
-        self.watch()
         self._setup()
         uvicorn.run(
             app=self._app,

@@ -77,8 +77,8 @@ class FtpService(BaseService):
         self._uuid_ftpServer_params[fileObj.uuid] = server
 
     def run(self) -> None:
-
         self.watch()
+        super(FtpService, self).run()
 
         while True:
             try:

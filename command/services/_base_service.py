@@ -60,8 +60,10 @@ class BaseService:
             sharerLogger.reload()
 
     def run(self) -> None:
+        # 关闭子进程控制台输出
+        import sys, os
+        sys.stdout = open(os.devnull, "w")
+        sys.stderr = open(os.devnull, "w")
 
         if self._watch_thread is None:
             raise OperationException("在service运行前必须先开启watch线程")
-
-        raise NotImplException("实现service对象的类必须有定义`run`方法")
