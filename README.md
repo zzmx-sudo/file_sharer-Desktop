@@ -1,4 +1,9 @@
-<p align="center"><a href="https://github.com/zzmx-sudo/file_sharer-LAN"><img src="https://github.com/zzmx-sudo/file_sharer-LAN/blob/develop/static/images/img/home.png"></a> </p>
+<p align="center"><a href="https://github.com/zzmx-sudo/file_sharer-LAN"><img src="https://github.com/zzmx-sudo/file_sharer-LAN/blob/develop/docs/logo.png" alt="file_sharer logo"></a></p>
+
+<p align="center">
+    <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="code style: black"></a>
+</p>
+
 <h2 align="center">局域网文件共享助手桌面版</h2>
 
 ### 说明
@@ -9,7 +14,8 @@
 - python3.9+
 - PyQt5
 - fastapi
-- pyftp
+- asyncio
+- pyftplib
 
 已支持的平台:
 
@@ -25,13 +31,13 @@
 
 #### 源码使用方式
 
-* 首先安装python 3.9及以上版本
+* 安装python 3.9及以上版本
 * 通过命令 `pip install -r requirements.txt` 安装第三方依赖
-* 最后运行main.py即可
+* 运行main.py
 
 ### UI界面
 
-<p><a href="https://github.com/zzmx-sudo/file_sharer-LAN"><img src="https://github.com/zzmx-sudo/file_sharer-LAN/blob/develop/docs/app.png"></a> </p>
+<p><a href="https://github.com/zzmx-sudo/file_sharer-LAN"><img src="https://github.com/zzmx-sudo/file_sharer-LAN/blob/develop/docs/app.png"></a></p>
 
 ### 常见问题
 

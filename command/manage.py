@@ -1,6 +1,4 @@
-__all__ = [
-    "ServiceProcessManager"
-]
+__all__ = ["ServiceProcessManager"]
 
 from typing import Union
 from multiprocessing import Process, Queue
@@ -10,10 +8,10 @@ import psutil
 from model.file import FileModel, DirModel
 from model import public_types as ptype
 from utils.logger import sysLogger
-from . services import HttpService, FtpService
+from .services import HttpService, FtpService
+
 
 class ServiceProcessManager:
-
     def __init__(self, output_q: Queue) -> None:
         self._http_service = None
         self._ftp_service = None

@@ -1,51 +1,41 @@
-__all__ = [
-    "SharingModel",
-    "FuseSharingModel"
-]
+__all__ = ["SharingModel", "FuseSharingModel"]
 
 import os
 import json
 from typing import Union
 
-from . file import FileModel, DirModel
-from . public_types import ShareType as shareType
+from .file import FileModel, DirModel
+from .public_types import ShareType as shareType
 from settings import settings
 from utils.logger import sysLogger
 
+
 class SharingModel(dict):
-
     def __setitem__(self, key: str, value: Union[FileModel, DirModel]) -> None:
-
         super(SharingModel, self).__setitem__(key, value)
 
     def __delitem__(self, key: str) -> None:
-
         super(SharingModel, self).__delitem__(key)
 
     @property
     def length(self) -> int:
-
         return len(self)
 
     @property
     def isEmpty(self) -> bool:
-
         return not self
 
-class FuseSharingModel(list):
 
+class FuseSharingModel(list):
     @property
     def length(self) -> int:
-
         return len(self)
 
     def append(self, fileObj: Union[FileModel, DirModel]) -> None:
-        
         super(FuseSharingModel, self).append(fileObj)
         fileObj.rowIndex = self.length - 1
 
     def remove(self, rowIndex: int) -> None:
-
         super(FuseSharingModel, self).pop(rowIndex)
         for index in range(rowIndex, self.length):
             self[index].rowIndex -= 1
@@ -58,7 +48,6 @@ class FuseSharingModel(list):
         return None
 
     def get_ftp_shared(self, target_path: str) -> Union[None, FileModel, DirModel]:
-
         basePath_file_params: dict = {}
         for fileObj in self:
             if fileObj.shareType is shareType.ftp:
@@ -72,23 +61,26 @@ class FuseSharingModel(list):
         return None
 
     def dump(self) -> None:
-
-        backup_result: list[dict[str: Union[None, str]]] = [
-            fileObj.to_dump_backup()
-            for fileObj in self
+        backup_result: list[dict[str : Union[None, str]]] = [
+            fileObj.to_dump_backup() for fileObj in self
         ]
 
-        backup_file_path: str = os.path.join(settings.BASE_DIR, "file_sharing_backups.json")
+        backup_file_path: str = os.path.join(
+            settings.BASE_DIR, "file_sharing_backups.json"
+        )
         with open(backup_file_path, "w") as f:
-            json.dump(backup_result, f, indent=4, separators=(",", ": "), ensure_ascii=False)
+            json.dump(
+                backup_result, f, indent=4, separators=(",", ": "), ensure_ascii=False
+            )
 
         sysLogger.info("保存历史分享记录成功")
 
     @classmethod
     def load(cls) -> "FuseSharingModel":
-
         model = cls()
-        backup_file_path: str = os.path.join(settings.BASE_DIR, "file_sharing_backups.json")
+        backup_file_path: str = os.path.join(
+            settings.BASE_DIR, "file_sharing_backups.json"
+        )
         if not os.path.exists(backup_file_path):
             sysLogger.info("file_sharing_backups.json文件不存在, 跳过历史分享记录加载")
             return model

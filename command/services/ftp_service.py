@@ -1,6 +1,4 @@
-__all__ = [
-    "FtpService"
-]
+__all__ = ["FtpService"]
 
 import sys
 import time
@@ -12,21 +10,21 @@ from pyftpdlib.authorizers import DummyAuthorizer
 from pyftpdlib.handlers import FTPHandler
 from pyftpdlib.servers import FTPServer
 
-from . _base_service import BaseService
+from ._base_service import BaseService
 from model.file import FileModel, DirModel
 from settings import settings
 
-class UuidServerMode(dict): pass
+
+class UuidServerMode(dict):
+    pass
+
 
 class FtpService(BaseService):
-
     def __init__(self, input_q: Queue, output_q: Queue) -> None:
-
         super(FtpService, self).__init__(input_q, output_q)
         self._uuid_ftpServer_params = UuidServerMode()
 
     def _add_share(self, fileObj: Union[FileModel, DirModel]) -> None:
-
         self._sharing_dict.update({fileObj.uuid: fileObj})
         need_start_new_server: bool = True
         for ftpServer in self._uuid_ftpServer_params.values():
@@ -38,7 +36,6 @@ class FtpService(BaseService):
             self._start_new_server(fileObj)
 
     def _remove_share(self, uuid: str) -> None:
-
         if uuid in self._sharing_dict:
             del self._sharing_dict[uuid]
 
@@ -58,7 +55,6 @@ class FtpService(BaseService):
         del self._uuid_ftpServer_params[uuid]
 
     def _start_new_server(self, fileObj: Union[FileModel, DirModel]) -> None:
-
         host: str = settings.LOCAL_HOST
         port: int = fileObj.ftp_port
         passwd: str = fileObj.ftp_pwd

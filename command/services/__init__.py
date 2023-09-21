@@ -1,7 +1,4 @@
-__all__ = [
-    "FtpService",
-    "HttpService"
-]
+__all__ = ["FtpService", "HttpService"]
 
-from . ftp_service import FtpService
-from . http_service import HttpService
+from .ftp_service import FtpService
+from .http_service import HttpService

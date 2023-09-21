@@ -5,7 +5,7 @@ __all__ = [
     "generate_ftp_passwd",
     "exists_port",
     "generate_http_port",
-    "generate_project_path"
+    "generate_project_path",
 ]
 
 import time
@@ -16,26 +16,26 @@ import sys
 
 import uuid
 
-def generate_uuid() -> str:
 
+def generate_uuid() -> str:
     return str(uuid.uuid1()).replace("-", "")
 
-def generate_timestamp() -> int:
 
+def generate_timestamp() -> int:
     return int(time.time() * 1000)
 
-def get_local_ip() -> str:
 
+def get_local_ip() -> str:
     return socket.gethostbyname(socket.gethostname())
 
-def generate_ftp_passwd() -> str:
 
+def generate_ftp_passwd() -> str:
     base_str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 
     return "".join(random.sample(base_str, 5))
 
-def exists_port(port: int) -> bool:
 
+def exists_port(port: int) -> bool:
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(0.2)
@@ -44,6 +44,7 @@ def exists_port(port: int) -> bool:
         return True
     except:
         return False
+
 
 def generate_http_port(start_port: int) -> int:
     if start_port <= 1024:
@@ -55,8 +56,8 @@ def generate_http_port(start_port: int) -> int:
     else:
         return start_port
 
-def generate_project_path() -> str:
 
+def generate_project_path() -> str:
     if getattr(sys, "frozen", False):
         return os.path.dirname(sys.executable)
     else:

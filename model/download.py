@@ -1,14 +1,12 @@
-__all__ = [
-    "DownloadFileDictModel"
-]
+__all__ = ["DownloadFileDictModel"]
 
 from collections import OrderedDict
 
 from utils.logger import sysLogger
 from PyQt5.Qt import QTableWidgetItem, QColor, QTableWidget, QApplication
 
-class DownloadFileDictModel(OrderedDict):
 
+class DownloadFileDictModel(OrderedDict):
     def __init__(self):
         super(DownloadFileDictModel, self).__init__()
 
@@ -18,7 +16,9 @@ class DownloadFileDictModel(OrderedDict):
             return
         url, status, msg = status_tuple
         if url not in self:
-            sysLogger.warning(f"未被存储的下载状态数据对象, 可能是重复下载的, url: {url}, 原始信息: {status_tuple}")
+            sysLogger.warning(
+                f"未被存储的下载状态数据对象, 可能是重复下载的, url: {url}, 原始信息: {status_tuple}"
+            )
             return
 
         item: QTableWidgetItem = self[url]
@@ -28,7 +28,7 @@ class DownloadFileDictModel(OrderedDict):
         else:
             item.setForeground(QColor("red"))
 
-    def remove_download_list(self, tableWidget: QTableWidget):
+    def remove_download_list(self, tableWidget: QTableWidget) -> None:
         row_index = 0
         need_remove_urls = []
         for url, item in self.items():
@@ -43,11 +43,9 @@ class DownloadFileDictModel(OrderedDict):
         for need_remove_url in need_remove_urls:
             del self[need_remove_url]
 
-    def is_empty(self):
-
+    def is_empty(self) -> bool:
         return not self
 
     @property
-    def length(self):
-
+    def length(self) -> int:
         return len(self)

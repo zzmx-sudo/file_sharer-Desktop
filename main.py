@@ -20,8 +20,8 @@ from model.browse import BrowseFileDictModel
 from model.download import DownloadFileDictModel
 from utils.public_func import generate_uuid
 
-class MainWindow(QMainWindow):
 
+class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super(MainWindow, self).__init__()
 
@@ -31,25 +31,25 @@ class MainWindow(QMainWindow):
 
         # setup ui_function
         from utils.ui_function import UiFunction
+
         self._UIClass = UiFunction
         self._ui_function = UiFunction(self)
         self._ui_function.setup()
 
-        # env load
+        # load env
         self._load_settings()
         self._load_sharing_backups()
 
         # Initialize service process manage and watch thread
         self._create_service_manager()
 
-        # attr setup
+        # setup attr
         self._setup_attr()
 
-        # event connect
+        # connect event
         self._setup_event_connect()
 
         # show window
-        self.ui.closeEvent = self.closeEvent
         self.show()
 
     def _load_settings(self) -> None:
@@ -71,12 +71,17 @@ class MainWindow(QMainWindow):
 
     def _update_browse_number(self, file_uuid: str) -> None:
         for fileObj in self._sharing_list:
-            if fileObj.uuid == file_uuid and fileObj.rowIndex < self.ui.shareListTable.rowCount():
+            if (
+                fileObj.uuid == file_uuid
+                and fileObj.rowIndex < self.ui.shareListTable.rowCount()
+            ):
                 fileObj.browse_number += 1
-                self.ui.shareListTable.item(fileObj.rowIndex, 3).setText(str(fileObj.browse_number))
+                self.ui.shareListTable.item(fileObj.rowIndex, 3).setText(
+                    str(fileObj.browse_number)
+                )
                 break
 
-    def _setup_attr(self):
+    def _setup_attr(self) -> None:
         self._prev_browse_url: str = ""
         self._browse_data: BrowseFileDictModel = BrowseFileDictModel.load({})
         self._download_data: DownloadFileDictModel = DownloadFileDictModel()
@@ -87,20 +92,30 @@ class MainWindow(QMainWindow):
 
     def _setup_event_connect(self) -> None:
         # settings elements
-        self.ui.logPathButton.clicked.connect(lambda : self._open_folder(self.ui.logPathEdit))
-        self.ui.downloadPathButton.clicked.connect(lambda : self._open_folder(self.ui.downloadPathEdit))
-        self.ui.saveSettingButton.clicked.connect(lambda : self._save_settings())
-        self.ui.cancelSettingButton.clicked.connect(lambda : self._cancel_settings())
+        self.ui.logPathButton.clicked.connect(
+            lambda: self._open_folder(self.ui.logPathEdit)
+        )
+        self.ui.downloadPathButton.clicked.connect(
+            lambda: self._open_folder(self.ui.downloadPathEdit)
+        )
+        self.ui.saveSettingButton.clicked.connect(lambda: self._save_settings())
+        self.ui.cancelSettingButton.clicked.connect(lambda: self._cancel_settings())
         # server elements
-        self.ui.sharePathButton.clicked.connect(lambda : self._open_folder(self.ui.sharePathEdit))
-        self.ui.sharePathButton.clicked.connect(lambda : self._update_file_combo())
-        self.ui.createShareButton.clicked.connect(lambda : self._create_share())
+        self.ui.sharePathButton.clicked.connect(
+            lambda: self._open_folder(self.ui.sharePathEdit)
+        )
+        self.ui.sharePathButton.clicked.connect(lambda: self._update_file_combo())
+        self.ui.createShareButton.clicked.connect(lambda: self._create_share())
         # client elements
-        self.ui.shareLinkButton.clicked.connect(lambda : self._load_browse_url())
-        self.ui.shareLinkEdit.returnPressed.connect(lambda : self._load_browse_url())
-        self.ui.backupButton.clicked.connect(lambda : self._backup_button_clicked())
-        self.ui.downloadDirButton.clicked.connect(lambda : self.create_download_record_and_start())
-        self.ui.removeDownloadsButton.clicked.connect(lambda : self._remove_download_list())
+        self.ui.shareLinkButton.clicked.connect(lambda: self._load_browse_url())
+        self.ui.shareLinkEdit.returnPressed.connect(lambda: self._load_browse_url())
+        self.ui.backupButton.clicked.connect(lambda: self._backup_button_clicked())
+        self.ui.downloadDirButton.clicked.connect(
+            lambda: self.create_download_record_and_start()
+        )
+        self.ui.removeDownloadsButton.clicked.connect(
+            lambda: self._remove_download_list()
+        )
 
     def _save_settings(self) -> None:
         logs_path: str = self.ui.logPathEdit.text()
@@ -112,16 +127,12 @@ class MainWindow(QMainWindow):
             return
         if not os.path.isdir(logs_path):
             errmsg = "保存设置错误,日志路径不存在！\n建议用按钮打开资源管理器选择路径"
-            self._ui_function.show_info_messageBox(
-                errmsg, msg_color="red"
-            )
+            self._ui_function.show_info_messageBox(errmsg, msg_color="red")
             sysLogger.warning(errmsg.replace("\n", "") + f", 欲设置的日志路径: {logs_path}")
             return
         if not os.path.isdir(download_path):
             errmsg = "保存设置错误,下载路径不存在！\n建议用按钮打开资源管理器选择路径"
-            self._ui_function.show_info_messageBox(
-                errmsg, msg_color="red"
-            )
+            self._ui_function.show_info_messageBox(errmsg, msg_color="red")
             sysLogger.warning(errmsg.replace("\n", "") + f", 欲设置的下载路径: {download_path}")
             return
 
@@ -158,17 +169,19 @@ class MainWindow(QMainWindow):
         for item in fileList:
             self.ui.shareFileCombo.addItem(item)
 
-    def _create_share(self):
-        def _create_share_inner():
+    def _create_share(self) -> None:
+        def _create_share_inner() -> None:
             base_path: str = self.ui.sharePathEdit.text()
             if not os.path.isdir(base_path):
                 errmsg = "分享的路径不存在！\n建议用按钮打开资源管理器选择路径"
-                self._ui_function.show_info_messageBox(
-                    errmsg, msg_color="red"
+                self._ui_function.show_info_messageBox(errmsg, msg_color="red")
+                sysLogger.warning(
+                    errmsg.replace("\n", "") + f", 欲分享的文件夹路径: {base_path}"
                 )
-                sysLogger.warning(errmsg.replace("\n", "") + f", 欲分享的文件夹路径: {base_path}")
                 return
-            target_path: str = os.path.join(base_path, self.ui.shareFileCombo.currentText())
+            target_path: str = os.path.join(
+                base_path, self.ui.shareFileCombo.currentText()
+            )
             # 路径整好看一点
             if settings.IS_WINDOWS:
                 target_path = target_path.replace("/", "\\")
@@ -176,18 +189,17 @@ class MainWindow(QMainWindow):
                 target_path = target_path.replace("\\", "/")
             if not os.path.exists(target_path):
                 errmsg = "分享的路径不存在！\n请确认后再新建"
-                self._ui_function.show_info_messageBox(
-                    errmsg, msg_color="red"
-                )
+                self._ui_function.show_info_messageBox(errmsg, msg_color="red")
                 sysLogger.warning(errmsg.replace("\n", "") + f", 欲分享的路径: {target_path}")
                 return
             share_type: Union[str, shareType] = self.ui.shareTypeCombo.currentText()
             share_type = shareType.ftp if share_type == "FTP" else shareType.http
-            shared_row_number: Union[None, int] = self._sharing_list.contains(target_path, share_type)
+            shared_row_number: Union[None, int] = self._sharing_list.contains(
+                target_path, share_type
+            )
             if shared_row_number is not None:
                 self._ui_function.show_info_messageBox(
-                    f"该路径已被分享过, 他在分享记录的第 [{shared_row_number + 1}] 行",
-                    msg_color="red"
+                    f"该路径已被分享过, 他在分享记录的第 [{shared_row_number + 1}] 行", msg_color="red"
                 )
                 sysLogger.warning(f"重复分享被取消, 分享的路径: {target_path}, 分享类型: {share_type}")
                 return
@@ -195,17 +207,13 @@ class MainWindow(QMainWindow):
                 file_count = self._calc_file_count(target_path)
             except FileNotFoundError as e:
                 self._ui_function.show_info_messageBox(
-                    f"文件路径解析错误, 原始错误信息: {e}",
-                    "分享异常",
-                    msg_color="red"
+                    f"文件路径解析错误, 原始错误信息: {e}", "分享异常", msg_color="red"
                 )
                 sysLogger.warning(f"分享文件中含无法打开路径, 尝试打开发生的错误信息: {e}")
                 return
             except Exception as e:
                 self._ui_function.show_info_messageBox(
-                    f"分享出现错误, 原始错误信息: {e}",
-                    "分享异常",
-                    msg_color="red"
+                    f"分享出现错误, 原始错误信息: {e}", "分享异常", msg_color="red"
                 )
                 sysLogger.warning(f"分享异常, 尝试分享发生的错误信息: {e}")
                 return
@@ -213,16 +221,20 @@ class MainWindow(QMainWindow):
                 self._ui_function.show_info_messageBox(
                     f"分享已被取消\n该文件夹内文件数量大于10000, 直接分享它不是一个好的选择, 请按需对文件夹进行打包后再分享",
                     "分享被取消",
-                    msg_color="red"
+                    msg_color="red",
                 )
                 sysLogger.warning("分享被取消, 因为分享的文件夹中文件个数超过10000, 建议打包后分享压缩文件")
                 return
             elif file_count > 100:
-                if self._ui_function.show_question_messageBox(
+                if (
+                    self._ui_function.show_question_messageBox(
                         "文件夹内文件数量大于100, 会影响下载速度, 若无浏览文件需求, 建议打包成压缩包后再分享",
                         "文件数量大",
-                        "好的, 打包后再分享", "无视直接分享"
-                ) == 0:
+                        "好的, 打包后再分享",
+                        "无视直接分享",
+                    )
+                    == 0
+                ):
                     sysLogger.info("成功取消文件个数大于100的文件夹的分享")
                     return
             uuid: str = f"{share_type.value[0]}{generate_uuid()}"
@@ -235,8 +247,11 @@ class MainWindow(QMainWindow):
                 fileObj = fileModel(target_path, uuid)
             else:
                 fileObj = fileModel(
-                    target_path, uuid, pwd=shared_fileObj.ftp_pwd,
-                    port=shared_fileObj.ftp_port, ftp_base_path=shared_fileObj.ftp_basePath
+                    target_path,
+                    uuid,
+                    pwd=shared_fileObj.ftp_pwd,
+                    port=shared_fileObj.ftp_port,
+                    ftp_base_path=shared_fileObj.ftp_basePath,
                 )
             self._sharing_list.append(fileObj)
             fileObj.isSharing = True
@@ -254,9 +269,7 @@ class MainWindow(QMainWindow):
         browse_url: str = self.ui.shareLinkEdit.text()
         if not browse_url or not browse_url.startswith("http://"):
             errmsg = "不支持的分享链接!\n请确认分享链接无误后再点击加载哦~"
-            self._ui_function.show_info_messageBox(
-                errmsg, msg_color="rgb(154, 96, 2)"
-            )
+            self._ui_function.show_info_messageBox(errmsg, msg_color="rgb(154, 96, 2)")
             sysLogger.warning(errmsg.replace("\n", "") + f"输入的链接地址: {browse_url}")
             return
         # 简单提高下效率
@@ -276,12 +289,16 @@ class MainWindow(QMainWindow):
         self._browse_thread.signal.connect(self._show_file_list)
         self._browse_thread.start()
 
-    def _load_browse_url_reload(self):
+    def _load_browse_url_reload(self) -> None:
         self._browse_data.reload()
         self.ui.backupButton.setEnabled(False)
 
     def _show_file_list(self, browse_response: dict) -> None:
-        if not browse_response or not isinstance(browse_response, dict) or not browse_response.get("errno"):
+        if (
+            not browse_response
+            or not isinstance(browse_response, dict)
+            or not browse_response.get("errno")
+        ):
             self._browse_data = BrowseFileDictModel.load({})
             self._UIClass.show_error_browse(self)
         elif browse_response.get("errno", 0) == 404:
@@ -306,19 +323,25 @@ class MainWindow(QMainWindow):
         self.ui.shareLinkButton.setEnabled(True)
         sysLogger.info("加载文件列表完成")
 
-    def _backup_button_clicked(self):
+    def _backup_button_clicked(self) -> None:
         self._browse_data.prev()
         self._UIClass.show_file_list(self, self._browse_data.currentDict)
         self.ui.backupButton.setEnabled(not self._browse_data.isRoot)
 
-    def create_download_record_and_start(self, fileDict: Union[None, dict] = None) -> None:
+    def create_download_record_and_start(
+        self, fileDict: Union[None, dict] = None
+    ) -> None:
         self.ui.downloadDirButton.setEnabled(False)
         if fileDict:
-            if self._ui_function.show_question_messageBox(
-                f"当前正要下载文件: {fileDict.get('fileName', '未知文件名')}, 暂未实现取消下载功能, 确认是否下载？",
-                "确认是否下载",
-                "没错, 我就要下载它", "点错了"
-            ) != 0:
+            if (
+                self._ui_function.show_question_messageBox(
+                    f"当前正要下载文件: {fileDict.get('fileName', '未知文件名')}, 暂未实现取消下载功能, 确认是否下载？",
+                    "确认是否下载",
+                    "没错, 我就要下载它",
+                    "点错了",
+                )
+                != 0
+            ):
                 self.ui.downloadDirButton.setEnabled(self._browse_data.isDir)
                 return
             copy_fileDict = copy.copy(fileDict)
@@ -337,8 +360,7 @@ class MainWindow(QMainWindow):
 
     def _generare_fileList_recursive(self) -> tuple[list, int]:
         def _generare_fileList_recursive_inner(
-                fileList: list,
-                fileDict: Union[None, dict] = None
+            fileList: list, fileDict: Union[None, dict] = None
         ) -> list:
             fileDict = fileDict or self._browse_data.currentDict
             copy_fileDict = copy.deepcopy(fileDict)
@@ -407,13 +429,17 @@ class MainWindow(QMainWindow):
 
     def open_share(self, fileObj: Union[FileModel, DirModel]) -> None:
         if fileObj.isSharing:
-            sysLogger.error(f"操作异常,重复打开分享,分享路径: {fileObj.targetPath}, 分享类型:{fileObj.shareType.value}")
+            sysLogger.error(
+                f"操作异常,重复打开分享,分享路径: {fileObj.targetPath}, 分享类型:{fileObj.shareType.value}"
+            )
             return
         self._service_process.add_share(fileObj)
 
     def close_share(self, fileObj: Union[FileModel, DirModel]) -> None:
         if not fileObj.isSharing:
-            sysLogger.error(f"操作异常,重复取消分享,分享路径: {fileObj.targetPath}, 分享类型:{fileObj.shareType.value}")
+            sysLogger.error(
+                f"操作异常,重复取消分享,分享路径: {fileObj.targetPath}, 分享类型:{fileObj.shareType.value}"
+            )
             return
         # 启动时加载历史分享记录,会调用此函数,理应不做处理,此时_service_process还未初始化
         try:
@@ -434,9 +460,15 @@ class MainWindow(QMainWindow):
         if isDir is None:
             return False
         if isDir:
-            other_full_keys = ["uuid", "downloadUrl", "fileName", "stareType", "children"]
+            other_full_keys = [
+                "uuid",
+                "downloadUrl",
+                "fileName",
+                "stareType",
+                "children",
+            ]
         else:
-             other_full_keys = ["uuid", "downloadUrl", "fileName", "stareType"]
+            other_full_keys = ["uuid", "downloadUrl", "fileName", "stareType"]
         if not all(key in data for key in other_full_keys):
             return False
         if isDir:
@@ -462,7 +494,8 @@ class MainWindow(QMainWindow):
                 except:
                     raise
                 else:
-                    if initial_count > 10000: return initial_count
+                    if initial_count > 10000:
+                        return initial_count
 
                 QApplication.processEvents()
 
@@ -471,7 +504,7 @@ class MainWindow(QMainWindow):
     def _update_download_status(self, status_tuple: [str, bool, str]):
         self._download_data.update_download_status(status_tuple)
 
-    def _remove_download_list(self):
+    def _remove_download_list(self) -> None:
         self._download_data.remove_download_list(self.ui.downloadListTable)
         self.ui.removeDownloadsButton.setEnabled(not self._download_data.is_empty())
 
@@ -485,8 +518,9 @@ class MainWindow(QMainWindow):
             event.ignore()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import multiprocessing
+
     multiprocessing.freeze_support()
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(":/icons/icon.ico"))

@@ -1,41 +1,33 @@
-__all__ = [
-    "BrowseFileDictModel"
-]
+__all__ = ["BrowseFileDictModel"]
 
 from typing import Union
 
+
 class BrowseFileDictModel(dict):
-    
     def __init__(self):
         super(BrowseFileDictModel, self).__init__()
         self._current_dict = self
 
     def prev(self) -> None:
-
         self._current_dict = self._current_dict["prev"]
 
-    def reload(self):
-
+    def reload(self) -> None:
         self._current_dict = self
 
     @property
-    def currentDict(self) -> dict[str: Union[str, list, dict]]:
-
+    def currentDict(self) -> dict[str : Union[str, list, dict]]:
         return self._current_dict
 
     @currentDict.setter
-    def currentDict(self, newVaule: dict):
-
+    def currentDict(self, newVaule: dict) -> None:
         self._current_dict = newVaule
 
     @property
     def isRoot(self) -> bool:
-
         return self._current_dict == self
 
     @property
     def isDir(self) -> bool:
-
         return bool(self["isDir"])
 
     @classmethod
@@ -54,7 +46,6 @@ class BrowseFileDictModel(dict):
 
     @classmethod
     def _load_dict_recursive(cls, data: dict) -> dict:
-
         children = data["children"]
         data["children"] = []
         for child in children:

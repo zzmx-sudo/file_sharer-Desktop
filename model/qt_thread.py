@@ -2,7 +2,7 @@ __all__ = [
     "WatchResultThread",
     "LoadBrowseUrlThread",
     "DownloadHttpFileThread",
-    "DownloadFtpFileThread"
+    "DownloadFtpFileThread",
 ]
 
 import time
@@ -21,6 +21,7 @@ from ftplib import FTP
 from settings import settings
 from utils.logger import sysLogger
 
+
 class WatchResultThread(QThread):
     signal = pyqtSignal(str)
 
@@ -36,6 +37,7 @@ class WatchResultThread(QThread):
                 self.signal.emit(file_uuid)
             else:
                 time.sleep(2)
+
 
 class LoadBrowseUrlThread(QThread):
     signal = pyqtSignal(dict)
@@ -63,6 +65,7 @@ class LoadBrowseUrlThread(QThread):
             return
         self.signal.emit(result)
 
+
 class DownloadHttpFileThread(QThread):
     signal = pyqtSignal(tuple)
 
@@ -73,10 +76,7 @@ class DownloadHttpFileThread(QThread):
         self.run_flag = True
 
     async def _download(
-            self,
-            session: aiohttp.ClientSession,
-            url: str,
-            file_path: str
+        self, session: aiohttp.ClientSession, url: str, file_path: str
     ) -> None:
         file_path = os.path.abspath(file_path)
         if os.path.exists(file_path):
@@ -109,9 +109,13 @@ class DownloadHttpFileThread(QThread):
         async with aiohttp.ClientSession() as session:
             tasks = [
                 asyncio.create_task(
-                    self._download(session, x["downloadUrl"],
-                                  os.path.join(settings.DOWNLOAD_DIR, x["relativePath"]))
-                ) for x in fileList
+                    self._download(
+                        session,
+                        x["downloadUrl"],
+                        os.path.join(settings.DOWNLOAD_DIR, x["relativePath"]),
+                    )
+                )
+                for x in fileList
             ]
             await asyncio.wait(tasks)
 
@@ -140,6 +144,7 @@ class DownloadHttpFileThread(QThread):
 
     def append(self, fileList: list) -> None:
         self._file_list.extend(fileList)
+
 
 class DownloadFtpFileThread(QThread):
     signal = pyqtSignal(tuple)
@@ -237,7 +242,9 @@ class DownloadFtpFileThread(QThread):
         os.environ["NO_PROXY"] = "127.0.0.1"
         headers = {"X-Client": "file-sharer client"}
         try:
-            response = requests.get(fileDict.get("downloadUrl"), headers=headers, timeout=2)
+            response = requests.get(
+                fileDict.get("downloadUrl"), headers=headers, timeout=2
+            )
         except:
             return {}
 
@@ -256,11 +263,11 @@ class DownloadFtpFileThread(QThread):
 
     def _calc_cwd(self, cwd: str, relativePath: str) -> str:
         if "\\" not in relativePath and "/" not in relativePath:
-            result =  cwd
+            result = cwd
         else:
             if not cwd:
                 step = "/" if not settings.IS_WINDOWS else "\\"
-                relativePath = relativePath[relativePath.find(step):]
+                relativePath = relativePath[relativePath.find(step) :]
             result = os.path.join(cwd, os.path.dirname(relativePath))
 
         result = result.replace("\\", "/")
@@ -270,5 +277,4 @@ class DownloadFtpFileThread(QThread):
         return result
 
     def append(self, fileList: list) -> None:
-
         self._file_list.append(fileList)
