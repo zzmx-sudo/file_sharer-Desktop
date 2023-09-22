@@ -3,7 +3,7 @@
 
 block_cipher = None
 
-PROJECT_PATH = "F:\\GitSource\\file_sharer-LAN\\"
+PROJECT_PATH = "F:\\GitSource\\file_sharer-Desktop\\"
 
 a = Analysis(
     [
