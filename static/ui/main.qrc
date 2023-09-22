@@ -1,6 +1,7 @@
 <RCC>
   <qresource prefix="icons">
     <file>../images/icon/down.png</file>
+    <file>../images/icon/down-active.png</file>
     <file>../images/icon/close-active.png</file>
     <file>../images/icon/logo.png</file>
     <file>icon.ico</file>

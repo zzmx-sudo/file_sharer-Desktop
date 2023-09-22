@@ -22,6 +22,8 @@ Global */
 	padding: 0;
 	font-size: 14px;
 	font-family: &quot;KaiTi&quot;;
+	background-position: center;
+	background-repeat: no-reperat;
 }
 
 /* ///////////////////////////////////////////////////////////////////////////////
@@ -57,7 +59,7 @@ QComboBox::drop-down {
 	background-repeat: no-reperat;
 }
 QComboBox::drop-down:hover {
-	background-image: url(:/icons/images/icon/down-avtive.png);
+	background-image: url(:/icons/images/icon/down-active.png);
 }
 QComboBox QAbstractItemView {
 	color: rgb(0, 0, 0);
@@ -218,8 +220,6 @@ AppBg */
 /* ///////////////////////////////////////////////////////////////////////////////
 QPushButton */
 QPushButton {
-	background-position: center;
-	background-repeat: no-repeat;
 	border: 2px solid rgb(126, 199, 255);
 	border-radius: 5%;
 	background-color: rg(236, 236, 236)
@@ -235,12 +235,6 @@ QPushButton:disabled {
 	border: none;
 }
 
-/* ///////////////////////////////////////////////////////////////////////////////
-Top Logo */
-#topLogoInfo {
-	background-position: center;
-	background-repeat: no-repeat;
-}
 /* ///////////////////////////////////////////////////////////////////////////////
 Left Menu Box */
 #leftMenuBox {
