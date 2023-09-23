@@ -36,8 +36,7 @@ a = Analysis(
     datas=[
         (PROJECT_PATH+"static\\ui\\icon.ico", "."),
         (PROJECT_PATH+"pyproject.toml", "."),
-        (PROJECT_PATH+"file_sharing_backups.json", "."),
-        (PROJECT_PATH+"licenses\\license.txt", ".")
+        (PROJECT_PATH+"file_sharing_backups.json", ".")
     ],
     hiddenimports=["settings.development", "settings.production"],
     hookspath=[],

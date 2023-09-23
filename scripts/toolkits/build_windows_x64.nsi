@@ -1,15 +1,16 @@
 ; 安装程序初始定义常量
-!define PRODUCT_NAME "局域网文件共享助手"
-!define PRODUCT_VERSION "0.0.1"
+!define PRODUCT_NAME "文件共享助手"
+!define PRODUCT_VERSION "v0.0.1"
 !define PRODUCT_PUBLISHER "大宝天天见丶"
 !define PRODUCT_WEB_SITE "https://github.com/zzmx-sudo/file_sharer-Desktop"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\file-sharer.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define PROJECT_DIR "F:\GitSource\file_sharer-Desktop"
-!define INSTALLER_NAME "${PROJECT_DIR}\build\installer\file-sharer.exe"
+!define INSTALLER_NAME "${PROJECT_DIR}\build\installer\file_sharer-desktop_${PRODUCT_VERSION}-win_x64.exe"
 
 SetCompressor lzma
+SetCompressorDictSize 64
 
 ; ------ MUI 现代界面定义 (1.67 版本以上兼容) ------
 !include "MUI.nsh"
@@ -28,7 +29,7 @@ SetCompressor lzma
 !insertmacro MUI_PAGE_WELCOME
 ; 许可协议页面
 !define MUI_LICENSEPAGE_CHECKBOX
-!insertmacro MUI_PAGE_LICENSE "${PROJECT_DIR}\build\file-sharer\license.txt"
+!insertmacro MUI_PAGE_LICENSE "${PROJECT_DIR}\licenses\license.txt"
 ; 安装目录选择页面
 !insertmacro MUI_PAGE_DIRECTORY
 ; 安装过程页面
@@ -52,7 +53,7 @@ SetCompressor lzma
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 !system 'mkdir "${INSTALLER_NAME}\.."'
 OutFile "${INSTALLER_NAME}"
-InstallDir "$PROGRAMFILES\局域网文件共享助手"
+InstallDir "$PROGRAMFILES\文件共享助手"
 InstallDirRegKey HKLM "${PRODUCT_UNINST_KEY}" "UninstallString"
 ShowInstDetails show
 ShowUnInstDetails show
@@ -61,9 +62,9 @@ Section "MainSection" SEC01
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
   File "${PROJECT_DIR}\build\file-sharer\file-sharer.exe"
-  CreateDirectory "$SMPROGRAMS\局域网文件共享助手"
-  CreateShortCut "$SMPROGRAMS\局域网文件共享助手\局域网文件共享助手.lnk" "$INSTDIR\file-sharer.exe"
-  CreateShortCut "$DESKTOP\局域网文件共享助手.lnk" "$INSTDIR\file-sharer.exe"
+  CreateDirectory "$SMPROGRAMS\文件共享助手"
+  CreateShortCut "$SMPROGRAMS\文件共享助手\文件共享助手.lnk" "$INSTDIR\file-sharer.exe" "" "$INSTDIR\icon.ico"
+  CreateShortCut "$DESKTOP\文件共享助手.lnk" "$INSTDIR\file-sharer.exe" "" "$INSTDIR\icon.ico"
   SetOverwrite off
   File "${PROJECT_DIR}\build\file-sharer\pyproject.toml"
   File "${PROJECT_DIR}\build\file-sharer\file_sharing_backups.json"
@@ -72,9 +73,9 @@ Section "MainSection" SEC01
 SectionEnd
 
 Section -AdditionalIcons
-  WriteIniStr "$INSTDIR\${PRODUCT_NAME}.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"
-  CreateShortCut "$SMPROGRAMS\局域网文件共享助手\Website.lnk" "$INSTDIR\${PRODUCT_NAME}.url"
-  CreateShortCut "$SMPROGRAMS\局域网文件共享助手\Uninstall.lnk" "$INSTDIR\uninst.exe"
+  WriteIniStr "$INSTDIR\打开项目.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"
+  CreateShortCut "$SMPROGRAMS\文件共享助手\Website.lnk" "$INSTDIR\打开项目.url"
+  CreateShortCut "$SMPROGRAMS\文件共享助手\Uninstall.lnk" "$INSTDIR\uninst.exe"
 SectionEnd
 
 Section -Post
@@ -105,12 +106,12 @@ Section Uninstall
   Delete "$INSTDIR\pyproject.toml"
   Delete "$INSTDIR\file-sharer.exe"
 
-  Delete "$SMPROGRAMS\局域网文件共享助手\Uninstall.lnk"
-  Delete "$SMPROGRAMS\局域网文件共享助手\Website.lnk"
-  Delete "$DESKTOP\局域网文件共享助手.lnk"
-  Delete "$SMPROGRAMS\局域网文件共享助手\局域网文件共享助手.lnk"
+  Delete "$SMPROGRAMS\文件共享助手\Uninstall.lnk"
+  Delete "$SMPROGRAMS\文件共享助手\Website.lnk"
+  Delete "$DESKTOP\文件共享助手.lnk"
+  Delete "$SMPROGRAMS\文件共享助手\文件共享助手.lnk"
 
-  RMDir "$SMPROGRAMS\局域网文件共享助手"
+  RMDir "$SMPROGRAMS\文件共享助手"
 
   RMDir /r "$INSTDIR\yarl"
   RMDir /r "$INSTDIR\PyQt5"

@@ -7,6 +7,8 @@ set PYTHON_ENV_DIR=D:\Envs\file-sharer
 set TOOLKITS_DIR=%cd%\toolkits
 ::项目名称(同spec中项目名)
 set PROJECT_NAME=file-sharer
+::项目版本
+set PRODUCT_VERSION=v0.0.1
 
 cd ..
 ::项目路径
@@ -22,11 +24,20 @@ set PROJECT_DIR=%cd%
 @echo ******************* Packaging the source code using pyinstaller *******************
 @pyinstaller main.spec --distpath %PROJECT_DIR%\build
 
+@rem 使用7z打包成绿色版
+@echo ******************* Packaging into a green version using 7z *******************
+@if exist %PROJECT_DIR\build\installer (
+    @echo installer dir is exists
+) else (
+    @md %PROJECT_DIR%\build\installer
+)
+@7z a %PROJECT_DIR%\build\installer\file_sharer-desktop_%PRODUCT_VERSION%-win_x64-green.7z %PROJECT_DIR%\build\%PROJECT_NAME%\
+
 @rem 再用NSIS打包成Windows安装程序
 @echo ******************* Packaging as Windows installation program using NSIS *******************
 ::安装之前需修改nsi中PROJECT_DIR的值
-@makensis %TOOLKITS_DIR%\build_windows.nsi
+@makensis %TOOLKITS_DIR%\build_windows_x64.nsi
 
 ::打包结束
-@echo ******************* build complete! *******************
+@echo ******************* Build complete! *******************
 @pause
