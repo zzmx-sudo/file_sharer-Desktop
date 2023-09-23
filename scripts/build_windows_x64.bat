@@ -35,7 +35,7 @@ set PROJECT_DIR=%cd%
 
 @rem 再用NSIS打包成Windows安装程序
 @echo ******************* Packaging as Windows installation program using NSIS *******************
-::安装之前需修改nsi中PROJECT_DIR的值
+::安装之前需修改nsi中PRODUCT_VERSION 和 PROJECT_DIR的值
 @makensis %TOOLKITS_DIR%\build_windows_x64.nsi
 
 ::打包结束
