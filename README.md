@@ -19,7 +19,7 @@
 
 所用技术栈:
 
-- python3.9+
+- python3.8+
 - PyQt5
 - fastapi
 - asyncio

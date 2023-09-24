@@ -10,7 +10,6 @@ import json
 import os
 import asyncio
 from multiprocessing import Queue
-from typing import Union
 
 import requests
 import aiohttp
@@ -184,7 +183,7 @@ class DownloadFtpFileThread(QThread):
             else:
                 time.sleep(3)
 
-    def _generate_ftp_client(self, ftp_param: dict) -> tuple[bool, Union[str, FTP]]:
+    def _generate_ftp_client(self, ftp_param: dict) -> tuple:
         if not ftp_param:
             return (False, "获取FTP必要参数失败")
         host = ftp_param.get("host")

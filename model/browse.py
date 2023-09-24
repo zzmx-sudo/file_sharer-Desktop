@@ -1,7 +1,5 @@
 __all__ = ["BrowseFileDictModel"]
 
-from typing import Union
-
 
 class BrowseFileDictModel(dict):
     def __init__(self):
@@ -15,7 +13,7 @@ class BrowseFileDictModel(dict):
         self._current_dict = self
 
     @property
-    def currentDict(self) -> dict[str : Union[str, list, dict]]:
+    def currentDict(self) -> dict:
         return self._current_dict
 
     @currentDict.setter

@@ -10,7 +10,7 @@ class DownloadFileDictModel(OrderedDict):
     def __init__(self):
         super(DownloadFileDictModel, self).__init__()
 
-    def update_download_status(self, status_tuple: tuple[str, bool, str]) -> None:
+    def update_download_status(self, status_tuple: tuple) -> None:
         if not isinstance(status_tuple, tuple) or len(status_tuple) != 3:
             sysLogger.error(f"获取的下载状态数据有误, 原始信息: {status_tuple}")
             return

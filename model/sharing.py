@@ -61,7 +61,7 @@ class FuseSharingModel(list):
         return None
 
     def dump(self) -> None:
-        backup_result: list[dict[str : Union[None, str]]] = [
+        backup_result: list = [
             fileObj.to_dump_backup() for fileObj in self
         ]
 
@@ -92,7 +92,7 @@ class FuseSharingModel(list):
                 sysLogger.error("加载历史分享记录失败, file_sharing_backups.json文件已损坏")
                 return model
 
-        path_share_params: list[tuple[str, str]] = []
+        path_share_params: list = []
         for file_dict in backup_result:
             targetPath = file_dict.get("path")
             if not targetPath or not os.path.exists(targetPath):

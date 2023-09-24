@@ -358,7 +358,7 @@ class MainWindow(QMainWindow):
 
         self.ui.downloadDirButton.setEnabled(self._browse_data.isDir)
 
-    def _generare_fileList_recursive(self) -> tuple[list, int]:
+    def _generare_fileList_recursive(self) -> tuple:
         def _generare_fileList_recursive_inner(
             fileList: list, fileDict: Union[None, dict] = None
         ) -> list:

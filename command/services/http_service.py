@@ -33,7 +33,7 @@ class MyRequest:
             # elif header_name == b"sec-ch-ua-platform":
             #     self.__dict__["client_platform"] = header_value.decode()
 
-    def __getitem__(self, item: str) -> Union[str, tuple[str, int]]:
+    def __getitem__(self, item: str) -> Union[str, tuple]:
         return self.__dict__.get(item, "")
 
 

@@ -63,7 +63,7 @@ class FtpService(BaseService):
         authorizer.add_user("a", passwd, fileObj.ftp_basePath, perm="elr")
         handler = FTPHandler
         handler.authorizer = authorizer
-        address: tuple[str, int] = (host, port)
+        address: tuple = (host, port)
 
         server = FTPServer(address, handler)
         t = Thread(target=server.serve_forever)
