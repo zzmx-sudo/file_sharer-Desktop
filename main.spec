@@ -7,7 +7,7 @@ PROJECT_PATH = "F:\\GitSource\\file_sharer-Desktop\\"
 
 a = Analysis(
     [
-        'main.py',
+        PROJECT_PATH + 'main.py',
         PROJECT_PATH + "command\\manage.py",
         PROJECT_PATH + "command\\services\\__init__.py",
         PROJECT_PATH + "command\\services\\_base_service.py",
