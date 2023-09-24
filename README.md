@@ -27,7 +27,12 @@
 
 已支持的平台:
 
-- windows7+
+- windows7及以上
+
+软件变化请查看：[更新日志](https://github.com/zzmx-sudo/file_sharer-LAN/blob/develop/CHANGELOG.md)<br>
+软件下载请到：[发布页面](https://github.com/zzmx-sudo/file_sharer-Desktop/releases)<br>
+或者到网盘下载：链接 `https://zzmx.lanzoue.com/b01fiitgd` 密码 `brjm`（若链接无法打开请百度：蓝奏云链接打不开）<br>
+使用常见问题或发布问题请转至：[常见问题](https://github.com/zzmx-sudo/file_sharer-Desktop/issues)
 
 目前本项目的原始发布地址只有**GitHub**及**蓝奏网盘**, 请认准本项目署名: **大宝天天见丶**, 其他渠道均为第三方转载发布, 与本项目无关！
 
@@ -39,13 +44,13 @@
 
 #### 源码使用方式
 
-* 安装python 3.9及以上版本
+* 安装python 3.8及以上版本
 * 通过命令 `pip install -r requirements.txt` 安装第三方依赖
 * 运行main.py
 
 ### UI界面
 
-<p><a href="https://github.com/zzmx-sudo/file_sharer-LAN"><img src="https://github.com/zzmx-sudo/file_sharer-LAN/blob/develop/docs/app.png"></a></p>
+<p><a href="https://github.com/zzmx-sudo/file_sharer-LAN"><img src="https://github.com/zzmx-sudo/file_sharer-LAN/blob/develop/docs/app.png" alt="UI界面"></a></p>
 
 ### 贡献代码
 

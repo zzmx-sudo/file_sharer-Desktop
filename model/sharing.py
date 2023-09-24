@@ -61,9 +61,7 @@ class FuseSharingModel(list):
         return None
 
     def dump(self) -> None:
-        backup_result: list = [
-            fileObj.to_dump_backup() for fileObj in self
-        ]
+        backup_result: list = [fileObj.to_dump_backup() for fileObj in self]
 
         backup_file_path: str = os.path.join(
             settings.BASE_DIR, "file_sharing_backups.json"
