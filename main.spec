@@ -66,6 +66,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=PROJECT_PATH+"static\\ui\\icon.ico",
 )
 coll = COLLECT(
     exe,
