@@ -124,13 +124,13 @@ class UiFunction:
             )
 
     def _save_share_msg(self) -> None:
-        msg = "我正在使用file-sharer分享/下载文件, 快一起来玩玩吧, 下载地址: https://github.com/zzmx-sudo/file_sharer-LAN"
+        msg = "我正在使用file-sharer分享/下载文件, 快一起来玩玩吧, 下载地址:https://zzmx.lanzoue.com/b01fiitgd, 密码:brjm"
         clip.copy(msg)
 
         self.show_info_messageBox("复制成功, 快发送给小伙伴吧^_^")
 
     def _open_project_code(self) -> None:
-        webbrowser.open_new_tab("https://github.com/zzmx-sudo/file_sharer-LAN")
+        webbrowser.open_new_tab("https://github.com/zzmx-sudo/file_sharer-Desktop")
 
     def _extra_setting(self) -> None:
         style = self._elements.settingButton.styleSheet()
