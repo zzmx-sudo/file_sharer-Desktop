@@ -21,7 +21,7 @@ if %PYTHON_ENV_DIR% == "" (
     call %PYTHON_ENV_DIR%\Scripts\activate.bat
 )
 echo ******************* Packaging the source code using pyinstaller *******************
-pyinstaller main.spec --distpath %PROJECT_DIR%\build
+pyinstaller32 main.spec --distpath %PROJECT_DIR%\build
 
 @rem 使用7z打包成绿色版
 echo ******************* Packaging into a green version using 7z *******************
@@ -30,12 +30,12 @@ if exist %PROJECT_DIR\build\installer (
 ) else (
     md %PROJECT_DIR%\build\installer
 )
-7z a %PROJECT_DIR%\build\installer\file_sharer-desktop_%PRODUCT_VERSION%-win_x64-green.7z %PROJECT_DIR%\build\%PROJECT_NAME%\
+7z a %PROJECT_DIR%\build\installer\file_sharer-desktop_%PRODUCT_VERSION%-win_x86-green.7z %PROJECT_DIR%\build\%PROJECT_NAME%\
 
 @rem 再用NSIS打包成Windows安装程序
 echo ******************* Packaging as Windows installation program using NSIS *******************
 ::安装之前需修改nsi中PRODUCT_VERSION 和 PROJECT_DIR的值
-makensis %TOOLKITS_DIR%\build_windows_x64.nsi
+makensis %TOOLKITS_DIR%\build_windows_x86.nsi
 
 ::打包结束
 echo ******************* Build complete! *******************

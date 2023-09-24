@@ -7,10 +7,10 @@
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define PROJECT_DIR "F:\GitSource\file_sharer-Desktop"
-!define INSTALLER_NAME "${PROJECT_DIR}\build\installer\file_sharer-desktop_${PRODUCT_VERSION}-win_x64.exe"
+!define INSTALLER_NAME "${PROJECT_DIR}\build\installer\file_sharer-desktop_${PRODUCT_VERSION}-win_x86.exe"
 
 SetCompressor lzma
-SetCompressorDictSize 64
+SetCompressorDictSize 32
 
 ; ------ MUI 现代界面定义 (1.67 版本以上兼容) ------
 !include "MUI.nsh"
