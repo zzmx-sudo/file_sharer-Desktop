@@ -26,7 +26,16 @@ def generate_timestamp() -> int:
 
 
 def get_local_ip() -> str:
-    return socket.gethostbyname(socket.gethostname())
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+    except:
+        ip = socket.gethostbyname(socket.gethostname())
+    finally:
+        s.close()
+
+    return ip
 
 
 def generate_ftp_passwd() -> str:
