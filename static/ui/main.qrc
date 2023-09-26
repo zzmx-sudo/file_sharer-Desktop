@@ -1,0 +1,29 @@
+<RCC>
+  <qresource prefix="icons">
+    <file>../images/icon/down.png</file>
+    <file>../images/icon/down-active.png</file>
+    <file>../images/icon/close-active.png</file>
+    <file>../images/icon/logo.png</file>
+    <file>icon.ico</file>
+    <file>../images/icon/folder_new.png</file>
+    <file>../images/icon/browse.png</file>
+    <file>../images/icon/check.png</file>
+    <file>../images/icon/restore.png</file>
+    <file>../images/icon/back.png</file>
+    <file>../images/icon/client.png</file>
+    <file>../images/icon/close.png</file>
+    <file>../images/icon/copy.png</file>
+    <file>../images/icon/download.png</file>
+    <file>../images/icon/file.png</file>
+    <file>../images/icon/folder.png</file>
+    <file>../images/icon/home.png</file>
+    <file>../images/icon/maximize.png</file>
+    <file>../images/icon/minimize.png</file>
+    <file>../images/icon/server.png</file>
+    <file>../images/icon/setting.png</file>
+    <file>../images/icon/share.png</file>
+  </qresource>
+  <qresource prefix="images">
+    <file>../images/img/home.png</file>
+  </qresource>
+</RCC>

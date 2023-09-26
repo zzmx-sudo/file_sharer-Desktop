@@ -4,3 +4,18 @@ __pycache__
 
 # debug file
 demo*
+
+# logs
+logs/
+
+# mac ignore file
+.DS_Store
+
+# backup files
+file_sharing_backups.json
+
+# download
+Download/
+
+# compilation product & output
+build/
