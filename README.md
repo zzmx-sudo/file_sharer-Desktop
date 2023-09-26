@@ -1,4 +1,4 @@
-<p align="center"><a href="https://github.com/zzmx-sudo/file_sharer-LAN"><img src="https://github.com/zzmx-sudo/file_sharer-LAN/blob/develop/docs/logo.png" alt="file_sharer logo"></a></p>
+<p align="center"><a href="https://github.com/zzmx-sudo/file_sharer-LAN"><img src="https://github.com/zzmx-sudo/file_sharer-LAN/blob/master/docs/logo.png" alt="file_sharer logo"></a></p>
 
 <p align="center">
     <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="code style: black"></a>
@@ -30,7 +30,7 @@
 - windows7及以上
 - MacOS 10.14(其他版本暂无条件测试, 可先下载尝鲜)
 
-软件变化请查看：[更新日志](https://github.com/zzmx-sudo/file_sharer-LAN/blob/develop/CHANGELOG.md)<br>
+软件变化请查看：[更新日志](https://github.com/zzmx-sudo/file_sharer-LAN/blob/master/CHANGELOG.md)<br>
 软件下载请到：[发布页面](https://github.com/zzmx-sudo/file_sharer-Desktop/releases)<br>
 或者到网盘下载：链接 `https://zzmx.lanzoue.com/b01fiitgd` 密码 `brjm`（若链接无法打开请百度：蓝奏云链接打不开）<br>
 使用常见问题或发布问题请转至：[常见问题](https://github.com/zzmx-sudo/file_sharer-Desktop/issues)
@@ -51,7 +51,7 @@
 
 ### UI界面
 
-<p><a href="https://github.com/zzmx-sudo/file_sharer-LAN"><img src="https://github.com/zzmx-sudo/file_sharer-LAN/blob/develop/docs/app.png" alt="UI界面"></a></p>
+<p><a href="https://github.com/zzmx-sudo/file_sharer-LAN"><img src="https://github.com/zzmx-sudo/file_sharer-LAN/blob/master/docs/app.png" alt="UI界面"></a></p>
 
 ### 贡献代码
 
