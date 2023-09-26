@@ -22,6 +22,7 @@ if %PYTHON_ENV_DIR% == "" (
 )
 echo ******************* Packaging the source code using pyinstaller *******************
 pyinstaller main.spec --distpath %PROJECT_DIR%\build
+echo [] > %PROJECT_DIR%\build\%PROJECT_NAME%\file_sharing_backups.json
 
 @rem 使用7z打包成绿色版
 echo ******************* Packaging into a green version using 7z *******************
