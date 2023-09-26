@@ -31,11 +31,8 @@ class WatchResultThread(QThread):
 
     def run(self) -> None:
         while self.run_flag:
-            if not self._output_q.empty():
-                file_uuid = self._output_q.get()
-                self.signal.emit(file_uuid)
-            else:
-                time.sleep(2)
+            file_uuid = self._output_q.get()
+            self.signal.emit(file_uuid)
 
 
 class LoadBrowseUrlThread(QThread):
@@ -99,7 +96,7 @@ class DownloadHttpFileThread(QThread):
         except aiohttp.ClientConnectorError:
             self.signal.emit((url, False, "连接目标网络失败"))
         except aiohttp.ClientPayloadError:
-            self.signal.emit((url, False, "下载失败,与目标失去连接"))
+            self.signal.emit((url, False, "下载失败,与目标失去连接或该文件对方无权限"))
         except Exception as e:
             self.signal.emit((url, False, "未知错误"))
             sysLogger.error("下载发生未知错误, 错误原始明细: %s" % str(e))
