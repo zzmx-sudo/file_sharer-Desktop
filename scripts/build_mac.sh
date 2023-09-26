@@ -32,7 +32,8 @@ fi
 echo "******************* Packaging the source code using pyinstaller *******************"
 pyinstaller ${PROJECT_PATH}/build/main_mac.spec --distpath ${PROJECT_PATH}/build
 echo "[]" > ${PROJECT_PATH}/build/${PROJECT_NAME}/file_sharing_backups.json
-echo "[]" > ${PROJECT_PATH}/build/${PROJECT_NAME}.app/file_sharing_backups.json
+echo "[]" > ${PROJECT_PATH}/build/${PROJECT_NAME}.app/Contents/MacOS/file_sharing_backups.json
+echo "[]" > ${PROJECT_PATH}/build/${PROJECT_NAME}.app/Contents/Resources/file_sharing_backups.json
 
 # 使用create-dmg打包成dmg文件
 echo "******************* Packaging as MacOS installation program using create-dmg *******************"
