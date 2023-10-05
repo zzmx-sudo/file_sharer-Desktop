@@ -1,7 +1,7 @@
 __all__ = ["ServiceProcessManager"]
 
 from typing import Union
-from multiprocessing import Process, Queue
+from multiprocessing import Queue
 
 import psutil
 
@@ -9,6 +9,7 @@ from model.file import FileModel, DirModel
 from model import public_types as ptype
 from utils.logger import sysLogger
 from .services import HttpService, FtpService
+from settings import settings
 
 
 class ServiceProcessManager:
@@ -63,7 +64,17 @@ class ServiceProcessManager:
     def _add_http_share(self, fileObj: Union[FileModel, DirModel]) -> bool:
         if self._http_service is None:
             http_service = HttpService(self._http_input_q, self._output_q)
-            self._http_service = Process(target=http_service.run)
+            if settings.IS_WINDOWS:
+                from multiprocessing import Process
+
+                process = Process
+            else:
+                from multiprocessing import get_context
+
+                ctx = get_context("fork")
+                process = ctx.Process
+
+            self._http_service = process(target=http_service.run)
             self._http_service.daemon = True
             self._http_service.start()
 
@@ -73,7 +84,17 @@ class ServiceProcessManager:
     def _add_ftp_share(self, fileObj: Union[FileModel, DirModel]) -> bool:
         if self._ftp_service is None:
             ftp_service = FtpService(self._ftp_input_q, self._output_q)
-            self._ftp_service = Process(target=ftp_service.run)
+            if settings.IS_WINDOWS:
+                from multiprocessing import Process
+
+                process = Process
+            else:
+                from multiprocessing import get_context
+
+                ctx = get_context("fork")
+                process = ctx.Process
+
+            self._ftp_service = process(target=ftp_service.run)
             self._ftp_service.daemon = True
             self._ftp_service.start()
 
