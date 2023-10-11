@@ -1,16 +1,20 @@
 __all__ = ["DownloadFileDictModel"]
 
-from utils.logger import sysLogger
-from PyQt5.Qt import QTableWidgetItem, QColor, QTableWidget, QApplication
+from PyQt5.Qt import QTableWidget, QApplication, QPushButton, QProgressBar
 
+from utils.logger import sysLogger
 from model.public_types import DownloadStatus
+from main import MainWindow
 
 
 class DownloadFileDictModel(list):
-    def __init__(self):
+    def __init__(self, window: MainWindow):
         super(DownloadFileDictModel, self).__init__()
+        self._window = window
+        self._download_progress_col = 1
+        self._download_options_col = 2
 
-    def update_download_status(self, status_tuple: tuple) -> None:
+    def update_download_status(self, status_tuple: tuple, tableWidget: QTableWidget) -> None:
         if not isinstance(status_tuple, tuple) or len(status_tuple) != 3:
             sysLogger.error(f"获取的下载状态数据有误, 原始信息: {status_tuple}")
             return
@@ -22,29 +26,53 @@ class DownloadFileDictModel(list):
             return
 
         index = self.index(url)
-
-
-        item: QTableWidgetItem = self[url]
-        item.setText(msg)
-        if status:
-            item.setForeground(QColor("green"))
+        if index >= tableWidget.rowCount():
+            sysLogger.error(
+                f"程序存在BUG, 存储的下载URL数大于表格行数"
+            )
+            return
+        progressBar: QProgressBar = tableWidget.cellWidget(index, self._download_progress_col)
+        options: QPushButton = tableWidget.cellWidget(index, self._download_options_col)
+        if status is DownloadStatus.DOING:
+            progressBar.setValue(msg)
+        elif status is DownloadStatus.PAUSE:
+            pass
+        elif status is DownloadStatus.SUCCESS:
+            progressBar.setValue(100)
+            self._window._ui_function.pushButton_change_to_remove(options)
+            options.clicked.connect(lambda : self._remove_download_item(url, tableWidget))
         else:
-            item.setForeground(QColor("red"))
+            options.clicked.disconnect()
+            options = self._window._ui_function.failed_download_options()
+            tableWidget.setCellWidget(index, self._download_options_col, options)
 
     def remove_download_list(self, tableWidget: QTableWidget) -> None:
         row_index = 0
-        need_remove_urls = []
-        for url, item in self.items():
-            if item.text() != "下载中...":
+        ignore_urls = []
+        for url in self:
+            options = tableWidget.cellWidget(row_index, self._download_options_col)
+            if isinstance(options, QPushButton) and options.text() == "移除该记录":
                 tableWidget.removeRow(row_index)
-                need_remove_urls.append(url)
             else:
+                ignore_urls.append(url)
                 row_index += 1
 
             QApplication.processEvents()
 
-        for need_remove_url in need_remove_urls:
-            del self[need_remove_url]
+        self.clear()
+        self.extend(ignore_urls)
+
+    def _remove_download_item(self, url: str, tableWidget: QTableWidget) -> None:
+        try:
+            index = self.index(url)
+        except ValueError:
+            return
+
+        if index >= tableWidget.rowCount():
+            return
+        tableWidget.removeRow(index)
+        self.pop(index)
+        self._window.ui.removeDownloadsButton.setEnabled(not self.is_empty())
 
     def is_empty(self) -> bool:
         return not self

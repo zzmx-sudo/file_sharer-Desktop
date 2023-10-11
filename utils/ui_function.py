@@ -18,7 +18,7 @@ from PyQt5.QtGui import QMouseEvent, QColor, QIcon
 import pyperclip as clip
 
 from main import MainWindow
-from custom_grips import CustomGrip
+from . custom_grips import CustomGrip
 from model.file import FileModel, DirModel
 from model.public_types import ShareType as shareType
 from model.browse import BrowseFileDictModel
@@ -636,7 +636,7 @@ class UiFunction:
                 self._download_data.append(url)
             else:
                 row_index = index
-                self.ui.downloadListTable.item(row_index, self._ui_function._download_progress_col).setText(fileName)
+                self.ui.downloadListTable.item(row_index, self._ui_function._download_fileName_col).setText(fileName)
 
             init_progressBar = self._ui_function.init_download_progressBar()
             init_pushButton = self._ui_function.init_download_pushButton(url, shareType)
