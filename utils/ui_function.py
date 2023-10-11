@@ -12,12 +12,13 @@ from PyQt5.Qt import (
     QWidget,
     QHBoxLayout,
     QApplication,
+    QProgressBar
 )
 from PyQt5.QtGui import QMouseEvent, QColor, QIcon
 import pyperclip as clip
 
 from main import MainWindow
-from .custom_grips import CustomGrip
+from custom_grips import CustomGrip
 from model.file import FileModel, DirModel
 from model.public_types import ShareType as shareType
 from model.browse import BrowseFileDictModel
@@ -53,7 +54,8 @@ class UiFunction:
         self._share_status_col = 4
         self._share_options_col = 5
         self._download_fileName_col = 0
-        self._download_status_col = 1
+        self._download_progress_col = 1
+        self._download_options_col = 2
 
     def setup(self) -> None:
         # main window scale
@@ -188,8 +190,13 @@ class UiFunction:
             self._download_fileName_col, QtWidgets.QHeaderView.Stretch
         )
         header.setSectionResizeMode(
-            self._download_status_col, QtWidgets.QHeaderView.Stretch
+            self._download_progress_col, QtWidgets.QHeaderView.Stretch
         )
+        header.resizeSection(self._download_options_col, 240)
+        header.setSectionResizeMode(
+            self._download_options_col, QtWidgets.QHeaderView.Fixed
+        )
+        header.setStretchLastSection(False)
         self._elements.downloadListTable.setRowCount(0)
         self._elements.downloadListTable.horizontalHeader().setSectionsClickable(False)
 
@@ -610,19 +617,13 @@ class UiFunction:
             table_fileList = fileList
 
         row_count = self._download_data.length
-        urls = [x for x in self._download_data.keys()]
+        shareType = fileList[0]["stareType"]
         for fileObj in table_fileList:
             url = fileObj["downloadUrl"]
             fileName = fileObj["relativePath"]
-            if url in urls:
-                row_index = urls.index(url)
-                self.ui.downloadListTable.item(
-                    row_index, self._ui_function._download_fileName_col
-                ).setText(fileName)
-                table_item: QTableWidgetItem = self._download_data[url]
-                table_item.setText("下载中...")
-                table_item.setForeground(QColor(0, 0, 0))
-            else:
+            try:
+                index = self._download_data.index(url)
+            except ValueError:
                 row_index = row_count
                 row_count += 1
                 self.ui.downloadListTable.setRowCount(row_count)
@@ -632,12 +633,188 @@ class UiFunction:
                 self.ui.downloadListTable.setItem(
                     row_index, self._ui_function._download_fileName_col, fileName_item
                 )
+                self._download_data.append(url)
+            else:
+                row_index = index
+                self.ui.downloadListTable.item(row_index, self._ui_function._download_progress_col).setText(fileName)
 
-                status_item = QTableWidgetItem("下载中...")
-                status_item.setForeground(QColor(0, 0, 0))
-                status_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-                self.ui.downloadListTable.setItem(
-                    row_index, self._ui_function._download_status_col, status_item
-                )
-                self._download_data[url] = status_item
+            init_progressBar = self._ui_function.init_download_progressBar()
+            init_pushButton = self._ui_function.init_download_pushButton(url, shareType)
+            self.ui.downloadListTable.setCellWidget(row_index, self._ui_function._download_progress_col, init_progressBar)
+            self.ui.downloadListTable.setCellWidget(row_index, self._ui_function._download_options_col, init_pushButton)
+
             QApplication.processEvents()
+
+    def init_download_pushButton(self, url: str, shareType: str) -> QPushButton:
+
+        def _pause_download(url: str, shareType: str):
+            if shareType == "http":
+                self._main_window._download_http_thread.pause(url)
+            else:
+                self._main_window._download_ftp_thread.pause(url)
+
+        pushButton = QPushButton("暂停下载")
+        pushButton.setStyleSheet(
+            """
+            QPushButton {
+                text-align: center;
+                background-color: rgb(200, 200, 200);
+                color: rgb(0, 0, 0);
+                height: 28px;
+                font: 14px;
+                border-radius: 5%;
+            }
+            
+            QPushButton:hover {
+                background-color: rgb(100, 100, 100)
+            }
+            """
+        )
+        pushButton.clicked.connect(lambda : _pause_download(url, shareType))
+
+        return pushButton
+
+    def pushButton_change_to_restart(self, pushButton: QPushButton, buttonText: str = "继续下载") -> None:
+        pushButton.clicked.disconnect()
+        pushButton.setText(buttonText)
+        pushButton.setStyleSheet(
+            """
+            QPushButton {
+                text-align: center;
+                background-color: rgb(126, 199, 255);
+                color: #ffffff;
+                height: 28px;
+                font: 14px;
+                border-radius: 5%;
+            }
+            
+            QPushButton:hover {
+                background-color: #409eff
+            }
+            """
+        )
+
+    def pushButton_change_to_remove(self, pushButton: QPushButton, buttonText: str = "移除该记录") -> None:
+        pushButton.clicked.disconnect()
+        pushButton.setText(buttonText)
+        pushButton.setStyleSheet(
+            """
+            QPushButton {
+                text-align: center;
+                background-color: rgb(126, 199, 255);
+                color: #ffffff;
+                height: 28px;
+                font: 14px;
+                border-radius: 5%;
+            }
+            
+            QPushButton:hover {
+                background-color: #409eff
+            }
+            """
+        )
+
+    def failed_download_options(self) -> QWidget:
+        restart_button = QPushButton("重新下载")
+        restart_button.setObjectName("restartButton")
+        restart_button.setStyleSheet(
+            """
+            QPushButton {
+                text-align: center;
+                background-color: rgb(126, 199, 255);
+                color: #ffffff;
+                height: 28px;
+                font: 14px;
+                border-radius: 5%;
+            }
+            
+            QPushButton:hover {
+                background-color: #409eff
+            }
+            """
+        )
+
+        remove_button = QPushButton("移除该记录")
+        remove_button.setObjectName("removeButton")
+        remove_button.setStyleSheet(
+            """
+            QPushButton {
+                text-align: center;
+                background-color: rgb(126, 199, 255);
+                color: #ffffff;
+                height: 28px;
+                font: 14px;
+                border-radius: 5%;
+            }
+            
+            QPushButton:hover {
+                background-color: #409eff
+            }
+            """
+        )
+
+        widget = QWidget()
+        hLayout = QHBoxLayout()
+        hLayout.addWidget(restart_button)
+        hLayout.addWidget(remove_button)
+        hLayout.setContentsMargins(0, 1, 0, 1)
+        hLayout.setSpacing(2)
+        widget.setLayout(hLayout)
+
+        return widget
+
+    def init_download_progressBar(self) -> QProgressBar:
+        progressBar = QProgressBar()
+        progressBar.setMaximum(100)
+        progressBar.setMinimum(0)
+        progressBar.setFormat("下载进度: %p%")
+        progressBar.setStyleSheet(
+            """
+            QProgressBar {
+                border: 2px solid #409eff;
+                border-radius: 5px;
+                color: rgb(0, 0, 0);
+                background-color: rgb(247, 247, 247);
+                text-align: center;
+            }
+            
+            QProgressBar::chunk {
+                background: QLinearGradient(x1:0,y1:0,x2:2,y2:0,stop:0 rgb(222, 222, 222),stop:1 #409eff);
+            }
+            """
+        )
+
+        return progressBar
+
+    def progressBar_change_to_pause(self, progressBar: QProgressBar) -> None:
+        progressBar.setStyleSheet(
+            progressBar.styleSheet().replace(
+                "background: QLinearGradient(x1:0,y1:0,x2:2,y2:0,stop:0 rgb(222, 222, 222),stop:1 #409eff);",
+                "background-color: rgb(222, 222, 222)"
+            )
+        )
+
+    def progressBar_change_to_failed(self, progressBar: QProgressBar) -> None:
+        progressBar.setStyleSheet(
+            progressBar.styleSheet().replace(
+                "background: QLinearGradient(x1:0,y1:0,x2:2,y2:0,stop:0 rgb(222, 222, 222),stop:1 #409eff);",
+                "background-color: red"
+            )
+        )
+
+    def progressBar_change_to_normal(self, progressBar: QProgressBar) -> None:
+        progressBar.setStyleSheet(
+            """
+            QProgressBar {
+                border: 2px solid #409eff;
+                border-radius: 5px;
+                color: rgb(0, 0, 0);
+                background-color: rgb(247, 247, 247);
+                text-align: center;
+            }
+
+            QProgressBar::chunk {
+                background: QLinearGradient(x1:0,y1:0,x2:2,y2:0,stop:0 rgb(222, 222, 222),stop:1 #409eff);
+            }
+            """
+        )

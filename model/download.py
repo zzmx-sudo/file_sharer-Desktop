@@ -1,12 +1,12 @@
 __all__ = ["DownloadFileDictModel"]
 
-from collections import OrderedDict
-
 from utils.logger import sysLogger
 from PyQt5.Qt import QTableWidgetItem, QColor, QTableWidget, QApplication
 
+from model.public_types import DownloadStatus
 
-class DownloadFileDictModel(OrderedDict):
+
+class DownloadFileDictModel(list):
     def __init__(self):
         super(DownloadFileDictModel, self).__init__()
 
@@ -20,6 +20,9 @@ class DownloadFileDictModel(OrderedDict):
                 f"未被存储的下载状态数据对象, 可能是重复下载的, url: {url}, 原始信息: {status_tuple}"
             )
             return
+
+        index = self.index(url)
+
 
         item: QTableWidgetItem = self[url]
         item.setText(msg)

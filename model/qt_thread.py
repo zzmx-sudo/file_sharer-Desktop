@@ -70,6 +70,7 @@ class DownloadHttpFileThread(QThread):
         self._file_list = fileList
         self._chunk_size = 1048576
         self.run_flag = True
+        self._pause_urls = []
 
     async def _download(
         self, session: aiohttp.ClientSession, url: str, file_path: str
@@ -141,6 +142,9 @@ class DownloadHttpFileThread(QThread):
     def append(self, fileList: list) -> None:
         self._file_list.extend(fileList)
 
+    def pause(self, url: str) -> None:
+        self._pause_urls.append(url)
+
 
 class DownloadFtpFileThread(QThread):
     signal = pyqtSignal(tuple)
@@ -149,6 +153,7 @@ class DownloadFtpFileThread(QThread):
         super(DownloadFtpFileThread, self).__init__()
         self._file_list = [fileList]
         self.run_flag = True
+        self._pause_urls = []
 
     def run(self) -> None:
         os.environ["NO_PROXY"] = "127.0.0.1"
@@ -274,3 +279,6 @@ class DownloadFtpFileThread(QThread):
 
     def append(self, fileList: list) -> None:
         self._file_list.append(fileList)
+
+    def pause(self, url: str) -> None:
+        self._pause_urls.append(url)
