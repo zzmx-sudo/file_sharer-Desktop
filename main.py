@@ -82,6 +82,7 @@ class MainWindow(QMainWindow):
 
     def _setup_attr(self) -> None:
         from model.download import DownloadFileDictModel
+
         self._prev_browse_url: str = ""
         self._browse_data: BrowseFileDictModel = BrowseFileDictModel.load({})
         self._download_data: DownloadFileDictModel = DownloadFileDictModel(self)
@@ -502,7 +503,9 @@ class MainWindow(QMainWindow):
         return initial_count
 
     def _update_download_status(self, status_tuple: [str, bool, str]):
-        self._download_data.update_download_status(status_tuple, self.ui.downloadListTable)
+        self._download_data.update_download_status(
+            status_tuple, self.ui.downloadListTable
+        )
 
     def _remove_download_list(self) -> None:
         self._download_data.remove_download_list(self.ui.downloadListTable)

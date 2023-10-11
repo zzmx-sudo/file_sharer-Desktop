@@ -14,7 +14,9 @@ class DownloadFileDictModel(list):
         self._download_progress_col = 1
         self._download_options_col = 2
 
-    def update_download_status(self, status_tuple: tuple, tableWidget: QTableWidget) -> None:
+    def update_download_status(
+        self, status_tuple: tuple, tableWidget: QTableWidget
+    ) -> None:
         if not isinstance(status_tuple, tuple) or len(status_tuple) != 3:
             sysLogger.error(f"获取的下载状态数据有误, 原始信息: {status_tuple}")
             return
@@ -27,24 +29,34 @@ class DownloadFileDictModel(list):
 
         index = self.index(url)
         if index >= tableWidget.rowCount():
-            sysLogger.error(
-                f"程序存在BUG, 存储的下载URL数大于表格行数"
-            )
+            sysLogger.error(f"程序存在BUG, 存储的下载URL数大于表格行数")
             return
-        progressBar: QProgressBar = tableWidget.cellWidget(index, self._download_progress_col)
-        options: QPushButton = tableWidget.cellWidget(index, self._download_options_col)
+        progressBar: QProgressBar = tableWidget.cellWidget(
+            index, self._download_progress_col
+        )
+        pushButton: QPushButton = tableWidget.cellWidget(
+            index, self._download_options_col
+        )
         if status is DownloadStatus.DOING:
             progressBar.setValue(msg)
         elif status is DownloadStatus.PAUSE:
-            pass
+            self._window._ui_function.progressBar_change_to_pause(progressBar)
+            print("暂停成功, ", url)
+            pushButton.clicked.disconnect()
+            widget = self._window._ui_function.pushButton_change_to_widget("继续下载")
+            # TODO: 给两个按钮绑定事件
+            tableWidget.setCellWidget(index, self._download_options_col, widget)
         elif status is DownloadStatus.SUCCESS:
             progressBar.setValue(100)
-            self._window._ui_function.pushButton_change_to_remove(options)
-            options.clicked.connect(lambda : self._remove_download_item(url, tableWidget))
+            self._window._ui_function.pushButton_change_to_remove(pushButton)
+            pushButton.clicked.connect(
+                lambda: self._remove_download_item(url, tableWidget)
+            )
         else:
-            options.clicked.disconnect()
-            options = self._window._ui_function.failed_download_options()
-            tableWidget.setCellWidget(index, self._download_options_col, options)
+            pushButton.clicked.disconnect()
+            widget = self._window._ui_function.pushButton_change_to_widget()
+            # TODO: 给两个按钮绑定事件
+            tableWidget.setCellWidget(index, self._download_options_col, widget)
 
     def remove_download_list(self, tableWidget: QTableWidget) -> None:
         row_index = 0

@@ -12,13 +12,13 @@ from PyQt5.Qt import (
     QWidget,
     QHBoxLayout,
     QApplication,
-    QProgressBar
+    QProgressBar,
 )
 from PyQt5.QtGui import QMouseEvent, QColor, QIcon
 import pyperclip as clip
 
 from main import MainWindow
-from . custom_grips import CustomGrip
+from .custom_grips import CustomGrip
 from model.file import FileModel, DirModel
 from model.public_types import ShareType as shareType
 from model.browse import BrowseFileDictModel
@@ -636,21 +636,32 @@ class UiFunction:
                 self._download_data.append(url)
             else:
                 row_index = index
-                self.ui.downloadListTable.item(row_index, self._ui_function._download_fileName_col).setText(fileName)
+                self.ui.downloadListTable.item(
+                    row_index, self._ui_function._download_fileName_col
+                ).setText(fileName)
 
             init_progressBar = self._ui_function.init_download_progressBar()
             init_pushButton = self._ui_function.init_download_pushButton(url, shareType)
-            self.ui.downloadListTable.setCellWidget(row_index, self._ui_function._download_progress_col, init_progressBar)
-            self.ui.downloadListTable.setCellWidget(row_index, self._ui_function._download_options_col, init_pushButton)
+            self.ui.downloadListTable.setCellWidget(
+                row_index, self._ui_function._download_progress_col, init_progressBar
+            )
+            self.ui.downloadListTable.setCellWidget(
+                row_index, self._ui_function._download_options_col, init_pushButton
+            )
 
             QApplication.processEvents()
 
     def init_download_pushButton(self, url: str, shareType: str) -> QPushButton:
-
         def _pause_download(url: str, shareType: str):
             if shareType == "http":
+                if self._main_window._download_http_thread is None:
+                    self.show_info_messageBox("暂停失败, 下载线程还未初始化, 请等待所有文件加入下载成功后再点击")
+                    return
                 self._main_window._download_http_thread.pause(url)
             else:
+                if self._main_window._download_ftp_thread is None:
+                    self.show_info_messageBox("暂停失败, 下载线程还未初始化, 请等待所有文件加入下载成功后再点击")
+                    return
                 self._main_window._download_ftp_thread.pause(url)
 
         pushButton = QPushButton("暂停下载")
@@ -670,11 +681,13 @@ class UiFunction:
             }
             """
         )
-        pushButton.clicked.connect(lambda : _pause_download(url, shareType))
+        pushButton.clicked.connect(lambda: _pause_download(url, shareType))
 
         return pushButton
 
-    def pushButton_change_to_restart(self, pushButton: QPushButton, buttonText: str = "继续下载") -> None:
+    def pushButton_change_to_remove(
+        self, pushButton: QPushButton, buttonText: str = "移除该记录"
+    ) -> None:
         pushButton.clicked.disconnect()
         pushButton.setText(buttonText)
         pushButton.setStyleSheet(
@@ -694,28 +707,8 @@ class UiFunction:
             """
         )
 
-    def pushButton_change_to_remove(self, pushButton: QPushButton, buttonText: str = "移除该记录") -> None:
-        pushButton.clicked.disconnect()
-        pushButton.setText(buttonText)
-        pushButton.setStyleSheet(
-            """
-            QPushButton {
-                text-align: center;
-                background-color: rgb(126, 199, 255);
-                color: #ffffff;
-                height: 28px;
-                font: 14px;
-                border-radius: 5%;
-            }
-            
-            QPushButton:hover {
-                background-color: #409eff
-            }
-            """
-        )
-
-    def failed_download_options(self) -> QWidget:
-        restart_button = QPushButton("重新下载")
+    def pushButton_change_to_widget(self, restart_str: str = "重新下载") -> QWidget:
+        restart_button = QPushButton(restart_str)
         restart_button.setObjectName("restartButton")
         restart_button.setStyleSheet(
             """
@@ -790,7 +783,7 @@ class UiFunction:
         progressBar.setStyleSheet(
             progressBar.styleSheet().replace(
                 "background: QLinearGradient(x1:0,y1:0,x2:2,y2:0,stop:0 rgb(222, 222, 222),stop:1 #409eff);",
-                "background-color: rgb(222, 222, 222)"
+                "background-color: rgb(222, 222, 222)",
             )
         )
 
@@ -798,23 +791,6 @@ class UiFunction:
         progressBar.setStyleSheet(
             progressBar.styleSheet().replace(
                 "background: QLinearGradient(x1:0,y1:0,x2:2,y2:0,stop:0 rgb(222, 222, 222),stop:1 #409eff);",
-                "background-color: red"
+                "background-color: red",
             )
-        )
-
-    def progressBar_change_to_normal(self, progressBar: QProgressBar) -> None:
-        progressBar.setStyleSheet(
-            """
-            QProgressBar {
-                border: 2px solid #409eff;
-                border-radius: 5px;
-                color: rgb(0, 0, 0);
-                background-color: rgb(247, 247, 247);
-                text-align: center;
-            }
-
-            QProgressBar::chunk {
-                background: QLinearGradient(x1:0,y1:0,x2:2,y2:0,stop:0 rgb(222, 222, 222),stop:1 #409eff);
-            }
-            """
         )

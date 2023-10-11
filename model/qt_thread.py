@@ -21,7 +21,7 @@ from ftplib import FTP
 
 from settings import settings
 from utils.logger import sysLogger
-from . public_types import DownloadStatus
+from .public_types import DownloadStatus
 
 
 class WatchResultThread(QThread):
@@ -93,15 +93,23 @@ class DownloadHttpFileThread(QThread):
         try:
             async with session.get(url, headers=headers) as response:
                 full_size = local_size + response.content_length
-                self.signal.emit((url, DownloadStatus.DOING, local_size * 100 / full_size))
+                self.signal.emit(
+                    (url, DownloadStatus.DOING, local_size * 100 / full_size)
+                )
                 if response.content_type != "application/octet-stream":
                     self.signal.emit((url, DownloadStatus.FAILED, "对方系统异常"))
                     return
                 with open(file_path, mode) as f:
                     async for chunk in response.content.iter_chunked(self._chunk_size):
+                        if url in self._pause_urls:
+                            self.signal.emit((url, DownloadStatus.PAUSE, "暂停成功"))
+                            self._pause_urls.remove(url)
+                            return
                         f.write(chunk)
                         local_size += chunk.__sizeof__()
-                        self.signal.emit((url, DownloadStatus.DOING, local_size * 100 / full_size))
+                        self.signal.emit(
+                            (url, DownloadStatus.DOING, local_size * 100 / full_size)
+                        )
             self.signal.emit((url, DownloadStatus.SUCCESS, "下载成功"))
         except aiohttp.ClientConnectorError:
             self.signal.emit((url, DownloadStatus.FAILED, "连接目标网络失败"))
@@ -152,6 +160,10 @@ class DownloadHttpFileThread(QThread):
         self._file_list.extend(fileList)
 
     def pause(self, url: str) -> None:
+        if url in self._file_list:
+            self._file_list.remove(url)
+            self.signal.emit((url, DownloadStatus.PAUSE, "暂停成功"))
+            return
         self._pause_urls.append(url)
 
 
@@ -180,12 +192,16 @@ class DownloadFtpFileThread(QThread):
                 if not ftp_status:
                     for fileDict in download_list:
                         downloadUrl = fileDict["downloadUrl"]
-                        self.signal.emit((downloadUrl, DownloadStatus.FAILED, ftp_client))
+                        self.signal.emit(
+                            (downloadUrl, DownloadStatus.FAILED, ftp_client)
+                        )
                     continue
 
                 for fileDict in download_list:
                     downloadUrl = fileDict["downloadUrl"]
-                    self._download_file(downloadUrl, ftp_param["cwd"], ftp_client, fileDict)
+                    self._download_file(
+                        downloadUrl, ftp_param["cwd"], ftp_client, fileDict
+                    )
                     QApplication.processEvents()
                 ftp_client.close()
             else:
@@ -216,7 +232,9 @@ class DownloadFtpFileThread(QThread):
             ftp.encoding = "utf-8"
             return (True, ftp)
 
-    def _download_file(self, url: str, cwd: str, ftp_client: FTP, fileDict: dict) -> str:
+    def _download_file(
+        self, url: str, cwd: str, ftp_client: FTP, fileDict: dict
+    ) -> None:
         relativePath = fileDict["relativePath"]
         fileName = fileDict["fileName"]
         cwd = self._calc_cwd(cwd, relativePath)
@@ -236,12 +254,18 @@ class DownloadFtpFileThread(QThread):
             try:
                 ftp_client.cwd(cwd)
             except:
-                return "文件所在目录已不存在"
+                self.signal.emit((url, DownloadStatus.FAILED, "文件所在目录已不存在"))
+                return
             full_size = ftp_client.size(fileName)
             self.signal.emit((url, DownloadStatus.DOING, local_size * 100 / full_size))
             ftp_client.sendcmd(f"REST {local_size}")
             with ftp_client.transfercmd(f"RETR {fileName}", None) as conn:
                 while True:
+                    if url in self._pause_urls:
+                        self.signal.emit((url, DownloadStatus.PAUSE, "暂停成功"))
+                        self._pause_urls.remove(url)
+                        ftp_client.voidresp()
+                        return
                     try:
                         data = conn.recv(self._chunk_size)
                     except Exception:
@@ -250,7 +274,9 @@ class DownloadFtpFileThread(QThread):
                         break
                     r_f.write(data)
                     local_size += len(data)
-                    self.signal.emit((url, DownloadStatus.DOING, local_size * 100 / full_size))
+                    self.signal.emit(
+                        (url, DownloadStatus.DOING, local_size * 100 / full_size)
+                    )
 
                 if isinstance(conn, ssl.SSLSocket):
                     conn.unwrap()
