@@ -619,10 +619,9 @@ class UiFunction:
         row_count = self._download_data.length
         shareType = fileList[0]["stareType"]
         for fileObj in table_fileList:
-            url = fileObj["downloadUrl"]
             fileName = fileObj["relativePath"]
             try:
-                index = self._download_data.index(url)
+                index = self._download_data.index(fileObj)
             except ValueError:
                 row_index = row_count
                 row_count += 1
@@ -640,7 +639,7 @@ class UiFunction:
                     self._ui_function._download_progress_col,
                     init_progressBar,
                 )
-                self._download_data.append(url)
+                self._download_data.append(fileObj)
             else:
                 row_index = index
                 self.ui.downloadListTable.item(
@@ -653,7 +652,7 @@ class UiFunction:
                 self._ui_function.progressBar_change_to_notmal(progressBar)
 
             init_pushButton = self._ui_function.init_download_pushButton(
-                url, shareType, fileObj
+                shareType, fileObj
             )
             self.ui.downloadListTable.setCellWidget(
                 row_index, self._ui_function._download_options_col, init_pushButton
@@ -661,20 +660,18 @@ class UiFunction:
 
             QApplication.processEvents()
 
-    def init_download_pushButton(
-        self, url: str, shareType: str, fileObj: dict
-    ) -> QPushButton:
-        def _pause_download(url: str, shareType: str, fileObj: dict):
+    def init_download_pushButton(self, shareType: str, fileObj: dict) -> QPushButton:
+        def _pause_download(shareType: str, fileObj: dict):
             if shareType == "http":
                 if self._main_window._download_http_thread is None:
                     self.show_info_messageBox("暂停失败, 下载线程还未初始化, 请等待所有文件加入下载成功后再点击")
                     return
-                self._main_window._download_http_thread.pause(url, fileObj)
+                self._main_window._download_http_thread.pause(fileObj)
             else:
                 if self._main_window._download_ftp_thread is None:
                     self.show_info_messageBox("暂停失败, 下载线程还未初始化, 请等待所有文件加入下载成功后再点击")
                     return
-                self._main_window._download_ftp_thread.pause(url, fileObj)
+                self._main_window._download_ftp_thread.pause(fileObj)
 
         pushButton = QPushButton("暂停下载")
         pushButton.setStyleSheet(
@@ -693,7 +690,7 @@ class UiFunction:
             }
             """
         )
-        pushButton.clicked.connect(lambda: _pause_download(url, shareType, fileObj))
+        pushButton.clicked.connect(lambda: _pause_download(shareType, fileObj))
 
         return pushButton
 
@@ -801,10 +798,12 @@ class UiFunction:
 
     def progressBar_change_to_failed(self, progressBar: QProgressBar) -> None:
         progressBar.setStyleSheet(
-            progressBar.styleSheet().replace(
+            progressBar.styleSheet()
+            .replace(
                 "background: QLinearGradient(x1:0,y1:0,x2:2,y2:0,stop:0 rgb(222, 222, 222),stop:1 #409eff);",
                 "background-color: red",
             )
+            .replace("border: 2px solid #409eff", "border: 2px solid red")
         )
 
     def progressBar_change_to_notmal(self, progressBar: QProgressBar) -> None:

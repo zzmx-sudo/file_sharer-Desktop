@@ -20,14 +20,14 @@ class DownloadFileDictModel(list):
         if not isinstance(status_tuple, tuple) or len(status_tuple) != 3:
             sysLogger.error(f"获取的下载状态数据有误, 原始信息: {status_tuple}")
             return
-        url, status, msg = status_tuple
-        if url not in self:
+        fileObj, status, msg = status_tuple
+        if fileObj not in self:
             sysLogger.warning(
-                f"未被存储的下载状态数据对象, 可能是重复下载的, url: {url}, 原始信息: {status_tuple}"
+                f"未被存储的下载状态数据对象, 可能是重复下载的, 文件路径: {fileObj['relativePath']}"
             )
             return
 
-        index = self.index(url)
+        index = self.index(fileObj)
         if index >= tableWidget.rowCount():
             sysLogger.error(f"程序存在BUG, 存储的下载URL数大于表格行数")
             return
@@ -41,18 +41,18 @@ class DownloadFileDictModel(list):
             progressBar.setValue(msg)
         elif status is DownloadStatus.PAUSE:
             self._window._ui_function.progressBar_change_to_pause(progressBar)
-            print("暂停成功, ", url)
             pushButton.clicked.disconnect()
-            self._setup_options_widget(index, url, "继续下载", msg, tableWidget)
+            self._setup_options_widget(index, fileObj, "继续下载", tableWidget)
         elif status is DownloadStatus.SUCCESS:
             progressBar.setValue(100)
             self._window._ui_function.pushButton_change_to_remove(pushButton)
             pushButton.clicked.connect(
-                lambda: self._remove_download_item(url, tableWidget)
+                lambda: self._remove_download_item(fileObj, tableWidget)
             )
         else:
+            self._window._ui_function.progressBar_change_to_failed(progressBar)
             pushButton.clicked.disconnect()
-            self._setup_options_widget(index, url, "重新下载", msg, tableWidget)
+            self._setup_options_widget(index, fileObj, "重新下载", tableWidget)
 
     def remove_download_list(self, tableWidget: QTableWidget) -> None:
         row_index = 0
@@ -70,9 +70,9 @@ class DownloadFileDictModel(list):
         self.clear()
         self.extend(ignore_urls)
 
-    def _remove_download_item(self, url: str, tableWidget: QTableWidget) -> None:
+    def _remove_download_item(self, fileObj: dict, tableWidget: QTableWidget) -> None:
         try:
-            index = self.index(url)
+            index = self.index(fileObj)
         except ValueError:
             return
 
@@ -85,9 +85,8 @@ class DownloadFileDictModel(list):
     def _setup_options_widget(
         self,
         index: int,
-        url: str,
-        reset_str: str,
         fileObj: dict,
+        reset_str: str,
         tableWidget: QTableWidget,
     ) -> None:
         widget = self._window._ui_function.pushButton_change_to_widget(reset_str)
@@ -99,7 +98,7 @@ class DownloadFileDictModel(list):
 
         remove_button = widget.findChild(QPushButton, "removeButton")
         remove_button.clicked.connect(
-            lambda: self._remove_download_item(url, tableWidget)
+            lambda: self._remove_download_item(fileObj, tableWidget)
         )
 
         self._window.ui.downloadListTable.setCellWidget(
