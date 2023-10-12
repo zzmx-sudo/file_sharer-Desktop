@@ -267,6 +267,7 @@ class MainWindow(QMainWindow):
         self.ui.createShareButton.setEnabled(True)
 
     def _load_browse_url(self) -> None:
+        self._reload_browse_buttons()
         browse_url: str = self.ui.shareLinkEdit.text()
         if not browse_url or not browse_url.startswith("http://"):
             errmsg = "不支持的分享链接!\n请确认分享链接无误后再点击加载哦~"
@@ -290,9 +291,12 @@ class MainWindow(QMainWindow):
         self._browse_thread.signal.connect(self._show_file_list)
         self._browse_thread.start()
 
+    def _reload_browse_buttons(self):
+        self.ui.backupButton.setEnabled(False)
+        self.ui.downloadDirButton.setEnabled(False)
+
     def _load_browse_url_reload(self) -> None:
         self._browse_data.reload()
-        self.ui.backupButton.setEnabled(False)
 
     def _show_file_list(self, browse_response: dict) -> None:
         if (
