@@ -43,9 +43,7 @@ class DownloadFileDictModel(list):
             self._window._ui_function.progressBar_change_to_pause(progressBar)
             print("暂停成功, ", url)
             pushButton.clicked.disconnect()
-            widget = self._window._ui_function.pushButton_change_to_widget("继续下载")
-            # TODO: 给两个按钮绑定事件
-            tableWidget.setCellWidget(index, self._download_options_col, widget)
+            self._setup_options_widget(index, url, "继续下载", msg, tableWidget)
         elif status is DownloadStatus.SUCCESS:
             progressBar.setValue(100)
             self._window._ui_function.pushButton_change_to_remove(pushButton)
@@ -54,9 +52,7 @@ class DownloadFileDictModel(list):
             )
         else:
             pushButton.clicked.disconnect()
-            widget = self._window._ui_function.pushButton_change_to_widget()
-            # TODO: 给两个按钮绑定事件
-            tableWidget.setCellWidget(index, self._download_options_col, widget)
+            self._setup_options_widget(index, url, "重新下载", msg, tableWidget)
 
     def remove_download_list(self, tableWidget: QTableWidget) -> None:
         row_index = 0
@@ -85,6 +81,30 @@ class DownloadFileDictModel(list):
         tableWidget.removeRow(index)
         self.pop(index)
         self._window.ui.removeDownloadsButton.setEnabled(not self.is_empty())
+
+    def _setup_options_widget(
+        self,
+        index: int,
+        url: str,
+        reset_str: str,
+        fileObj: dict,
+        tableWidget: QTableWidget,
+    ) -> None:
+        widget = self._window._ui_function.pushButton_change_to_widget(reset_str)
+
+        reset_button = widget.findChild(QPushButton, "restartButton")
+        reset_button.clicked.connect(
+            lambda: self._window._append_download_fileList([fileObj])
+        )
+
+        remove_button = widget.findChild(QPushButton, "removeButton")
+        remove_button.clicked.connect(
+            lambda: self._remove_download_item(url, tableWidget)
+        )
+
+        self._window.ui.downloadListTable.setCellWidget(
+            index, self._download_options_col, widget
+        )
 
     def is_empty(self) -> bool:
         return not self

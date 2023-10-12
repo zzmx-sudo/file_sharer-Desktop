@@ -75,10 +75,10 @@ class DownloadHttpFileThread(QThread):
         self.run_flag = True
         self._pause_urls = []
 
-    async def _download(
-        self, session: aiohttp.ClientSession, url: str, file_path: str
-    ) -> None:
-        file_path = os.path.abspath(file_path)
+    async def _download(self, session: aiohttp.ClientSession, fileObj: dict) -> None:
+        url = fileObj["downloadUrl"]
+        relativePath = fileObj["relativePath"]
+        file_path = os.path.abspath(os.path.join(settings.DOWNLOAD_DIR, relativePath))
         if os.path.exists(file_path):
             local_size = os.path.getsize(file_path)
             headers = {"Range": f"bytes={os.path.getsize(file_path)}-"}
@@ -97,12 +97,12 @@ class DownloadHttpFileThread(QThread):
                     (url, DownloadStatus.DOING, local_size * 100 / full_size)
                 )
                 if response.content_type != "application/octet-stream":
-                    self.signal.emit((url, DownloadStatus.FAILED, "对方系统异常"))
+                    sysLogger.warning(f"下载文件失败, 失败原因: 对方系统异常, 文件路径: {relativePath}")
+                    self.signal.emit((url, DownloadStatus.FAILED, fileObj))
                     return
                 with open(file_path, mode) as f:
                     async for chunk in response.content.iter_chunked(self._chunk_size):
                         if url in self._pause_urls:
-                            self.signal.emit((url, DownloadStatus.PAUSE, "暂停成功"))
                             self._pause_urls.remove(url)
                             return
                         f.write(chunk)
@@ -112,25 +112,20 @@ class DownloadHttpFileThread(QThread):
                         )
             self.signal.emit((url, DownloadStatus.SUCCESS, "下载成功"))
         except aiohttp.ClientConnectorError:
-            self.signal.emit((url, DownloadStatus.FAILED, "连接目标网络失败"))
+            sysLogger.warning(f"下载文件失败, 失败原因: 连接目标网络失败, 文件路径: {relativePath}")
+            self.signal.emit((url, DownloadStatus.FAILED, fileObj))
         except aiohttp.ClientPayloadError:
-            self.signal.emit((url, DownloadStatus.FAILED, "下载失败,与目标失去连接或该文件对方无权限"))
+            sysLogger.warning(f"下载文件失败, 失败原因: 与目标失去连接或该文件对方无权限, 文件路径: {relativePath}")
+            self.signal.emit((url, DownloadStatus.FAILED, fileObj))
         except Exception:
-            self.signal.emit((url, DownloadStatus.FAILED, "未知错误"))
-            sysLogger.error(f"下载发生未知错误, 错误原始明细如下:\n{format_exc()}")
+            sysLogger.error(
+                f"下载文件失败, 文件路径: {relativePath}, 失败原因: 未知错误, 错误原始明细如下:\n{format_exc()}"
+            )
+            self.signal.emit((url, DownloadStatus.FAILED, fileObj))
 
     async def _main(self, fileList: list) -> None:
         async with aiohttp.ClientSession() as session:
-            tasks = [
-                asyncio.create_task(
-                    self._download(
-                        session,
-                        x["downloadUrl"],
-                        os.path.join(settings.DOWNLOAD_DIR, x["relativePath"]),
-                    )
-                )
-                for x in fileList
-            ]
+            tasks = [asyncio.create_task(self._download(session, x)) for x in fileList]
             await asyncio.wait(tasks)
 
     def run(self) -> None:
@@ -150,21 +145,25 @@ class DownloadHttpFileThread(QThread):
     def _append_up_to_five_files(self) -> list:
         downloading_list = []
         while self._file_list:
-            downloading_list.append(self._file_list.pop(0))
-            if len(downloading_list) >= 5:
-                break
+            fileObj = self._file_list.pop(0)
+            url = fileObj["downloadUrl"]
+            if url not in self._pause_urls:
+                downloading_list.append(fileObj)
+                if len(downloading_list) >= 5:
+                    break
+            else:
+                self._pause_urls.remove(url)
 
         return downloading_list
 
     def append(self, fileList: list) -> None:
         self._file_list.extend(fileList)
 
-    def pause(self, url: str) -> None:
-        if url in self._file_list:
-            self._file_list.remove(url)
-            self.signal.emit((url, DownloadStatus.PAUSE, "暂停成功"))
+    def pause(self, url: str, fileObj: dict) -> None:
+        if url in self._pause_urls:
             return
         self._pause_urls.append(url)
+        self.signal.emit((url, DownloadStatus.PAUSE, fileObj))
 
 
 class DownloadFtpFileThread(QThread):
@@ -190,11 +189,12 @@ class DownloadFtpFileThread(QThread):
                     ftp_param = self._get_ftp_param(download_list.pop(0))
                 ftp_status, ftp_client = self._generate_ftp_client(ftp_param)
                 if not ftp_status:
+                    sysLogger.warning(
+                        f"文件/文件夹下载失败, 失败原因: {ftp_client}, 文件路径: {download_list[0].get('relativePath', '未知路径')}"
+                    )
                     for fileDict in download_list:
                         downloadUrl = fileDict["downloadUrl"]
-                        self.signal.emit(
-                            (downloadUrl, DownloadStatus.FAILED, ftp_client)
-                        )
+                        self.signal.emit((downloadUrl, DownloadStatus.FAILED, fileDict))
                     continue
 
                 for fileDict in download_list:
@@ -254,7 +254,8 @@ class DownloadFtpFileThread(QThread):
             try:
                 ftp_client.cwd(cwd)
             except:
-                self.signal.emit((url, DownloadStatus.FAILED, "文件所在目录已不存在"))
+                sysLogger.warning(f"文件下载失败, 失败原因: 文件所在目录已不存在, 文件路径: {relativePath}")
+                self.signal.emit((url, DownloadStatus.FAILED, fileDict))
                 return
             full_size = ftp_client.size(fileName)
             self.signal.emit((url, DownloadStatus.DOING, local_size * 100 / full_size))
@@ -262,14 +263,15 @@ class DownloadFtpFileThread(QThread):
             with ftp_client.transfercmd(f"RETR {fileName}", None) as conn:
                 while True:
                     if url in self._pause_urls:
-                        self.signal.emit((url, DownloadStatus.PAUSE, "暂停成功"))
                         self._pause_urls.remove(url)
-                        ftp_client.voidresp()
                         return
                     try:
                         data = conn.recv(self._chunk_size)
                     except Exception:
-                        self.signal.emit((url, DownloadStatus.FAILED, "文件已找到,但下载中出现异常"))
+                        sysLogger.warning(
+                            f"文件下载失败, 失败原因: 文件已找到,但下载中出现异常, 文件路径: {relativePath}"
+                        )
+                        self.signal.emit((url, DownloadStatus.FAILED, fileDict))
                     if not data:
                         break
                     r_f.write(data)
@@ -324,5 +326,8 @@ class DownloadFtpFileThread(QThread):
     def append(self, fileList: list) -> None:
         self._file_list.append(fileList)
 
-    def pause(self, url: str) -> None:
+    def pause(self, url: str, fileObj: dict) -> None:
+        if url in self._pause_urls:
+            return
         self._pause_urls.append(url)
+        self.signal.emit((url, DownloadStatus.PAUSE, fileObj))

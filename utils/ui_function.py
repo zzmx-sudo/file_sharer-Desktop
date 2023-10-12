@@ -633,6 +633,13 @@ class UiFunction:
                 self.ui.downloadListTable.setItem(
                     row_index, self._ui_function._download_fileName_col, fileName_item
                 )
+
+                init_progressBar = self._ui_function.init_download_progressBar()
+                self.ui.downloadListTable.setCellWidget(
+                    row_index,
+                    self._ui_function._download_progress_col,
+                    init_progressBar,
+                )
                 self._download_data.append(url)
             else:
                 row_index = index
@@ -640,10 +647,13 @@ class UiFunction:
                     row_index, self._ui_function._download_fileName_col
                 ).setText(fileName)
 
-            init_progressBar = self._ui_function.init_download_progressBar()
-            init_pushButton = self._ui_function.init_download_pushButton(url, shareType)
-            self.ui.downloadListTable.setCellWidget(
-                row_index, self._ui_function._download_progress_col, init_progressBar
+                progressBar = self.ui.downloadListTable.cellWidget(
+                    row_index, self._ui_function._download_progress_col
+                )
+                self._ui_function.progressBar_change_to_notmal(progressBar)
+
+            init_pushButton = self._ui_function.init_download_pushButton(
+                url, shareType, fileObj
             )
             self.ui.downloadListTable.setCellWidget(
                 row_index, self._ui_function._download_options_col, init_pushButton
@@ -651,18 +661,20 @@ class UiFunction:
 
             QApplication.processEvents()
 
-    def init_download_pushButton(self, url: str, shareType: str) -> QPushButton:
-        def _pause_download(url: str, shareType: str):
+    def init_download_pushButton(
+        self, url: str, shareType: str, fileObj: dict
+    ) -> QPushButton:
+        def _pause_download(url: str, shareType: str, fileObj: dict):
             if shareType == "http":
                 if self._main_window._download_http_thread is None:
                     self.show_info_messageBox("暂停失败, 下载线程还未初始化, 请等待所有文件加入下载成功后再点击")
                     return
-                self._main_window._download_http_thread.pause(url)
+                self._main_window._download_http_thread.pause(url, fileObj)
             else:
                 if self._main_window._download_ftp_thread is None:
                     self.show_info_messageBox("暂停失败, 下载线程还未初始化, 请等待所有文件加入下载成功后再点击")
                     return
-                self._main_window._download_ftp_thread.pause(url)
+                self._main_window._download_ftp_thread.pause(url, fileObj)
 
         pushButton = QPushButton("暂停下载")
         pushButton.setStyleSheet(
@@ -681,7 +693,7 @@ class UiFunction:
             }
             """
         )
-        pushButton.clicked.connect(lambda: _pause_download(url, shareType))
+        pushButton.clicked.connect(lambda: _pause_download(url, shareType, fileObj))
 
         return pushButton
 
@@ -694,15 +706,15 @@ class UiFunction:
             """
             QPushButton {
                 text-align: center;
-                background-color: rgb(126, 199, 255);
-                color: #ffffff;
+                background-color: rg(236, 236, 236);
+                border: 2px solid rgb(126, 199, 255);
                 height: 28px;
                 font: 14px;
                 border-radius: 5%;
             }
             
             QPushButton:hover {
-                background-color: #409eff
+                border: 2px solid #409eff;
             }
             """
         )
@@ -733,15 +745,15 @@ class UiFunction:
             """
             QPushButton {
                 text-align: center;
-                background-color: rgb(126, 199, 255);
-                color: #ffffff;
+                background-color: rg(236, 236, 236);
+                border: 2px solid rgb(126, 199, 255);
                 height: 28px;
                 font: 14px;
                 border-radius: 5%;
             }
             
             QPushButton:hover {
-                background-color: #409eff
+                border: 2px solid #409eff;
             }
             """
         )
@@ -793,4 +805,21 @@ class UiFunction:
                 "background: QLinearGradient(x1:0,y1:0,x2:2,y2:0,stop:0 rgb(222, 222, 222),stop:1 #409eff);",
                 "background-color: red",
             )
+        )
+
+    def progressBar_change_to_notmal(self, progressBar: QProgressBar) -> None:
+        progressBar.setStyleSheet(
+            """
+            QProgressBar {
+                border: 2px solid #409eff;
+                border-radius: 5px;
+                color: rgb(0, 0, 0);
+                background-color: rgb(247, 247, 247);
+                text-align: center;
+            }
+
+            QProgressBar::chunk {
+                background: QLinearGradient(x1:0,y1:0,x2:2,y2:0,stop:0 rgb(222, 222, 222),stop:1 #409eff);
+            }
+            """
         )
