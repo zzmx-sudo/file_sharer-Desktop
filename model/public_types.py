@@ -11,3 +11,11 @@ DOWNLOAD_URI: str = "/download"
 class ShareType(str, Enum):
     http = "http"
     ftp = "ftp"
+
+
+# download status
+class DownloadStatus(int, Enum):
+    DOING = 0
+    PAUSE = 1
+    SUCCESS = 2
+    FAILED = 3

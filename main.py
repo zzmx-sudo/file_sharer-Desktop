@@ -17,7 +17,6 @@ from model.file import FileModel, DirModel
 from model.public_types import ShareType as shareType
 from model.qt_thread import *
 from model.browse import BrowseFileDictModel
-from model.download import DownloadFileDictModel
 from utils.public_func import generate_uuid
 
 
@@ -82,9 +81,11 @@ class MainWindow(QMainWindow):
                 break
 
     def _setup_attr(self) -> None:
+        from model.download import DownloadFileDictModel
+
         self._prev_browse_url: str = ""
         self._browse_data: BrowseFileDictModel = BrowseFileDictModel.load({})
-        self._download_data: DownloadFileDictModel = DownloadFileDictModel()
+        self._download_data: DownloadFileDictModel = DownloadFileDictModel(self)
 
         self._browse_thread: Union[None, LoadBrowseUrlThread] = None
         self._download_http_thread: Union[None, DownloadHttpFileThread] = None
@@ -266,6 +267,7 @@ class MainWindow(QMainWindow):
         self.ui.createShareButton.setEnabled(True)
 
     def _load_browse_url(self) -> None:
+        self._reload_browse_buttons()
         browse_url: str = self.ui.shareLinkEdit.text()
         if not browse_url or not browse_url.startswith("http://"):
             errmsg = "不支持的分享链接!\n请确认分享链接无误后再点击加载哦~"
@@ -289,9 +291,12 @@ class MainWindow(QMainWindow):
         self._browse_thread.signal.connect(self._show_file_list)
         self._browse_thread.start()
 
+    def _reload_browse_buttons(self):
+        self.ui.backupButton.setEnabled(False)
+        self.ui.downloadDirButton.setEnabled(False)
+
     def _load_browse_url_reload(self) -> None:
         self._browse_data.reload()
-        self.ui.backupButton.setEnabled(False)
 
     def _show_file_list(self, browse_response: dict) -> None:
         if (
@@ -502,7 +507,9 @@ class MainWindow(QMainWindow):
         return initial_count
 
     def _update_download_status(self, status_tuple: [str, bool, str]):
-        self._download_data.update_download_status(status_tuple)
+        self._download_data.update_download_status(
+            status_tuple, self.ui.downloadListTable
+        )
 
     def _remove_download_list(self) -> None:
         self._download_data.remove_download_list(self.ui.downloadListTable)

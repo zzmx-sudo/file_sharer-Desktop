@@ -8,7 +8,7 @@ Usage:
 from setuptools import setup
 
 PROJECT_PATH = "/Users/mr.cheng/GitSourceCodes/file_sharer-Desktop/"
-PRODUCT_VERSION = "0.0.1"
+PRODUCT_VERSION = "0.1.0"
 
 APP = [PROJECT_PATH + "main.py"]
 DATA_FILES = [

@@ -8,7 +8,7 @@ set TOOLKITS_DIR=%cd%\toolkits
 ::项目名称(同spec中项目名)
 set PROJECT_NAME=file-sharer
 ::项目版本
-set PRODUCT_VERSION=v0.0.1
+set PRODUCT_VERSION=v0.1.0
 
 cd ..
 ::项目路径

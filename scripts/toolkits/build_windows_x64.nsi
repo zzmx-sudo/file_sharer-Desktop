@@ -1,6 +1,6 @@
 ; 安装程序初始定义常量
 !define PRODUCT_NAME "文件共享助手"
-!define PRODUCT_VERSION "v0.0.1"
+!define PRODUCT_VERSION "v0.1.0"
 !define PRODUCT_PUBLISHER "大宝天天见丶"
 !define PRODUCT_WEB_SITE "https://github.com/zzmx-sudo/file_sharer-Desktop"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\file-sharer.exe"
