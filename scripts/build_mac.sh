@@ -2,7 +2,7 @@ cd ..
 PROJECT_PATH=`pwd`
 PYTHON_ENV_DIR="/Users/mr.cheng/PY_ENVS/file_sharer"
 PROJECT_NAME="file-sharer"
-PRODUCT_VERSION="0.0.1"
+PRODUCT_VERSION="0.1.0"
 # 创建build文件夹
 if [ -d "${PROJECT_PATH}/build" ]; then
   echo "build文件夹已存在, 跳过创建"
