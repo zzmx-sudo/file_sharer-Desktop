@@ -20,7 +20,10 @@ jobs:
       - name: Install Dependencies with pip
         run: pip install -r requirements.txt
 
-      - name: Install 7z & NSIS
+      - name: Compress windows Binary
+        run: |
+          cd .\scripts
+          build_windows_x64.bat
 
   MacOs:
     name: Macos
@@ -38,4 +41,7 @@ jobs:
       - name: Install Dependencies with pip
         run: pip install -r requirements.txt
 
-      - name: Install create-dmg
+      - name: Compress Macos Binary
+        run: |
+          cd ./scripts
+          sh build_mac.sh
