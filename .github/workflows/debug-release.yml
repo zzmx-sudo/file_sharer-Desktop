@@ -23,17 +23,18 @@ jobs:
       - name: Compress windows Binary
         run: |
           cd .\scripts
-          build_windows_x64.bat
+          python modify_script_file.py
+          .\build_windows_x64.bat
 
   MacOs:
     name: Macos
     runs-on: macos-latest
     steps:
       - name: Clone code
-        uses: actions/ckecout@v3
+        uses: actions/ckeckout@v3
 
       - name: Install Python
-        uses: actioons/setip-python@v4
+        uses: actions/setip-python@v4
         with:
           python-version: '3.8.*'
           cache: 'pip'
@@ -44,4 +45,5 @@ jobs:
       - name: Compress Macos Binary
         run: |
           cd ./scripts
+          python modify_script_file.py
           sh build_mac.sh
