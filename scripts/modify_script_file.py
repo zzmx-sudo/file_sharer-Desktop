@@ -2,7 +2,6 @@ import os
 import sys
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-print("BASE_DIR--->", BASE_DIR)
 sys.path.insert(0, BASE_DIR)
 
 from utils import public_func
@@ -12,7 +11,6 @@ def modify_spec_file() -> None:
     print("Modify main.spec...")
     project_path = BASE_DIR
     project_path = "\\\\".join(project_path.split("\\")) + "\\\\"
-    print("project_path--->", project_path)
     file_path = os.path.join(BASE_DIR, "main.spec")
     new_str = ""
     with open(file_path, encoding="utf-8") as f:

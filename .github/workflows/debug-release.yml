@@ -23,7 +23,6 @@ jobs:
       - name: Compress windows Binary
         run: |
           cd .\scripts
-          echo %cd% && dir
           python modify_script_file.py
           .\build_windows_x64.bat
 
@@ -31,7 +30,6 @@ jobs:
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "v0.1.0"
           prerelease: false
           title: "Release v0.1.0"
           files: |
@@ -43,7 +41,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Clone code
-        uses: actions/ckeckout@v3
+        uses: actions/checkout@v3
 
       - name: Install Python
         uses: actions/setup-python@v4
@@ -64,7 +62,6 @@ jobs:
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "v0.1.0"
           prerelease: false
           title: "Release v0.1.0"
           files: |

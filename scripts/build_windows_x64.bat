@@ -40,4 +40,3 @@ makensis %TOOLKITS_DIR%\build_windows_x64.nsi
 
 ::打包结束
 echo ******************* Build complete! *******************
-pause
