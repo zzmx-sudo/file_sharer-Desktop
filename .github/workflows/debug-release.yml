@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - Rel_*
+      - develop
 
 jobs:
   Windows:
@@ -23,8 +23,20 @@ jobs:
       - name: Compress windows Binary
         run: |
           cd .\scripts
+          echo %cd% && dir
           python modify_script_file.py
           .\build_windows_x64.bat
+
+      - name: Publish Release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "v0.1.0"
+          prerelease: false
+          title: "Release v0.1.0"
+          files: |
+            build\installer\*.7z
+            build\installer\*.exe
 
   MacOs:
     name: Macos
@@ -34,7 +46,7 @@ jobs:
         uses: actions/ckeckout@v3
 
       - name: Install Python
-        uses: actions/setip-python@v4
+        uses: actions/setup-python@v4
         with:
           python-version: '3.8.*'
           cache: 'pip'
@@ -47,3 +59,13 @@ jobs:
           cd ./scripts
           python modify_script_file.py
           sh build_mac.sh
+
+      - name: Publish Release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "v0.1.0"
+          prerelease: false
+          title: "Release v0.1.0"
+          files: |
+            build\installer\*.dmg
