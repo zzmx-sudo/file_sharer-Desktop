@@ -15,7 +15,7 @@ cd ..
 set PROJECT_DIR=%cd%
 
 ::进入虚拟环境打包源码
-if %PYTHON_ENV_DIR% == "" (
+if not exist %PYTHON_ENV_DIR% (
     echo Using the global python env
 ) else (
     call %PYTHON_ENV_DIR%\Scripts\activate.bat
@@ -26,7 +26,7 @@ echo [] > %PROJECT_DIR%\build\%PROJECT_NAME%\file_sharing_backups.json
 
 @rem 使用7z打包成绿色版
 echo ******************* Packaging into a green version using 7z *******************
-if exist %PROJECT_DIR\build\installer (
+if exist %PROJECT_DIR%\build\installer (
     echo installer dir is exists
 ) else (
     md %PROJECT_DIR%\build\installer
