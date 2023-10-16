@@ -8,6 +8,7 @@ extend-exclude = """
 respect-gitignore = true
 
 [file-sharer]
+version = "0.1.1"
 saveSystemLog = true
 saveShareLog = true
 logsPath = "/users/mr-cheng/GitSourceCodes/file_sharer-LAN/logs"

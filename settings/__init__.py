@@ -8,7 +8,7 @@ import toml
 
 from exceptions import OperationException
 from settings import _base
-from utils.public_func import generate_http_port
+from utils.public_func import generate_http_port, get_config_from_toml
 
 empty = object()
 
@@ -86,13 +86,10 @@ class FuseSettings:
             raise OperationException(f"配置的日志文件夹路径不存在, LOGS_PATH: {logs_path}")
 
     def _load(self) -> None:
-        settings_file = os.path.join(self.BASE_DIR, "pyproject.toml")
-        if not os.path.exists(settings_file):
+        tool_config = get_config_from_toml()
+        if not tool_config:
             return
-        try:
-            tool_config = toml.load(settings_file)
-        except toml.TomlDecodeError:
-            return
+
         settings_config = tool_config.get("file-sharer")
         if not settings_config or not isinstance(settings_config, dict):
             return

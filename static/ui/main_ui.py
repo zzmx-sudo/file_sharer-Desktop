@@ -11,6 +11,7 @@
 from PyQt5 import QtGui, QtWidgets
 
 from . main_qrc import *
+from utils.public_func import generate_product_version
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -1279,4 +1280,4 @@ class Ui_MainWindow(object):
         item = self.downloadListTable.horizontalHeaderItem(2)
         item.setText(_translate("MainWindow", "操作"))
         self.authorLabel.setText(_translate("MainWindow", "By: 大宝天天见丶"))
-        self.versionLabel.setText(_translate("MainWindow", "v0.0.1"))
+        self.versionLabel.setText(_translate("MainWindow", f"v{generate_product_version()}"))

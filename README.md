@@ -24,7 +24,7 @@
 - PyQt5
 - fastapi
 - asyncio
-- pyftplib
+- pyftpdlib
 
 已支持的平台:
 

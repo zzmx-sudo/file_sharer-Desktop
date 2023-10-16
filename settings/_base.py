@@ -1,8 +1,7 @@
 import os
-import platform
 import sys
 
-from utils.public_func import get_local_ip, generate_project_path
+from utils.public_func import get_system, get_local_ip, generate_project_path
 
 """
 请移步 `development.py` 或 `production.py` 修改配置, 配置名称字母均大写才有效
@@ -13,7 +12,7 @@ BASE_DIR: str = generate_project_path()
 sys.path.insert(0, BASE_DIR)
 
 # 当前操作系统
-SYSTEM: str = platform.system()
+SYSTEM: str = get_system()
 
 # 是否为windows
 IS_WINDOWS: bool = SYSTEM == "Windows"

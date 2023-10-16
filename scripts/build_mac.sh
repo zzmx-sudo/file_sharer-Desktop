@@ -2,7 +2,7 @@ cd ..
 PROJECT_PATH=`pwd`
 PYTHON_ENV_DIR="/Users/mr.cheng/PY_ENVS/file_sharer"
 PROJECT_NAME="file-sharer"
-PRODUCT_VERSION="0.1.0"
+PRODUCT_VERSION="v0.1.0"
 # 创建build文件夹
 if [ -d "${PROJECT_PATH}/build" ]; then
   echo "build文件夹已存在, 跳过创建"
@@ -14,7 +14,7 @@ fi
 sed -i '' "s~PROJECT_PATH = .*~PROJECT_PATH = \"$PROJECT_PATH/\"~g" ${PROJECT_PATH}/main_setup.py
 sed -i '' "s~PRODUCT_VERSION = .*~PRODUCT_VERSION = \"$PRODUCT_VERSION\"~g" ${PROJECT_PATH}/main_setup.py
 # 进入虚拟环境
-if [ $PYTHON_ENV_DIR != "" ]; then
+if [ -d $PYTHON_ENV_DIR ]; then
   source $PYTHON_ENV_DIR/bin/activate
 else
   echo Using the global python env

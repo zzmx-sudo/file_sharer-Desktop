@@ -1,4 +1,5 @@
 __all__ = [
+    "get_system",
     "generate_uuid",
     "generate_timestamp",
     "get_local_ip",
@@ -6,6 +7,8 @@ __all__ = [
     "exists_port",
     "generate_http_port",
     "generate_project_path",
+    "get_config_from_toml",
+    "generate_product_version"
 ]
 
 import time
@@ -13,8 +16,14 @@ import socket
 import random
 import os
 import sys
+import platform
 
 import uuid
+import toml
+
+
+def get_system() -> str:
+    return platform.system()
 
 
 def generate_uuid() -> str:
@@ -71,3 +80,24 @@ def generate_project_path() -> str:
         return os.path.dirname(sys.executable)
     else:
         return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def get_config_from_toml() -> dict:
+    project_path = generate_project_path()
+    tool_config = {}
+    settings_file = os.path.join(project_path, "pyproject.toml")
+    if not os.path.exists(settings_file):
+        return tool_config
+
+    try:
+        tool_config = toml.load(settings_file)
+    except Exception:
+        pass
+
+    return tool_config
+
+
+def generate_product_version() -> str:
+    tool_config = get_config_from_toml()
+
+    return tool_config.get("file-sharer", {}).get("version", "0.1.0")
