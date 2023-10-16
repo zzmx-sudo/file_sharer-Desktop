@@ -8,7 +8,7 @@ __all__ = [
     "generate_http_port",
     "generate_project_path",
     "get_config_from_toml",
-    "generate_product_version"
+    "generate_product_version",
 ]
 
 import time

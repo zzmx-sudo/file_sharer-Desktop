@@ -16,7 +16,7 @@ def modify_spec_file() -> None:
     with open(file_path, encoding="utf-8") as f:
         for line in f.readlines():
             if line.startswith("PROJECT_PATH"):
-                line = f"PROJECT_PATH = \"{project_path}\"\n"
+                line = f'PROJECT_PATH = "{project_path}"\n'
 
             new_str += line
 
@@ -58,9 +58,9 @@ def modify_nsis_file() -> None:
         with open(file_path, encoding="gbk") as f:
             for line in f.readlines():
                 if line.startswith("!define PRODUCT_VERSION"):
-                    line = f"!define PRODUCT_VERSION \"v{product_version}\"\n"
+                    line = f'!define PRODUCT_VERSION "v{product_version}"\n'
                 elif line.startswith("!define PROJECT_DIR"):
-                    line = f"!define PROJECT_DIR \"{project_path}\"\n"
+                    line = f'!define PROJECT_DIR "{project_path}"\n'
 
                 new_str += line
 
@@ -79,7 +79,7 @@ def modify_shell_file() -> None:
     with open(file_path, encoding="utf-8") as f:
         for line in f.readlines():
             if line.startswith("PRODUCT_VERSION"):
-                line = f"PRODUCT_VERSION = \"v{product_version}\"\n"
+                line = f'PRODUCT_VERSION = "v{product_version}"\n'
 
             new_str += line
 
@@ -87,7 +87,7 @@ def modify_shell_file() -> None:
         f.write(new_str)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     system = public_func.get_system()
     if system == "Windows":
         modify_spec_file()
