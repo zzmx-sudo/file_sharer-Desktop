@@ -371,13 +371,11 @@ class UiFunction:
             QMessageBox.Critical, "程序出错", full_msg, parent=self._main_window
         )
         critical.setWindowFlag(Qt.FramelessWindowHint)
-        okButton = critical.addButton(
-            self._main_window.tr("好的"), QMessageBox.YesRole
-        )
+        okButton = critical.addButton(self._main_window.tr("好的"), QMessageBox.YesRole)
         okButton.setCursor(QtGui.QCursor(Qt.PointingHandCursor))
         critical.setStyleSheet(
-            self._messageBox_normal_style +
-            """
+            self._messageBox_normal_style
+            + """
             QLabel {
                 color: red;
             }

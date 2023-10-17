@@ -79,7 +79,7 @@ def modify_shell_file() -> None:
     with open(file_path, encoding="utf-8") as f:
         for line in f.readlines():
             if line.startswith("PRODUCT_VERSION"):
-                line = f'PRODUCT_VERSION = "v{product_version}"\n'
+                line = f'PRODUCT_VERSION="v{product_version}"\n'
 
             new_str += line
 
