@@ -26,15 +26,15 @@ jobs:
           python modify_script_file.py
           .\build_windows_x64.bat
 
-      - name: Publish Release
-        uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: false
-          title: "Release v0.1.0"
-          files: |
-            build\installer\*.7z
-            build\installer\*.exe
+#      - name: Publish Release
+#        uses: "marvinpinto/action-automatic-releases@latest"
+#        with:
+#          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+#          prerelease: false
+#          title: "Release v0.1.0"
+#          files: |
+#            build\installer\*.7z
+#            build\installer\*.exe
 
   MacOs:
     name: Macos
@@ -58,11 +58,11 @@ jobs:
           python modify_script_file.py
           sh build_mac.sh
 
-      - name: Publish Release
-        uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: false
-          title: "Release v0.1.0"
-          files: |
-            build\installer\*.dmg
+#      - name: Publish Release
+#        uses: "marvinpinto/action-automatic-releases@latest"
+#        with:
+#          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+#          prerelease: false
+#          title: "Release v0.1.0"
+#          files: |
+#            build\installer\*.dmg

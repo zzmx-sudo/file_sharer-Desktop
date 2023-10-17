@@ -1,6 +1,7 @@
 import os
 import sys
 import copy
+import traceback
 from multiprocessing import Queue
 from typing import Union
 
@@ -524,6 +525,19 @@ class MainWindow(QMainWindow):
         else:
             event.ignore()
 
+    def except_hook(self, type: Exception, value: str, tb: traceback) -> None:
+        err_msg = ""
+        while tb:
+            filename = tb.tb_frame.f_code.co_filename
+            func_name = tb.tb_frame.f_code.co_name
+            line_no = tb.tb_lineno
+            err_msg += f"File {filename} line {line_no} in {func_name}\n"
+
+            tb = tb.tb_next
+        err_msg += f"{type.__name__}: {value}"
+
+        self._ui_function.show_critical_messageBox(err_msg)
+
 
 if __name__ == "__main__":
     import multiprocessing
@@ -532,4 +546,5 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(":/icons/icon.ico"))
     window = MainWindow()
+    sys.excepthook = window.except_hook
     sys.exit(app.exec_())

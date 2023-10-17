@@ -365,6 +365,32 @@ class UiFunction:
         question.setStyleSheet(self._messageBox_normal_style)
         return question.exec_()
 
+    def show_critical_messageBox(self, msg: str) -> None:
+        full_msg = f"程序出现BUG, 你可以将复现方式和该弹框截图至项目GitHub提交Lssues, 原始错误信息:\n{msg}"
+        critical = QMessageBox(
+            QMessageBox.Critical, "程序出错", full_msg, parent=self._main_window
+        )
+        critical.setWindowFlag(Qt.FramelessWindowHint)
+        okButton = critical.addButton(
+            self._main_window.tr("好的"), QMessageBox.YesRole
+        )
+        okButton.setCursor(QtGui.QCursor(Qt.PointingHandCursor))
+        critical.setStyleSheet(
+            self._messageBox_normal_style +
+            """
+            QLabel {
+                color: red;
+            }
+            QMessageBox QPushButton {
+                border: 1px solid red;
+            }
+            QMessageBox QPushButton:hover {
+                background-color: #ffffff;
+            }
+            """
+        )
+        critical.exec_()
+
     def add_share_table_item(
         self: MainWindow, fileObj: Union[FileModel, DirModel]
     ) -> None:
