@@ -47,7 +47,7 @@ create-dmg --volname "文件共享助手" \
   --icon "${PROJECT_NAME}.app" 175 120 \
   --hide-extension "${PROJECT_NAME}.app" \
   --app-drop-link 425 120 \
-  "installer/file_sharer-desktop_v${PRODUCT_VERSION}-macos.dmg" \
+  "installer/file_sharer-desktop_${PRODUCT_VERSION}-macos.dmg" \
   "./dmg/"
 
 # 打包结束
