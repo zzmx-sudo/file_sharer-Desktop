@@ -1,7 +1,7 @@
 __all__ = ["ServiceProcessManager"]
 
 from typing import Union
-from multiprocessing import Queue
+from multiprocessing import Queue, Process
 
 import psutil
 
@@ -9,15 +9,14 @@ from model.file import FileModel, DirModel
 from model import public_types as ptype
 from utils.logger import sysLogger
 from .services import HttpService, FtpService
-from settings import settings
 
 
 class ServiceProcessManager:
     def __init__(self, output_q: Queue) -> None:
         self._http_service = None
         self._ftp_service = None
-        self._http_input_q = Queue()
-        self._ftp_input_q = Queue()
+        self._http_input_q = None
+        self._ftp_input_q = None
         self._output_q = output_q
 
     def add_share(self, fileObj: Union[FileModel, DirModel]) -> bool:
@@ -52,6 +51,10 @@ class ServiceProcessManager:
         if self._ftp_service is not None:
             self._kill_process(self._ftp_service.pid)
 
+        self._ftp_service = None
+        if self._ftp_input_q is not None:
+            self._ftp_input_q.close()
+            self._ftp_input_q = None
         return True
 
     def close_all(self) -> bool:
@@ -59,22 +62,18 @@ class ServiceProcessManager:
         if self._http_service is not None:
             self._kill_process(self._http_service.pid)
 
+        self._http_service = None
+        if self._http_input_q is not None:
+            self._http_input_q.close()
+            self._http_input_q = None
         return True
 
     def _add_http_share(self, fileObj: Union[FileModel, DirModel]) -> bool:
+        if self._http_input_q is None:
+            self._http_input_q = Queue()
         if self._http_service is None:
             http_service = HttpService(self._http_input_q, self._output_q)
-            if settings.IS_WINDOWS:
-                from multiprocessing import Process
-
-                process = Process
-            else:
-                from multiprocessing import get_context
-
-                ctx = get_context("fork")
-                process = ctx.Process
-
-            self._http_service = process(target=http_service.run)
+            self._http_service = Process(target=http_service.run)
             self._http_service.daemon = True
             self._http_service.start()
 
@@ -82,19 +81,11 @@ class ServiceProcessManager:
         return True
 
     def _add_ftp_share(self, fileObj: Union[FileModel, DirModel]) -> bool:
+        if self._ftp_input_q is None:
+            self._ftp_input_q = Queue()
         if self._ftp_service is None:
             ftp_service = FtpService(self._ftp_input_q, self._output_q)
-            if settings.IS_WINDOWS:
-                from multiprocessing import Process
-
-                process = Process
-            else:
-                from multiprocessing import get_context
-
-                ctx = get_context("fork")
-                process = ctx.Process
-
-            self._ftp_service = process(target=ftp_service.run)
+            self._ftp_service = Process(target=ftp_service.run)
             self._ftp_service.daemon = True
             self._ftp_service.start()
 
