@@ -6,7 +6,7 @@ __all__ = ["CustomGrip"]
 
 from PyQt5.QtCore import Qt, QSize, QRect
 from PyQt5.QtGui import QCursor, QMouseEvent
-from PyQt5.QtWidgets import QMainWindow, QWidget, QFrame, QHBoxLayout
+from PyQt5.QtWidgets import QMainWindow, QWidget, QFrame, QHBoxLayout, QSizeGrip
 
 
 class CustomGrip(QWidget):
@@ -22,6 +22,10 @@ class CustomGrip(QWidget):
             self.wi.top_func(self)
             self.setGeometry(0, 0, self.parent.width(), 10)
             self.setMaximumHeight(10)
+
+            # GRIPS
+            top_left = QSizeGrip(self.wi.top_left)
+            top_right = QSizeGrip(self.wi.top_right)
 
             # RESIZE TOP
             def resize_top(event: QMouseEvent) -> None:
@@ -44,6 +48,10 @@ class CustomGrip(QWidget):
             self.wi.bottom_func(self)
             self.setGeometry(0, self.parent.height() - 10, self.parent.width(), 10)
             self.setMaximumHeight(10)
+
+            # GRIPS
+            bottom_left = QSizeGrip(self.wi.bottom_left)
+            bottom_right = QSizeGrip(self.wi.bottom_right)
 
             # RESIZE BOTTOM
             def resize_bottom(event: QMouseEvent) -> None:
