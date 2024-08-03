@@ -22,6 +22,7 @@ from .custom_grips import CustomGrip
 from model.file import FileModel, DirModel
 from model.public_types import ShareType as shareType
 from model.browse import BrowseFileDictModel
+from settings import settings
 
 
 class UiFunction:
@@ -86,6 +87,12 @@ class UiFunction:
         self._elements.downloadButton.clicked.connect(self._menu_button_clicked)
         self._elements.settingButton.clicked.connect(lambda: self._extra_setting())
         # extra elements
+        self._elements.themeColorButtonGroup.buttonClicked.connect(
+            lambda: self._change_theme_color()
+        )
+        self._elements.transparencySlider.valueChanged.connect(
+            lambda v: self._change_theme_transparency(v)
+        )
         self._elements.shareProjectButton.clicked.connect(
             lambda: self._save_share_msg()
         )
@@ -124,6 +131,19 @@ class UiFunction:
                     restore_image, maximize_image
                 )
             )
+
+    def _change_theme_color(self) -> None:
+        # TODO: 修改主题颜色槽函数
+        checkRadio = self._elements.themeColorButtonGroup.checkedButton()
+        themeColorStr = checkRadio.objectName()
+        controlColor = getattr(settings.COLOR_CARD, themeColorStr)
+        print(themeColorStr)
+        print(controlColor.QComboBoxBgColor)
+        print(controlColor.QComboBoxBorderColor)
+
+    def _change_theme_transparency(self, value) -> None:
+        # TODO: 修改背景透明度槽函数
+        self._elements.transparencyRateLabel.setText(f"{value}%")
 
     def _save_share_msg(self) -> None:
         msg = "我正在使用file-sharer分享/下载文件, 快一起来玩玩吧, 下载地址:https://zzmx.lanzoue.com/b01fiitgd, 密码:brjm"

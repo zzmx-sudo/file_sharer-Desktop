@@ -16,7 +16,7 @@ from utils.public_func import generate_product_version
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1066, 580)
+        MainWindow.resize(1066, 600)
         self.styleSheet = QtWidgets.QWidget(MainWindow)
         self.styleSheet.setStyleSheet("/* ///////////////////////////////////////////////////////////////////////////////\n"
 "Global */\n"
@@ -225,7 +225,6 @@ class Ui_MainWindow(object):
 "QPushButton {\n"
 "    border: 2px solid rgb(126, 199, 255);\n"
 "    border-radius: 5%;\n"
-"    background-color: rg(236, 236, 236)\n"
 "}\n"
 "QPushButton:hover {\n"
 "    border: 2px solid #409eff;\n"
@@ -308,6 +307,47 @@ class Ui_MainWindow(object):
 "    margin-right: 10px;\n"
 "    background-color: rgb(236, 236, 236);\n"
 "    font: 12px \"JetBrains Mono\";\n"
+"}\n"
+"#extraContentBox .QRadioButton::indicator {\n"
+"    width: 22px;\n"
+"    height: 22px;\n"
+"    margin: 2px;\n"
+"    border-radius: 5px;\n"
+"}\n"
+"#extraContentBox .QRadioButton::indicator:hover {\n"
+"    margin: 0px;\n"
+"    width: 26px;\n"
+"    height: 26px;\n"
+"}\n"
+"#extraContentBox .QRadioButton::indicator:checked {\n"
+"    width: 24px;\n"
+"    height: 24px;\n"
+"    margin: 0px;\n"
+"    border: 2px solid black;\n"
+"}\n"
+"#extraContentBox #Default::indicator {\n"
+"    background-color: #409eff;\n"
+"}\n"
+"#extraContentBox #Red::indicator {\n"
+"    background-color: red;\n"
+"}\n"
+"#extraContentBox #Orange::indicator {\n"
+"    background-color: orange;\n"
+"}\n"
+"#extraContentBox #Yellow::indicator {\n"
+"    background-color: yellow;\n"
+"}\n"
+"#extraContentBox #Green::indicator {\n"
+"    background-color: green;\n"
+"}\n"
+"#extraContentBox #Cyan::indicator {\n"
+"    background-color: cyan;\n"
+"}\n"
+"#extraContentBox #Blue::indicator {\n"
+"    background-color: blue;\n"
+"}\n"
+"#extraContentBox #Purple::indicator {\n"
+"    background-color: purple;\n"
 "}\n"
 "\n"
 "/* ///////////////////////////////////////////////////////////////////////////////\n"
@@ -531,6 +571,7 @@ class Ui_MainWindow(object):
         self.settingLabel = QtWidgets.QLabel(self.extraTopBox)
         font = QtGui.QFont()
         font.setFamily("KaiTi")
+        font.setPointSize(-1)
         self.settingLabel.setFont(font)
         self.settingLabel.setObjectName("settingLabel")
         self.horizontalLayout_5.addWidget(self.settingLabel)
@@ -650,12 +691,139 @@ class Ui_MainWindow(object):
         self.horizontalLayout_9.addWidget(self.downloadPathButton)
         self.verticalLayout_14.addWidget(self.downloadPathFrame)
         self.verticalLayout_15.addWidget(self.downloadPathBox)
+        self.themeColorBox = QtWidgets.QFrame(self.extraContentBox)
+        self.themeColorBox.setMinimumSize(QtCore.QSize(0, 0))
+        self.themeColorBox.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.themeColorBox.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.themeColorBox.setObjectName("themeColorBox")
+        self.verticalLayout_25 = QtWidgets.QVBoxLayout(self.themeColorBox)
+        self.verticalLayout_25.setSpacing(0)
+        self.verticalLayout_25.setObjectName("verticalLayout_25")
+        self.themeColorLabel = QtWidgets.QLabel(self.themeColorBox)
+        self.themeColorLabel.setObjectName("themeColorLabel")
+        self.verticalLayout_25.addWidget(self.themeColorLabel)
+        self.FristColorFrame = QtWidgets.QFrame(self.themeColorBox)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.FristColorFrame.sizePolicy().hasHeightForWidth())
+        self.FristColorFrame.setSizePolicy(sizePolicy)
+        self.FristColorFrame.setMinimumSize(QtCore.QSize(0, 30))
+        self.FristColorFrame.setMaximumSize(QtCore.QSize(16777215, 30))
+        self.FristColorFrame.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
+        self.FristColorFrame.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.FristColorFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.FristColorFrame.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.FristColorFrame.setObjectName("FristColorFrame")
+        self.horizontalLayout_19 = QtWidgets.QHBoxLayout(self.FristColorFrame)
+        self.horizontalLayout_19.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)
+        self.horizontalLayout_19.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_19.setSpacing(0)
+        self.horizontalLayout_19.setObjectName("horizontalLayout_19")
+        self.Default = QtWidgets.QRadioButton(self.FristColorFrame)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.Default.sizePolicy().hasHeightForWidth())
+        self.Default.setSizePolicy(sizePolicy)
+        self.Default.setMinimumSize(QtCore.QSize(30, 30))
+        self.Default.setMaximumSize(QtCore.QSize(30, 30))
+        self.Default.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.Default.setText("")
+        self.Default.setObjectName("Default")
+        self.horizontalLayout_19.addWidget(self.Default)
+        self.Red = QtWidgets.QRadioButton(self.FristColorFrame)
+        self.Red.setMinimumSize(QtCore.QSize(30, 30))
+        self.Red.setMaximumSize(QtCore.QSize(30, 30))
+        self.Red.setText("")
+        self.Red.setObjectName("Red")
+        self.horizontalLayout_19.addWidget(self.Red)
+        self.Orange = QtWidgets.QRadioButton(self.FristColorFrame)
+        self.Orange.setMinimumSize(QtCore.QSize(30, 30))
+        self.Orange.setMaximumSize(QtCore.QSize(30, 30))
+        self.Orange.setText("")
+        self.Orange.setObjectName("Orange")
+        self.horizontalLayout_19.addWidget(self.Orange)
+        self.Yellow = QtWidgets.QRadioButton(self.FristColorFrame)
+        self.Yellow.setMinimumSize(QtCore.QSize(30, 30))
+        self.Yellow.setMaximumSize(QtCore.QSize(30, 30))
+        self.Yellow.setText("")
+        self.Yellow.setObjectName("Yellow")
+        self.horizontalLayout_19.addWidget(self.Yellow)
+        self.verticalLayout_25.addWidget(self.FristColorFrame)
+        self.SecondColorFrame = QtWidgets.QFrame(self.themeColorBox)
+        self.SecondColorFrame.setMinimumSize(QtCore.QSize(0, 30))
+        self.SecondColorFrame.setMaximumSize(QtCore.QSize(16777215, 30))
+        self.SecondColorFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.SecondColorFrame.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.SecondColorFrame.setObjectName("SecondColorFrame")
+        self.horizontalLayout_20 = QtWidgets.QHBoxLayout(self.SecondColorFrame)
+        self.horizontalLayout_20.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_20.setSpacing(0)
+        self.horizontalLayout_20.setObjectName("horizontalLayout_20")
+        self.Green = QtWidgets.QRadioButton(self.SecondColorFrame)
+        self.Green.setMinimumSize(QtCore.QSize(30, 30))
+        self.Green.setMaximumSize(QtCore.QSize(30, 30))
+        self.Green.setText("")
+        self.Green.setObjectName("Green")
+        self.horizontalLayout_20.addWidget(self.Green)
+        self.Cyan = QtWidgets.QRadioButton(self.SecondColorFrame)
+        self.Cyan.setMinimumSize(QtCore.QSize(30, 30))
+        self.Cyan.setMaximumSize(QtCore.QSize(30, 30))
+        self.Cyan.setText("")
+        self.Cyan.setObjectName("Cyan")
+        self.horizontalLayout_20.addWidget(self.Cyan)
+        self.Blue = QtWidgets.QRadioButton(self.SecondColorFrame)
+        self.Blue.setMinimumSize(QtCore.QSize(30, 30))
+        self.Blue.setMaximumSize(QtCore.QSize(30, 30))
+        self.Blue.setText("")
+        self.Blue.setObjectName("Blue")
+        self.horizontalLayout_20.addWidget(self.Blue)
+        self.Purple = QtWidgets.QRadioButton(self.SecondColorFrame)
+        self.Purple.setMinimumSize(QtCore.QSize(30, 30))
+        self.Purple.setMaximumSize(QtCore.QSize(30, 30))
+        self.Purple.setText("")
+        self.Purple.setObjectName("Purple")
+        self.horizontalLayout_20.addWidget(self.Purple)
+        self.verticalLayout_25.addWidget(self.SecondColorFrame)
+        self.verticalLayout_15.addWidget(self.themeColorBox)
+        self.themeTransparencyBox = QtWidgets.QFrame(self.extraContentBox)
+        self.themeTransparencyBox.setMinimumSize(QtCore.QSize(0, 0))
+        self.themeTransparencyBox.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.themeTransparencyBox.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.themeTransparencyBox.setObjectName("themeTransparencyBox")
+        self.verticalLayout_26 = QtWidgets.QVBoxLayout(self.themeTransparencyBox)
+        self.verticalLayout_26.setSpacing(0)
+        self.verticalLayout_26.setObjectName("verticalLayout_26")
+        self.themeTransparencyLabel = QtWidgets.QLabel(self.themeTransparencyBox)
+        self.themeTransparencyLabel.setObjectName("themeTransparencyLabel")
+        self.verticalLayout_26.addWidget(self.themeTransparencyLabel)
+        self.themeTransparencyFrame = QtWidgets.QFrame(self.themeTransparencyBox)
+        self.themeTransparencyFrame.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        self.themeTransparencyFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.themeTransparencyFrame.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.themeTransparencyFrame.setObjectName("themeTransparencyFrame")
+        self.horizontalLayout_21 = QtWidgets.QHBoxLayout(self.themeTransparencyFrame)
+        self.horizontalLayout_21.setContentsMargins(5, 0, 5, 0)
+        self.horizontalLayout_21.setSpacing(0)
+        self.horizontalLayout_21.setObjectName("horizontalLayout_21")
+        self.transparencySlider = QtWidgets.QSlider(self.themeTransparencyFrame)
+        self.transparencySlider.setOrientation(QtCore.Qt.Horizontal)
+        self.transparencySlider.setObjectName("transparencySlider")
+        self.horizontalLayout_21.addWidget(self.transparencySlider)
+        self.transparencyRateLabel = QtWidgets.QLabel(self.themeTransparencyFrame)
+        self.transparencyRateLabel.setObjectName("transparencyRateLabel")
+        self.horizontalLayout_21.addWidget(self.transparencyRateLabel)
+        self.horizontalLayout_21.setStretch(0, 8)
+        self.horizontalLayout_21.setStretch(1, 2)
+        self.verticalLayout_26.addWidget(self.themeTransparencyFrame)
+        self.verticalLayout_15.addWidget(self.themeTransparencyBox)
         self.outsideLinkFrame = QtWidgets.QFrame(self.extraContentBox)
         self.outsideLinkFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.outsideLinkFrame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.outsideLinkFrame.setObjectName("outsideLinkFrame")
         self.verticalLayout_17 = QtWidgets.QVBoxLayout(self.outsideLinkFrame)
-        self.verticalLayout_17.setContentsMargins(10, 10, 0, 10)
+        self.verticalLayout_17.setContentsMargins(10, 9, 0, 9)
         self.verticalLayout_17.setSpacing(5)
         self.verticalLayout_17.setObjectName("verticalLayout_17")
         self.shareProjectButton = QtWidgets.QPushButton(self.outsideLinkFrame)
@@ -727,6 +895,7 @@ class Ui_MainWindow(object):
         self.contentTitleLabel = QtWidgets.QLabel(self.contentTitleBox)
         font = QtGui.QFont()
         font.setFamily("JetBrains Mono")
+        font.setPointSize(-1)
         font.setBold(False)
         font.setItalic(False)
         font.setWeight(50)
@@ -963,7 +1132,7 @@ class Ui_MainWindow(object):
         self.shareListTable.setItem(0, 2, item)
         item = QtWidgets.QTableWidgetItem()
         self.shareListTable.setItem(0, 4, item)
-        self.shareListTable.horizontalHeader().setVisible(True)
+        self.shareListTable.horizontalHeader().setVisible(False)
         self.shareListTable.horizontalHeader().setCascadingSectionResizes(False)
         self.shareListTable.horizontalHeader().setDefaultSectionSize(150)
         self.shareListTable.horizontalHeader().setHighlightSections(True)
@@ -1068,7 +1237,7 @@ class Ui_MainWindow(object):
         self.fileListTable.setVerticalHeaderItem(2, item)
         item = QtWidgets.QTableWidgetItem()
         self.fileListTable.setHorizontalHeaderItem(0, item)
-        self.fileListTable.horizontalHeader().setVisible(True)
+        self.fileListTable.horizontalHeader().setVisible(False)
         self.fileListTable.horizontalHeader().setCascadingSectionResizes(False)
         self.fileListTable.horizontalHeader().setDefaultSectionSize(215)
         self.fileListTable.horizontalHeader().setMinimumSectionSize(50)
@@ -1125,7 +1294,7 @@ class Ui_MainWindow(object):
         self.downloadListTable.setHorizontalHeaderItem(1, item)
         item = QtWidgets.QTableWidgetItem()
         self.downloadListTable.setHorizontalHeaderItem(2, item)
-        self.downloadListTable.horizontalHeader().setVisible(True)
+        self.downloadListTable.horizontalHeader().setVisible(False)
         self.downloadListTable.horizontalHeader().setDefaultSectionSize(240)
         self.downloadListTable.horizontalHeader().setMinimumSectionSize(50)
         self.downloadListTable.horizontalHeader().setSortIndicatorShown(True)
@@ -1141,6 +1310,7 @@ class Ui_MainWindow(object):
         self.contentBottomBar.setMaximumSize(QtCore.QSize(16777215, 16))
         font = QtGui.QFont()
         font.setFamily("KaiTi")
+        font.setPointSize(-1)
         self.contentBottomBar.setFont(font)
         self.contentBottomBar.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.contentBottomBar.setFrameShadow(QtWidgets.QFrame.Raised)
@@ -1152,6 +1322,7 @@ class Ui_MainWindow(object):
         self.authorLabelBox = QtWidgets.QFrame(self.contentBottomBar)
         font = QtGui.QFont()
         font.setFamily("KaiTi")
+        font.setPointSize(-1)
         self.authorLabelBox.setFont(font)
         self.authorLabelBox.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.authorLabelBox.setFrameShadow(QtWidgets.QFrame.Raised)
@@ -1163,6 +1334,7 @@ class Ui_MainWindow(object):
         self.authorLabel = QtWidgets.QLabel(self.authorLabelBox)
         font = QtGui.QFont()
         font.setFamily("KaiTi")
+        font.setPointSize(-1)
         self.authorLabel.setFont(font)
         self.authorLabel.setObjectName("authorLabel")
         self.verticalLayout_10.addWidget(self.authorLabel, 0, QtCore.Qt.AlignLeft)
@@ -1207,6 +1379,9 @@ class Ui_MainWindow(object):
         self.logPathButton.setToolTip(_translate("MainWindow", "打开资源管理器选择路径"))
         self.downloadPathLabel.setText(_translate("MainWindow", "下载路径："))
         self.downloadPathButton.setToolTip(_translate("MainWindow", "打开资源管理器选择路径"))
+        self.themeColorLabel.setText(_translate("MainWindow", "主题颜色："))
+        self.themeTransparencyLabel.setText(_translate("MainWindow", "透明度："))
+        self.transparencyRateLabel.setText(_translate("MainWindow", "100%"))
         self.shareProjectButton.setText(_translate("MainWindow", "分享软件"))
         self.browseProjectButton.setText(_translate("MainWindow", "打开项目"))
         self.saveSettingButton.setToolTip(_translate("MainWindow", "保存配置"))

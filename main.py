@@ -5,7 +5,7 @@ import traceback
 from multiprocessing import Queue
 from typing import Union
 
-from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QButtonGroup
 from PyQt5.Qt import QApplication, QIcon
 from PyQt5 import QtGui
 
@@ -16,6 +16,7 @@ from command.manage import ServiceProcessManager
 from model.sharing import FuseSharingModel
 from model.file import FileModel, DirModel
 from model.public_types import ShareType as shareType
+from model.public_types import ThemeColor as themeColor
 from model.qt_thread import *
 from model.browse import BrowseFileDictModel
 from utils.public_func import generate_uuid
@@ -28,6 +29,7 @@ class MainWindow(QMainWindow):
         # load ui
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self._merge_theme_radioButton()
 
         # setup ui_function
         from utils.ui_function import UiFunction
@@ -51,6 +53,17 @@ class MainWindow(QMainWindow):
 
         # show window
         self.show()
+
+    def _merge_theme_radioButton(self) -> None:
+        self.ui.themeColorButtonGroup = QButtonGroup()
+        self.ui.themeColorButtonGroup.addButton(self.ui.Default)
+        self.ui.themeColorButtonGroup.addButton(self.ui.Red)
+        self.ui.themeColorButtonGroup.addButton(self.ui.Orange)
+        self.ui.themeColorButtonGroup.addButton(self.ui.Yellow)
+        self.ui.themeColorButtonGroup.addButton(self.ui.Green)
+        self.ui.themeColorButtonGroup.addButton(self.ui.Cyan)
+        self.ui.themeColorButtonGroup.addButton(self.ui.Blue)
+        self.ui.themeColorButtonGroup.addButton(self.ui.Purple)
 
     def _load_settings(self) -> None:
         self._cancel_settings()
@@ -152,6 +165,9 @@ class MainWindow(QMainWindow):
             sysLogger.reload()
             sharerLogger.reload()
         settings.DOWNLOAD_DIR = download_path
+        checkedRadio = self.ui.themeColorButtonGroup.checkedButton()
+        settings.THEME_COLOR = themeColor.dispatch(checkedRadio.objectName())
+        settings.THEME_TRANSPARENCY = self.ui.transparencySlider.value()
         settings.dump()
         self._ui_function.show_info_messageBox("保存配置成功")
         sysLogger.info("保存配置成功")
@@ -161,6 +177,9 @@ class MainWindow(QMainWindow):
         self.ui.saveShareCheck.setChecked(settings.SAVE_SHARER_LOG)
         self.ui.logPathEdit.setText(settings.LOGS_PATH)
         self.ui.downloadPathEdit.setText(settings.DOWNLOAD_DIR)
+        rollback_radioButton = getattr(self.ui, settings.THEME_COLOR.value)
+        rollback_radioButton.setChecked(True)
+        self.ui.transparencySlider.setValue(settings.THEME_TRANSPARENCY)
 
     def _update_file_combo(self) -> None:
         share_path: str = self.ui.sharePathEdit.text()

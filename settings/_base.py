@@ -1,11 +1,20 @@
 import os
 import sys
 
-from utils.public_func import get_system, get_local_ip, generate_project_path
+from utils.public_func import (
+    get_system,
+    get_local_ip,
+    generate_project_path,
+    generate_product_version,
+)
+from model.public_types import ThemeColor, ColorCardStruct
 
 """
 请移步 `development.py` 或 `production.py` 修改配置, 配置名称字母均大写才有效
 """
+
+# 软件版本
+VERSION: str = generate_product_version()
 
 # 项目主目录
 BASE_DIR: str = generate_project_path()
@@ -37,3 +46,12 @@ LOGS_PATH: str = os.path.join(BASE_DIR, "logs")
 
 # 下载目录路径
 DOWNLOAD_DIR: str = os.path.join(BASE_DIR, "Download")
+
+# 主题颜色
+THEME_COLOR: ThemeColor = ThemeColor.Default
+
+# 背景透明度
+THEME_TRANSPARENCY: int = 100
+
+# 全局色卡
+COLOR_CARD: ColorCardStruct = ColorCardStruct.dispatch()

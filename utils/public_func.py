@@ -17,6 +17,7 @@ import random
 import os
 import sys
 import platform
+import json
 
 import uuid
 import toml
@@ -101,3 +102,20 @@ def generate_product_version() -> str:
     tool_config = get_config_from_toml()
 
     return tool_config.get("file-sharer", {}).get("version", "0.1.0")
+
+
+def generate_color_card_map() -> dict:
+    project_path = generate_project_path()
+    color_card_json_path = os.path.join(
+        project_path, "static", "themes", "color_card.json"
+    )
+    if not os.path.exists(color_card_json_path):
+        color_card_json_path = os.path.join(project_path, "color_card.json")
+    if not os.path.exists(color_card_json_path):
+        return {}
+
+    with open(color_card_json_path) as f:
+        try:
+            return json.load(f)
+        except:
+            return {}

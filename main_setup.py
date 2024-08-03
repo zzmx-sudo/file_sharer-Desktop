@@ -14,6 +14,7 @@ APP = [PROJECT_PATH + "main.py"]
 DATA_FILES = [
     PROJECT_PATH + "pyproject.toml",
     PROJECT_PATH + "file_sharing_backups.json",
+    PROJECT_PATH + "static/themes/color_card.json",
 ]
 OPTIONS = {
     "argv_emulation": True,

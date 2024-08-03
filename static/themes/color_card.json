@@ -1,0 +1,10 @@
+{
+    "Default": {
+        "QComboBoxBgColor": "rgb(236, 236, 244)",
+        "QComboBoxBorderColor": "#409eff"
+    },
+    "Red": {
+        "QComboBoxBgColor": "rgb(255, 0, 0)",
+        "QComboBoxBorderColor": "rgb(222, 0, 0)"
+    }
+}

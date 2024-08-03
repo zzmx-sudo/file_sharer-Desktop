@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1066</width>
-    <height>580</height>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -222,7 +222,6 @@ QPushButton */
 QPushButton {
 	border: 2px solid rgb(126, 199, 255);
 	border-radius: 5%;
-	background-color: rg(236, 236, 236)
 }
 QPushButton:hover {
 	border: 2px solid #409eff;
@@ -305,6 +304,47 @@ Extra Content Box */
 	margin-right: 10px;
 	background-color: rgb(236, 236, 236);
 	font: 12px &quot;JetBrains Mono&quot;;
+}
+#extraContentBox .QRadioButton::indicator {
+    width: 22px;
+    height: 22px;
+    margin: 2px;
+    border-radius: 5px;
+}
+#extraContentBox .QRadioButton::indicator:hover {
+    margin: 0px;
+    width: 26px;
+    height: 26px;
+}
+#extraContentBox .QRadioButton::indicator:checked {
+    width: 24px;
+    height: 24px;
+    margin: 0px;
+    border: 2px solid black;
+}
+#extraContentBox #Default::indicator {
+    background-color: #409eff;
+}
+#extraContentBox #Red::indicator {
+    background-color: red;
+}
+#extraContentBox #Orange::indicator {
+    background-color: orange;
+}
+#extraContentBox #Yellow::indicator {
+    background-color: yellow;
+}
+#extraContentBox #Green::indicator {
+    background-color: green;
+}
+#extraContentBox #Cyan::indicator {
+    background-color: cyan;
+}
+#extraContentBox #Blue::indicator {
+    background-color: blue;
+}
+#extraContentBox #Purple::indicator {
+    background-color: purple;
 }
 
 /* ///////////////////////////////////////////////////////////////////////////////
@@ -815,6 +855,7 @@ Content Bottom Bar */
                <property name="font">
                 <font>
                  <family>KaiTi</family>
+                 <pointsize>-1</pointsize>
                 </font>
                </property>
                <property name="text">
@@ -1194,6 +1235,363 @@ Content Bottom Bar */
               </widget>
              </item>
              <item>
+              <widget class="QFrame" name="themeColorBox">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+               </property>
+               <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_25">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="themeColorLabel">
+                  <property name="text">
+                   <string>主题颜色：</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QFrame" name="FristColorFrame">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="contextMenuPolicy">
+                   <enum>Qt::NoContextMenu</enum>
+                  </property>
+                  <property name="layoutDirection">
+                   <enum>Qt::LeftToRight</enum>
+                  </property>
+                  <property name="frameShape">
+                   <enum>QFrame::StyledPanel</enum>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Raised</enum>
+                  </property>
+                  <layout class="QHBoxLayout" name="horizontalLayout_19">
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
+                   <property name="sizeConstraint">
+                    <enum>QLayout::SetDefaultConstraint</enum>
+                   </property>
+                   <property name="leftMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <widget class="QRadioButton" name="Default">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="minimumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="layoutDirection">
+                      <enum>Qt::LeftToRight</enum>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QRadioButton" name="Red">
+                     <property name="minimumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QRadioButton" name="Orange">
+                     <property name="minimumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QRadioButton" name="Yellow">
+                     <property name="minimumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QFrame" name="SecondColorFrame">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="frameShape">
+                   <enum>QFrame::StyledPanel</enum>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Raised</enum>
+                  </property>
+                  <layout class="QHBoxLayout" name="horizontalLayout_20">
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
+                   <property name="leftMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <widget class="QRadioButton" name="Green">
+                     <property name="minimumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QRadioButton" name="Cyan">
+                     <property name="minimumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QRadioButton" name="Blue">
+                     <property name="minimumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QRadioButton" name="Purple">
+                     <property name="minimumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="themeTransparencyBox">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+               </property>
+               <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_26">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="themeTransparencyLabel">
+                  <property name="text">
+                   <string>透明度：</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QFrame" name="themeTransparencyFrame">
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="frameShape">
+                   <enum>QFrame::StyledPanel</enum>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Raised</enum>
+                  </property>
+                  <layout class="QHBoxLayout" name="horizontalLayout_21" stretch="8,2">
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
+                   <property name="leftMargin">
+                    <number>5</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>5</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <widget class="QSlider" name="transparencySlider">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="transparencyRateLabel">
+                     <property name="text">
+                      <string>100%</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
               <widget class="QFrame" name="outsideLinkFrame">
                <property name="frameShape">
                 <enum>QFrame::StyledPanel</enum>
@@ -1209,13 +1607,13 @@ Content Bottom Bar */
                  <number>10</number>
                 </property>
                 <property name="topMargin">
-                 <number>10</number>
+                 <number>9</number>
                 </property>
                 <property name="rightMargin">
                  <number>0</number>
                 </property>
                 <property name="bottomMargin">
-                 <number>10</number>
+                 <number>9</number>
                 </property>
                 <item>
                  <widget class="QPushButton" name="shareProjectButton">
@@ -1423,6 +1821,7 @@ Content Bottom Bar */
                   <property name="font">
                    <font>
                     <family>JetBrains Mono</family>
+                    <pointsize>-1</pointsize>
                     <weight>50</weight>
                     <italic>false</italic>
                     <bold>false</bold>
@@ -2050,7 +2449,7 @@ Content Bottom Bar */
                           <enum>QAbstractItemView::SelectRows</enum>
                          </property>
                          <attribute name="horizontalHeaderVisible">
-                          <bool>true</bool>
+                          <bool>false</bool>
                          </attribute>
                          <attribute name="horizontalHeaderCascadingSectionResizes">
                           <bool>false</bool>
@@ -2452,7 +2851,7 @@ Content Bottom Bar */
                              <enum>QAbstractItemView::SelectRows</enum>
                             </property>
                             <attribute name="horizontalHeaderVisible">
-                             <bool>true</bool>
+                             <bool>false</bool>
                             </attribute>
                             <attribute name="horizontalHeaderCascadingSectionResizes">
                              <bool>false</bool>
@@ -2619,7 +3018,7 @@ Content Bottom Bar */
                           <enum>Qt::ElideRight</enum>
                          </property>
                          <attribute name="horizontalHeaderVisible">
-                          <bool>true</bool>
+                          <bool>false</bool>
                          </attribute>
                          <attribute name="horizontalHeaderMinimumSectionSize">
                           <number>50</number>
@@ -2677,6 +3076,7 @@ Content Bottom Bar */
                <property name="font">
                 <font>
                  <family>KaiTi</family>
+                 <pointsize>-1</pointsize>
                 </font>
                </property>
                <property name="frameShape">
@@ -2706,6 +3106,7 @@ Content Bottom Bar */
                   <property name="font">
                    <font>
                     <family>KaiTi</family>
+                    <pointsize>-1</pointsize>
                    </font>
                   </property>
                   <property name="frameShape">
@@ -2735,6 +3136,7 @@ Content Bottom Bar */
                      <property name="font">
                       <font>
                        <family>KaiTi</family>
+                       <pointsize>-1</pointsize>
                       </font>
                      </property>
                      <property name="text">

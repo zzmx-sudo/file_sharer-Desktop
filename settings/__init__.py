@@ -8,7 +8,12 @@ import toml
 
 from exceptions import OperationException
 from settings import _base
-from utils.public_func import generate_http_port, get_config_from_toml
+from utils.public_func import (
+    generate_http_port,
+    get_config_from_toml,
+    generate_color_card_map,
+)
+from model.public_types import ThemeColor as themeColor, ColorCardStruct
 
 empty = object()
 
@@ -102,6 +107,14 @@ class FuseSettings:
         downloadPath = settings_config.get("downloadPath")
         if downloadPath and os.path.isdir(downloadPath):
             self._wrapper.DOWNLOAD_DIR = downloadPath
+        theme_color = themeColor.dispatch(settings_config.get("theme_color", "Default"))
+        self._wrapper.THEME_COLOR = theme_color or self.THEME_COLOR
+        theme_transparency = settings_config.get("theme_transparency", 99)
+        self._wrapper.THEME_TRANSPARENCY = (
+            theme_transparency if isinstance(theme_transparency, int) else 99
+        )
+        color_card_map = generate_color_card_map()
+        self._wrapper.COLOR_CARD = ColorCardStruct.dispatch(**color_card_map)
 
     def _available_http_port(self) -> None:
         http_port = self._wrapper.__dict__.get("WSGI_PORT", 8080)
@@ -119,10 +132,13 @@ class FuseSettings:
         tool_config.update(
             {
                 "file-sharer": {
+                    "version": self.VERSION,
                     "saveSystemLog": self.SAVE_SYSTEM_LOG,
                     "saveShareLog": self.SAVE_SHARER_LOG,
                     "logsPath": self.LOGS_PATH,
                     "downloadPath": self.DOWNLOAD_DIR,
+                    "theme_color": self.THEME_COLOR.name,
+                    "theme_transparency": self.THEME_TRANSPARENCY,
                 }
             }
         )
