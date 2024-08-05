@@ -21,6 +21,7 @@ from main import MainWindow
 from .custom_grips import CustomGrip
 from model.file import FileModel, DirModel
 from model.public_types import ShareType as shareType
+from model.public_types import ThemeColor as themeColor
 from model.browse import BrowseFileDictModel
 from settings import settings
 
@@ -57,6 +58,8 @@ class UiFunction:
         self._download_fileName_col = 0
         self._download_progress_col = 1
         self._download_options_col = 2
+        self._theme_color = None
+        self._theme_transparency = None
 
     def setup(self) -> None:
         # main window scale
@@ -133,16 +136,22 @@ class UiFunction:
             )
 
     def _change_theme_color(self) -> None:
-        # TODO: 修改主题颜色槽函数
-        checkRadio = self._elements.themeColorButtonGroup.checkedButton()
-        themeColorStr = checkRadio.objectName()
-        controlColor = getattr(settings.COLOR_CARD, themeColorStr)
-        print(themeColorStr)
-        print(controlColor.QComboBoxBgColor)
-        print(controlColor.QComboBoxBorderColor)
+        check_radio = self._elements.themeColorButtonGroup.checkedButton()
+        theme_color_str = check_radio.objectName()
+        theme_color = themeColor.dispatch(theme_color_str)
+        if theme_color is None:
+            self.show_critical_messageBox(f"得到非预期的颜色主题: {theme_color_str}")
+            return
+        self._theme_color = theme_color
+        self._elements.styleSheet.setStyleSheet(
+            settings.style_sheet(theme_color, self._theme_transparency)
+        )
 
     def _change_theme_transparency(self, value) -> None:
-        # TODO: 修改背景透明度槽函数
+        self._theme_transparency = value
+        self._elements.styleSheet.setStyleSheet(
+            settings.style_sheet(self._theme_color, value)
+        )
         self._elements.transparencyRateLabel.setText(f"{value}%")
 
     def _save_share_msg(self) -> None:

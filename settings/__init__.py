@@ -2,7 +2,7 @@ __all__ = ["settings"]
 
 import os
 import importlib
-from typing import Any
+from typing import Any, Optional
 
 import toml
 
@@ -144,6 +144,23 @@ class FuseSettings:
         )
         with open(settings_file, "w") as f:
             toml.dump(tool_config, f)
+
+    def style_sheet(
+        self,
+        theme_color: Optional[themeColor] = None,
+        theme_transparency: Optional[int] = None,
+    ) -> str:
+        theme_color = theme_color or self.THEME_COLOR
+        theme_transparency = theme_transparency or self.THEME_TRANSPARENCY
+        control_color = getattr(self.COLOR_CARD, theme_color.value)
+        control_color_map = control_color._asdict()
+        control_color_map.update(
+            {"ThemeTransparency": "%.1f" % (theme_transparency / 100)}
+        )
+        return self.BASIC_QSS % (control_color_map)
+
+    def initStyle(self) -> str:
+        return self.style_sheet()
 
 
 settings = FuseSettings("prod")
