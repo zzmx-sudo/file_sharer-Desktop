@@ -1,0 +1,148 @@
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  Build-Win-x64:
+    name: Build-Win-x64
+    runs-on: windows-latest
+    steps:
+      - name: Clone code
+        uses: actions/checkout@v3
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+          architecture: 'x64'
+
+      - name: Install Dependencies with pip
+        run: pip install -r requirements.txt
+
+      - name: Install NSIS and 7Z
+        run: |
+          choco install nsis -y
+          choco install 7zip -y
+
+      - name: Gen Current ChangeLog
+        run: |
+          cd .\scripts
+          python generate_cur_changelog.py
+
+      - name: Compress windows Binary
+        run: |
+          cd .\scripts
+          python modify_script_file.py
+          .\build_windows_x64.bat
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Build-Win-x64
+          path: |
+            current_change_log.md
+            build/installer/*.exe
+            build/installer/*.7z
+
+  Build-Win-x86:
+    name: Build-Win-x86
+    runs-on: windows-latest
+    steps:
+      - name: Clone code
+        uses: actions/checkout@v3
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+          architecture: 'x86'
+
+      - name: Install Dependencies with pip
+        run: pip install -r requirements.txt
+
+      - name: Install NSIS and 7Z
+        run: |
+          choco install nsis -y
+          choco install 7zip -y
+
+      - name: Compress windows Binary
+        run: |
+          cd .\scripts
+          python modify_script_file.py
+          .\build_windows_x86.bat
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Build-Win-x86
+          path: |
+            build/installer/*.exe
+            build/installer/*.7z
+
+  Build-MacOs:
+    name: Build-MacOs
+    runs-on: macos-12
+    steps:
+      - name: Clone code
+        uses: actions/checkout@v3
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+
+      - name: Install Dependencies with pip
+        run: pip install -r requirements.txt
+
+      - name: Install Create-dmg
+        run: brew install create-dmg
+
+      - name: Compress Macos Binary
+        run: |
+          cd ./scripts
+          python modify_script_file.py
+          sh build_mac.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Build-MacOs
+          path: build/installer/*.dmg
+  
+  Release:
+    runs-on: ubuntu-latest
+    needs: [Build-Win-x64, Build-Win-x86, Build-MacOs]
+
+    steps:
+      - name: Download Win-x64 artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: Build-Win-x64
+
+      - name: Download Win-x86 artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: Build-Win-x86
+          path: ./x86
+
+      - name: Download Macos artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: Build-MacOs
+          path: ./macos
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./build/installer/*.exe
+            ./build/installer/*.7z
+            ./x86/*.exe
+            ./x86/*.7z
+            ./macos/*.dmg
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}发布
+          body_path: current_change_log.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

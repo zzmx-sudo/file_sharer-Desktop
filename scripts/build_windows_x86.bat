@@ -21,7 +21,7 @@ if not exist %PYTHON_ENV_DIR% (
     call %PYTHON_ENV_DIR%\Scripts\activate.bat
 )
 echo ******************* Packaging the source code using pyinstaller *******************
-pyinstaller32 main.spec --distpath %PROJECT_DIR%\build
+pyinstaller main.spec --distpath %PROJECT_DIR%\build
 echo [] > %PROJECT_DIR%\build\%PROJECT_NAME%\file_sharing_backups.json
 
 @rem 使用7z打包成绿色版

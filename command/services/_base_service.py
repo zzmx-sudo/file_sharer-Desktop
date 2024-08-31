@@ -1,6 +1,5 @@
 __all__ = ["BaseService"]
 
-import time
 from typing import Union
 from threading import Thread
 from multiprocessing import Queue
