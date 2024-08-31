@@ -18,6 +18,7 @@ DATA_FILES = [
 OPTIONS = {
     "argv_emulation": True,
     "includes": [
+        "imp",
         "aiofiles",
         "aiohttp",
         "fastapi",
