@@ -42,8 +42,10 @@ class ServiceProcessManager:
             return False
 
     def modify_settings(self, key: str, value: Union[bool, str]) -> bool:
-        self._http_input_q.put(("settings", (key, value)))
-        self._ftp_input_q.put(("settings", (key, value)))
+        if self._http_input_q is not None:
+            self._http_input_q.put(("settings", (key, value)))
+        if self._ftp_input_q is not None:
+            self._ftp_input_q.put(("settings", (key, value)))
 
         return True
 
