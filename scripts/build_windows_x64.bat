@@ -2,7 +2,7 @@
 
 @rem 先使用pyinstaller打包源码
 ::python虚拟环境路径,若无请配空值
-set PYTHON_ENV_DIR=D:\Envs\file-sharer
+set PYTHON_ENV_DIR=D:\PY_ENVS\file-sharer
 ::工具包(构建工具脚本)路径
 set TOOLKITS_DIR=%cd%\toolkits
 ::项目名称(同spec中项目名)

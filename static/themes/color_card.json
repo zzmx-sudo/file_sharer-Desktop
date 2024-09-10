@@ -1,0 +1,98 @@
+{
+    "Default": {
+        "DirName": "Default",
+        "BaseColor": "64, 158, 255",
+        "LightColor": "126, 199, 255",
+        "DeepColor": "42, 120, 255",
+        "BaseBgColor": "236, 236, 236",
+        "LightBgColor": "247, 247, 247",
+        "DeepBgColor": "222, 222, 222",
+        "Deep2BgColor": "200, 200, 200",
+        "SpecialHovColor": "255, 255, 255",
+        "TextColor": "0, 0, 0"
+    },
+    "Red": {
+        "DirName": "Red",
+        "BaseColor": "241, 80, 80",
+        "LightColor": "241, 160, 160",
+        "DeepColor": "241, 45, 45",
+        "BaseBgColor": "236, 236, 236",
+        "LightBgColor": "247, 247, 247",
+        "DeepBgColor": "222, 222, 222",
+        "Deep2BgColor": "200, 200, 200",
+        "SpecialHovColor": "255, 255, 255",
+        "TextColor": "0, 0, 0"
+    },
+    "Orange" : {
+        "DirName": "Orange",
+        "BaseColor": "240, 165, 0",
+        "LightColor": "250, 190, 100",
+        "DeepColor": "220, 125, 20",
+        "BaseBgColor": "236, 236, 236",
+        "LightBgColor": "247, 247, 247",
+        "DeepBgColor": "222, 222, 222",
+        "Deep2BgColor": "200, 200, 200",
+        "SpecialHovColor": "255, 255, 255",
+        "TextColor": "0, 0, 0"
+    },
+    "Yellow": {
+        "DirName": "Yellow",
+        "BaseColor": "230, 200, 50",
+        "LightColor": "240, 220, 50",
+        "DeepColor": "220, 180, 10",
+        "BaseBgColor": "236, 236, 236",
+        "LightBgColor": "247, 247, 247",
+        "DeepBgColor": "222, 222, 222",
+        "Deep2BgColor": "200, 200, 200",
+        "SpecialHovColor": "255, 255, 255",
+        "TextColor": "0, 0, 0"
+    },
+    "Green": {
+        "DirName": "Green",
+        "BaseColor": "0, 180, 0",
+        "LightColor": "0, 220, 0",
+        "DeepColor": "0, 140, 0",
+        "BaseBgColor": "236, 236, 236",
+        "LightBgColor": "247, 247, 247",
+        "DeepBgColor": "222, 222, 222",
+        "Deep2BgColor": "200, 200, 200",
+        "SpecialHovColor": "255, 255, 255",
+        "TextColor": "0, 0, 0"
+    },
+    "Cyan": {
+        "DirName": "Cyan",
+        "BaseColor": "30, 180, 180",
+        "LightColor": "40, 220, 220",
+        "DeepColor": "20, 140, 140",
+        "BaseBgColor": "236, 236, 236",
+        "LightBgColor": "247, 247, 247",
+        "DeepBgColor": "222, 222, 222",
+        "Deep2BgColor": "200, 200, 200",
+        "SpecialHovColor": "255, 255, 255",
+        "TextColor": "0, 0, 0"
+    },
+    "Blue": {
+        "DirName": "Blue",
+        "BaseColor": "90, 90, 220",
+        "LightColor": "130, 130, 250",
+        "DeepColor": "70, 70, 200",
+        "BaseBgColor": "236, 236, 236",
+        "LightBgColor": "247, 247, 247",
+        "DeepBgColor": "222, 222, 222",
+        "Deep2BgColor": "200, 200, 200",
+        "SpecialHovColor": "255, 255, 255",
+        "TextColor": "0, 0, 0"
+    },
+    "Purple": {
+        "DirName": "Purple",
+        "BaseColor": "128, 0, 120",
+        "LightColor": "200, 0, 200",
+        "DeepColor": "80, 0, 80",
+        "BaseBgColor": "236, 236, 236",
+        "LightBgColor": "247, 247, 247",
+        "DeepBgColor": "222, 222, 222",
+        "Deep2BgColor": "200, 200, 200",
+        "SpecialHovColor": "255, 255, 255",
+        "TextColor": "0, 0, 0"
+    }
+}

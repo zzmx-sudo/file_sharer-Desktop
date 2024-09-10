@@ -2,13 +2,22 @@ __all__ = ["settings"]
 
 import os
 import importlib
-from typing import Any
+from typing import Any, Optional
 
 import toml
 
 from exceptions import OperationException
 from settings import _base
-from utils.public_func import generate_http_port, get_config_from_toml
+from utils.public_func import (
+    generate_http_port,
+    get_config_from_toml,
+    generate_color_card_map,
+)
+from model.public_types import (
+    ThemeColor as themeColor,
+    ColorCardStruct,
+    ControlColorStruct,
+)
 
 empty = object()
 
@@ -102,6 +111,14 @@ class FuseSettings:
         downloadPath = settings_config.get("downloadPath")
         if downloadPath and os.path.isdir(downloadPath):
             self._wrapper.DOWNLOAD_DIR = downloadPath
+        theme_color = themeColor.dispatch(settings_config.get("theme_color", "Default"))
+        self._wrapper.THEME_COLOR = theme_color or self.THEME_COLOR
+        theme_opacity = settings_config.get("theme_opacity", 99)
+        self._wrapper.THEME_OPACITY = (
+            theme_opacity if isinstance(theme_opacity, int) else 99
+        )
+        color_card_map = generate_color_card_map()
+        self._wrapper.COLOR_CARD = ColorCardStruct.dispatch(**color_card_map)
 
     def _available_http_port(self) -> None:
         http_port = self._wrapper.__dict__.get("WSGI_PORT", 8080)
@@ -119,15 +136,40 @@ class FuseSettings:
         tool_config.update(
             {
                 "file-sharer": {
+                    "version": self.VERSION,
                     "saveSystemLog": self.SAVE_SYSTEM_LOG,
                     "saveShareLog": self.SAVE_SHARER_LOG,
                     "logsPath": self.LOGS_PATH,
                     "downloadPath": self.DOWNLOAD_DIR,
+                    "theme_color": self.THEME_COLOR.name,
+                    "theme_opacity": self.THEME_OPACITY,
                 }
             }
         )
         with open(settings_file, "w") as f:
             toml.dump(tool_config, f)
+
+    def style_sheet(
+        self,
+        theme_color: Optional[themeColor] = None,
+        theme_opacity: Optional[int] = None,
+    ) -> str:
+        theme_color = theme_color or self.THEME_COLOR
+        theme_opacity = theme_opacity or self.THEME_OPACITY
+        control_color = getattr(self.COLOR_CARD, theme_color.value)
+        control_color_map = control_color._asdict()
+        control_color_map.update({"ThemeOpacity": theme_opacity / 100})
+        return self.BASIC_QSS % (control_color_map)
+
+    def controlColor(
+        self, theme_color: Optional[themeColor] = None
+    ) -> ControlColorStruct:
+        theme_color = theme_color or self.THEME_COLOR
+        return getattr(self.COLOR_CARD, theme_color.value)
+
+    @property
+    def initStyle(self) -> str:
+        return self.style_sheet()
 
 
 settings = FuseSettings("prod")

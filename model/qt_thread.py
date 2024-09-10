@@ -125,6 +125,11 @@ class DownloadHttpFileThread(QThread):
         except aiohttp.ClientPayloadError:
             sysLogger.warning(f"下载文件失败, 失败原因: 与目标失去连接或该文件对方无权限, 文件路径: {relativePath}")
             self.signal.emit((fileObj, DownloadStatus.FAILED, "与目标失去连接或该文件对方无权限"))
+        except aiohttp.client_exceptions.ServerDisconnectedError:
+            sysLogger.warning(
+                f"下载文件失败, 失败原因: 远程服务器关闭连接, 可能为本地存在该文件引起冲突, 请将其删除后再重新下载, 文件路径: {relativePath}"
+            )
+            self.signal.emit((fileObj, DownloadStatus.FAILED, "远程服务器关闭连接"))
         except Exception:
             sysLogger.error(
                 f"下载文件失败, 文件路径: {relativePath}, 失败原因: 未知错误, 错误原始明细如下:\n{format_exc()}"
@@ -132,7 +137,11 @@ class DownloadHttpFileThread(QThread):
             self.signal.emit((fileObj, DownloadStatus.FAILED, "未知错误"))
 
     async def _main(self, fileList: list) -> None:
-        async with aiohttp.ClientSession() as session:
+        timeout = aiohttp.ClientTimeout(total=600)
+        connector = aiohttp.TCPConnector(force_close=True)
+        async with aiohttp.ClientSession(
+            connector=connector, timeout=timeout
+        ) as session:
             tasks = [asyncio.create_task(self._download(session, x)) for x in fileList]
             await asyncio.wait(tasks)
 
