@@ -2504,41 +2504,17 @@ Content Bottom Bar */
                        </property>
                        <item>
                         <widget class="QTableWidget" name="shareListTable">
-                         <property name="minimumSize">
-                          <size>
-                           <width>0</width>
-                           <height>0</height>
-                          </size>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>16777215</width>
-                           <height>16777215</height>
-                          </size>
-                         </property>
                          <property name="cursor" stdset="0">
                           <cursorShape>PointingHandCursor</cursorShape>
-                         </property>
-                         <property name="frameShape">
-                          <enum>QFrame::NoFrame</enum>
-                         </property>
-                         <property name="verticalScrollBarPolicy">
-                          <enum>Qt::ScrollBarAlwaysOn</enum>
-                         </property>
-                         <property name="horizontalScrollBarPolicy">
-                          <enum>Qt::ScrollBarAsNeeded</enum>
-                         </property>
-                         <property name="sizeAdjustPolicy">
-                          <enum>QAbstractScrollArea::AdjustToContents</enum>
                          </property>
                          <property name="editTriggers">
                           <set>QAbstractItemView::NoEditTriggers</set>
                          </property>
-                         <property name="selectionMode">
-                          <enum>QAbstractItemView::SingleSelection</enum>
-                         </property>
                          <property name="selectionBehavior">
                           <enum>QAbstractItemView::SelectRows</enum>
+                         </property>
+						 <property name="textElideMode">
+                          <enum>Qt::ElideRight</enum>
                          </property>
                          <attribute name="horizontalHeaderVisible">
                           <bool>true</bool>
