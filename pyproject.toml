@@ -5,7 +5,7 @@ saveShareLog = true
 logsPath = "/Users/mr.cheng/GitSourceCodes/file_sharer-Desktop/logs"
 downloadPath = "/Users/mr.cheng/GitSourceCodes/file_sharer-Desktop/Download"
 theme_color = "Default"
-theme_opacity = 99
+theme_opacity = 80
 
 [tool.black]
 line-length = 88

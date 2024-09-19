@@ -138,12 +138,13 @@ class UiFunction:
         )
         self._init_maximizeRestoreButton_style()
 
-    def _change_theme_opacity(self, value) -> None:
-        self._theme_opacity = value
+    def _change_theme_opacity(self, value: Optional[int] = None) -> None:
+        theme_opacity = value or settings.THEME_OPACITY
+        self._theme_opacity = theme_opacity
         self._elements.styleSheet.setStyleSheet(
-            settings.style_sheet(self._theme_color, value)
+            settings.style_sheet(self._theme_color, theme_opacity)
         )
-        self._elements.opacityRateLabel.setText(f"{value}%")
+        self._elements.opacityRateLabel.setText(f"{theme_opacity}%")
 
     def _init_maximizeRestoreButton_style(self):
         maximize_image = self._maximize_image(self._theme_color)
@@ -622,6 +623,7 @@ class UiFunction:
 
     def reset_theme(self):
         self._change_theme_color()
+        self._change_theme_opacity()
 
     def remove_share_row(self: MainWindow, rowIndex: int) -> None:
         self.ui.shareListTable.removeRow(rowIndex)
@@ -1034,9 +1036,10 @@ class UiFunction:
     @property
     def MessageBoxNormalStyle(self) -> str:
         """弹框通用样式"""
+        theme_opacity = settings.THEME_OPACITY / 100
         return f"""
             QMessageBox {{
-                background-color: rgb({self.controlColor.BaseBgColor});
+                background-color: rgba({self.controlColor.BaseBgColor}, {theme_opacity:.2f});
                 border: 1px solid rgb({self.controlColor.BaseColor});
                 border-radius: 10%;
             }}

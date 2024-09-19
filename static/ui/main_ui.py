@@ -382,6 +382,8 @@ class Ui_MainWindow(object):
         self.horizontalLayout_21.setSpacing(0)
         self.horizontalLayout_21.setObjectName("horizontalLayout_21")
         self.opacitySlider = QtWidgets.QSlider(self.themeOpacityFrame)
+        self.opacitySlider.setMinimum(10)
+        self.opacitySlider.setMaximum(80)
         self.opacitySlider.setOrientation(QtCore.Qt.Horizontal)
         self.opacitySlider.setObjectName("opacitySlider")
         self.horizontalLayout_21.addWidget(self.opacitySlider)

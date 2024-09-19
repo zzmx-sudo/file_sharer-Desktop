@@ -124,7 +124,7 @@ QCheckBox::indicator:checked {
 /* ///////////////////////////////////////////////////////////////////////////////
 QLineEdit */
 QLineEdit {
-    background-color: rgb(%(BaseBgColor)s);
+    background-color: rgba(%(BaseBgColor)s, %(ThemeOpacity).2f);
 }
 
 /* ///////////////////////////////////////////////////////////////////////////////
@@ -151,7 +151,7 @@ QComboBox {
 	border: 2px solid rgb(%(LightColor)s);
 	padding: 5px;
 	padding-left: 10px;
-	background-color: rgb(%(BaseBgColor)s)
+	background-color: rgba(%(BaseBgColor)s, %(ThemeOpacity).2f)
 }
 QComboBox:hover {
 	border: 2px solid rgb(%(BaseColor)s);
@@ -171,7 +171,7 @@ QComboBox QAbstractItemView {
 	border-radius: 0px 0px 5px 5px;
 	font-size: 14px;
 	outline: 0px;
-	background-color: rgb(%(BaseBgColor)s)
+	background-color: rgba(%(BaseBgColor)s, %(ThemeOpacity).2f)
 }
 QComboBox QAbstractItemView::item {
     height: 36px;
@@ -191,7 +191,7 @@ QComboBox QAbstractItemView::item:selected {
 /* ///////////////////////////////////////////////////////////////////////////////
 QTableWidget */
 QTableWidget {
-	background-color: rgb(%(BaseBgColor)s);
+	background-color: rgba(%(BaseBgColor)s, %(ThemeOpacity).2f);
 	padding: 10px;
 	border-radius: 5px;
 	gridline-color: rgb(%(LightColor)s);
@@ -304,7 +304,7 @@ QCheckBox::indicator {
 	width: 15px;
 	height: 15px;
 	border-radius: 9px;
-	background: rgb(%(BaseBgColor)s);
+	background: rgba(%(BaseBgColor)s, %(ThemeOpacity).2f);
 }
 QCheckBox::indicator:hover {
 	background-color: rgb(%(SpecialHovColor)s);
@@ -343,7 +343,7 @@ QSlider::handle:horizontal:hover {
 QTooltip */
 QToolTip {
 	color: rgb(%(BaseColor)s);
-	background-color: rgba(%(BaseBgColor)s, 180);
+	background-color: rgba(%(BaseBgColor)s, %(ThemeOpacity).2f);
 	border: 1px solid rgb(%(BaseColor)s);
 	background-image: none;
 	background-position: left center;
@@ -358,14 +358,14 @@ QToolTip {
 /* ///////////////////////////////////////////////////////////////////////////////
 AppBg */
 #AppBg {
-	background-color: rgb(%(BaseBgColor)s);
+	background-color: rgba(%(BaseBgColor)s, %(ThemeOpacity).2f);
 	border: 1px solid rgb(%(BaseColor)s);
 }
 
 /* ///////////////////////////////////////////////////////////////////////////////
 Left Menu Box */
 #leftMenuBox {
-	background-color: rgba(%(DeepBgColor)s, 0.9);
+	background-color: rgba(%(DeepBgColor)s, %(ThemeOpacity).2f);
 }
 #leftMenuFrame {
 	padding-bottom: 5px;
@@ -390,13 +390,13 @@ Left Menu Box */
 /* ///////////////////////////////////////////////////////////////////////////////
 Extra Box */
 #extraBox {
-	background-color: rgb(%(BaseBgColor)s);
+	background-color: rgba(%(BaseBgColor)s, %(ThemeOpacity).2f);
 }
 
 /* ///////////////////////////////////////////////////////////////////////////////
 Extra Top Box */
 #extraTopBox {
-	background-color: rgb(%(BaseColor)s);
+	background-color: rgba(%(BaseColor)s, %(ThemeOpacity).2f);
 	padding: 0 10px;
 }
 #extraTopBox .QLabel {
@@ -432,7 +432,6 @@ Extra Content Box */
 	border: 1px solid rgb(%(BaseColor)s);
 	border-radius: 3%%;
 	margin-right: 10px;
-	background-color: rgb(%(BaseBgColor)s);
 	font: 12px "JetBrains Mono";
 }
 #extraContentBox .QRadioButton::indicator {
@@ -509,7 +508,7 @@ Content Box */
 /* ///////////////////////////////////////////////////////////////////////////////
 Content Top Box */
 #contentTopBox {
-	background-color: rgba(%(DeepBgColor)s, 0.9);
+	background-color: rgba(%(DeepBgColor)s, %(ThemeOpacity).2f);
 	padding: 0 10px 0 20px;
 }
 #contentTitleBox .QLabel {
@@ -530,7 +529,7 @@ Content Top Box */
 /* ///////////////////////////////////////////////////////////////////////////////
 Content Bottom Box */
 #contentBottomBox {
-	background-color: rgba(%(BaseBgColor)s, 0.9);
+	background-color: rgba(%(BaseBgColor)s, %(ThemeOpacity).2f);
 }
 
 /* ///////////////////////////////////////////////////////////////////////////////
@@ -568,7 +567,7 @@ Content client Box */
 /* ///////////////////////////////////////////////////////////////////////////////
 Content Bottom Bar */
 #contentBottomBar {
-	background-color: rgba(%(DeepBgColor)s, 0.9);
+	background-color: rgba(%(DeepBgColor)s, %(ThemeOpacity).2f);
 	color: rgb(97, 97, 97);
 	padding: 0 10px;
 }
