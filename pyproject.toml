@@ -1,15 +1,15 @@
-[tool.black]
-line-length = 88
-target-version = [ "py39",]
-include = "\\.py$"
-extend-exclude = """
-    /(static)/
-"""
-respect-gitignore = true
-
 [file-sharer]
-version = "0.1.1"
+version = "0.2.0"
 saveSystemLog = true
 saveShareLog = true
-logsPath = "/users/mr-cheng/GitSourceCodes/file_sharer-LAN/logs"
-downloadPath = "/users/mr-cheng/GitSourceCodes/file_sharer-LAN/Download"
+logsPath = "/Users/mr.cheng/GitSourceCodes/file_sharer-Desktop/logs"
+downloadPath = "/Users/mr.cheng/GitSourceCodes/file_sharer-Desktop/Download"
+theme_color = "Default"
+theme_opacity = 80
+
+[tool.black]
+line-length = 88
+target-version = [ "py38",]
+include = "\\.py$"
+extend-exclude = "    /(static)/\n"
+respect-gitignore = true

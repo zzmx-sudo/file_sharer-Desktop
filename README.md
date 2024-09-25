@@ -29,7 +29,7 @@
 已支持的平台:
 
 - windows7及以上
-- MacOS 10.14(其他版本暂无条件测试, 可先下载尝鲜)
+- MacOS 12(其他版本暂无条件测试, 可先下载尝鲜)
 
 软件变化请查看：[更新日志](https://github.com/zzmx-sudo/file_sharer-LAN/blob/master/CHANGELOG.md)<br>
 软件下载请到：[发布页面](https://github.com/zzmx-sudo/file_sharer-Desktop/releases)<br>
@@ -58,7 +58,7 @@
 
 本项目欢迎PR, 但为了PR能够顺利合入, 需要注意以下几点:
 
-- PR目标分支: `develop`
+- PR目标分支: `master`
 - 对于添加新功能的PR，建议在PR前先创建issue说明，以确认该功能是否确实需要
 - 对于修复Bug PR，请提供修复前后的说明及重现方式
 - 其他类型的PR则适当附上说明

@@ -1,6 +1,23 @@
 # file_sharer-Desktop changed log
 
 
+## [0.2.0] - 20240926
+### 特性
+
+- 支持主题(颜色)切换, 共预设8个主题(颜色)
+- 支持背景透明度调节
+
+### 优化
+
+- 修改workflow脚本, 支持通过github actions打包发布Release
+
+### 修复
+
+- 修复macos版本的打开报错和闪退
+- 修复保存设置时'NoneType'无'put'属性的报错
+- 修复macos打包后程序读取不到DATA_FILES中文件的问题
+- 修复下载时的偶现失败
+
 ## [0.1.1] - 20231019
 
 ### 优化

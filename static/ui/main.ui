@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1066</width>
-    <height>580</height>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,48 +24,114 @@ Global */
 	font-family: &quot;KaiTi&quot;;
 	background-position: center;
 	background-repeat: no-reperat;
+	border: none;
+	color: rgb(0, 0, 0)
 }
 
 /* ///////////////////////////////////////////////////////////////////////////////
-QWidget */
-QWidget{
-	color: rgb(0, 0, 0);
+Background Image */
+QComboBox::drop-down {
+	background-image: url(:/icons/images/icon/Default/down.png);
+}
+QCheckBox::indicator:checked {
+	background-image: url(:/icons/images/icon/Default/check.png);
+}
+#homeButton {
+	background-image: url(:/icons/images/icon/Default/home.png)
+}
+#serverButton {
+	background-image: url(:/icons/images/icon/Default/server.png)
+}
+#clientButton {
+	background-image: url(:/icons/images/icon/Default/client.png)
+}
+#downloadButton {
+	background-image: url(:/icons/images/icon/Default/download.png)
+}
+#settingButton {
+	background-image: url(:/icons/images/icon/Default/setting.png)
+}
+#minimizeButton {
+	background-image: url(:/icons/images/icon/Default/minimize.png)
+}
+#maximizeRestoreButton {
+	background-image: url(:/icons/images/icon/Default/maximize.png)
+}
+#closeAppButton {
+	background-image: url(:/icons/images/icon/Default/close.png);
+}
+#sharePathButton {
+	background-image: url(:/icons/images/icon/Default/folder.png)
+}
+#logPathButton {
+	background-image: url(:/icons/images/icon/Default/folder.png)
+}
+#downloadPathButton {
+	background-image: url(:/icons/images/icon/Default/folder.png)
+}
+#shareProjectButton {
+	qproperty-icon: url(:/icons/images/icon/Default/share.png);
+	qproperty-iconSize: 16px 16px;
+}
+#browseProjectButton {
+	qproperty-icon: url(:/icons/images/icon/Default/browse.png);
+	qproperty-iconSize: 16px 16px;
+}
+
+/* ///////////////////////////////////////////////////////////////////////////////
+QLineEdit */
+QLineEdit {
+    background-color: rgb(236, 236, 236);
+}
+
+/* ///////////////////////////////////////////////////////////////////////////////
+QPushButton */
+QPushButton {
+	border: 2px solid rgb(126, 199, 255);
+	border-radius: 5%;
+}
+QPushButton:hover {
+	border: 2px solid #409eff;
+}
+QPushButton:pressed {
+	background-color: #409eff;
+}
+QPushButton:disabled {
+	background-color: rgb(200, 200, 200);
 	border: none;
 }
 
 /* ///////////////////////////////////////////////////////////////////////////////
 QComboBox */
 QComboBox {
-	background-color: rgb(236, 236, 236);
 	border-radius: 5%;
-	border: 2px solid #409eff;
+	border: 2px solid rgb(126, 199, 255);
 	padding: 5px;
 	padding-left: 10px;
+    background-color: rgb(236, 236, 236)
 }
 QComboBox:hover {
-	background-color: #409eff;
+	border: 2px solid rgb(64, 158, 255);
 }
 QComboBox::drop-down {
 	subcontrol-origin: padding;
 	subcontrol-position: top right;
 	width: 25px;
 	border-left-width: 1px;
-	border-left-color: #409eff;
+	border-left-color: rgb(64, 158, 255);
 	border-left-style: solid;
-	border-top-right-radius: 3px;
-	border-bottom-right-radius: 3px;
-	background-image: url(:/icons/images/icon/down.png);
 	background-position: center;
 	background-repeat: no-reperat;
 }
-QComboBox::drop-down:hover {
-	background-image: url(:/icons/images/icon/down-active.png);
-}
 QComboBox QAbstractItemView {
-	color: rgb(0, 0, 0);
+    border-radius: 5%%;
+	color: rgb(%(TextColor)s);
+	border: 2px solid rgb(64, 158, 255);
+	border-top: none;
+	outline: 0px;
+	padding: 5px;
 	background-color: rgb(236, 236, 236);
-	padding: 10px;
-	selection-background-color: #409eff;
+	selection-background-color: rgb(64, 158, 255)
 }
 
 /* ///////////////////////////////////////////////////////////////////////////////
@@ -94,6 +160,8 @@ QHeaderView::section {
 	max-width: 100px;
 	border: none;
 	border-style: none;
+	font-size: 15px;
+	font-weight: bold;
 }
 QHeaderView::section:horizontal {
 	border: 1px solid #409eff;
@@ -190,8 +258,34 @@ QCheckBox::indicator {
 QCheckBox::indicator:hover {
 	background-color: #ffffff;
 }
-QCheckBox::indicator:checked {
-	background-image: url(:/icons/images/icon/check.png);
+
+/* ///////////////////////////////////////////////////////////////////////////////
+QSlider */
+QSlider::groove:horizontal {
+    border-radius: 4px;
+    height: 8px;
+	margin: 0px;
+	background-color: rgb(%(DeepBgColor)s);
+	border: 1px solid rgb(%(LightColor)s);
+}
+QSlider::groove:horizontal:hover {
+	border: 2px solid rgb(%(BaseColor)s);
+	border-radius: 5px
+}
+QSlider::sub-page::horizontal {
+    background-color: rgb(%(BaseColor)s);
+    border-radius: 4px
+}
+QSlider::handle:horizontal {
+    background-color: rgb(%(LightColor)s);
+    border: none;
+    height: 20px;
+    width: 20px;
+    margin: -6px 0px;
+	border-radius: 10px;
+}
+QSlider::handle:horizontal:hover {
+    background-color: rgb(%(DeepColor)s);
 }
 
 /* ///////////////////////////////////////////////////////////////////////////////
@@ -218,27 +312,9 @@ AppBg */
 }
 
 /* ///////////////////////////////////////////////////////////////////////////////
-QPushButton */
-QPushButton {
-	border: 2px solid rgb(126, 199, 255);
-	border-radius: 5%;
-	background-color: rg(236, 236, 236)
-}
-QPushButton:hover {
-	border: 2px solid #409eff;
-}
-QPushButton:pressed {
-	background-color: #409eff;
-}
-QPushButton:disabled {
-	background-color: rgb(200, 200, 200);
-	border: none;
-}
-
-/* ///////////////////////////////////////////////////////////////////////////////
 Left Menu Box */
 #leftMenuBox {
-	background-color: rgb(222, 222, 222);
+	background-color: rgba(222, 222, 222, 0.9);
 }
 #leftMenuFrame {
 	padding-bottom: 5px;
@@ -265,10 +341,11 @@ Extra Box */
 #extraBox {
 	background-color: rgb(236, 236, 236);
 }
+
 /* ///////////////////////////////////////////////////////////////////////////////
 Extra Top Box */
 #extraTopBox {
-	background-color: rgb(64, 158, 255);
+	background-color: #409eff;
 	padding: 0 10px;
 }
 #extraTopBox .QLabel {
@@ -285,6 +362,7 @@ Extra Top Box */
 #extraTopBox .QPushButton:pressed {
 	background-color: #ffffff;
 }
+
 /* ///////////////////////////////////////////////////////////////////////////////
 Extra Content Box */
 #extraContentBox {
@@ -305,6 +383,47 @@ Extra Content Box */
 	margin-right: 10px;
 	background-color: rgb(236, 236, 236);
 	font: 12px &quot;JetBrains Mono&quot;;
+}
+#extraContentBox .QRadioButton::indicator {
+    width: 22px;
+    height: 22px;
+    margin: 2px;
+    border-radius: 5px;
+}
+#extraContentBox .QRadioButton::indicator:hover {
+    margin: 0px;
+    width: 26px;
+    height: 26px;
+}
+#extraContentBox .QRadioButton::indicator:checked {
+    width: 24px;
+    height: 24px;
+    margin: 0px;
+    border: 2px solid black;
+}
+#extraContentBox #Default::indicator {
+    background-color: rgb(64, 158, 255);
+}
+#extraContentBox #Red::indicator {
+    background-color: rgb(241, 80, 80);
+}
+#extraContentBox #Orange::indicator {
+    background-color: rgb(240, 165, 0);
+}
+#extraContentBox #Yellow::indicator {
+    background-color: rgb(230, 200, 50);
+}
+#extraContentBox #Green::indicator {
+    background-color: rgb(0, 180, 0);
+}
+#extraContentBox #Cyan::indicator {
+    background-color: rgb(30, 180, 180);
+}
+#extraContentBox #Blue::indicator {
+    background-color: rgb(90, 90, 220);
+}
+#extraContentBox #Purple::indicator {
+    background-color: rgb(128, 0, 128);
 }
 
 /* ///////////////////////////////////////////////////////////////////////////////
@@ -339,7 +458,7 @@ Content Box */
 /* ///////////////////////////////////////////////////////////////////////////////
 Content Top Box */
 #contentTopBox {
-	background-color: rgb(236, 236, 236);
+	background-color: rgba(222, 222, 222, 0.9);
 	padding: 0 10px 0 20px;
 }
 #contentTitleBox .QLabel {
@@ -356,18 +475,17 @@ Content Top Box */
 	border: none;
 	background-color: #409eff;
 }
+
 /* ///////////////////////////////////////////////////////////////////////////////
 Content Bottom Box */
 #contentBottomBox {
-	background-color: rgb(246, 246, 246);
+	background-color: rgba(236, 236, 236, 0.9);
 }
+
 /* ///////////////////////////////////////////////////////////////////////////////
 Content stackedWidget Box */
 /* ///////////////////////////////////////////////////////////////////////////////
 Content server Box */
-#server {
-	background-color: rgb(246, 246, 246);
-}
 #createShareButton {
 	border: none;
 	border-radius: 13%;
@@ -385,21 +503,21 @@ Content server Box */
 	border: 1px solid #409eff;
 	border-radius: 5%;
 	margin-right: 10px;
+	padding-left: 5px;
 }
+
 /* ///////////////////////////////////////////////////////////////////////////////
 Content client Box */
 #clientParamFrame .QLineEdit {
 	border: 1px solid #409eff;
 	border-radius: 5%;
-	padding-left: 10px;
+	padding-left: 5px;
 }
-#fileListFrame .QTableWidget::item:selected {
-	background-color: rgb(247, 247, 247);
-}
+
 /* ///////////////////////////////////////////////////////////////////////////////
 Content Bottom Bar */
 #contentBottomBar {
-	background-color: rgb(236, 236, 236);
+	background-color: rgba(222, 222, 222, 0.9);
 	color: rgb(97, 97, 97);
 	padding: 0 10px;
 }</string>
@@ -589,7 +707,7 @@ Content Bottom Bar */
                    <string>首页</string>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-image: url(:/icons/images/icon/home.png);</string>
+                   <string notr="true"/>
                   </property>
                   <property name="text">
                    <string/>
@@ -617,7 +735,7 @@ Content Bottom Bar */
                    <string>服务端</string>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-image: url(:/icons/images/icon/server.png);</string>
+                   <string notr="true"/>
                   </property>
                   <property name="text">
                    <string/>
@@ -645,7 +763,7 @@ Content Bottom Bar */
                    <string>客户端</string>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-image: url(:/icons/images/icon/client.png);</string>
+                   <string notr="true"/>
                   </property>
                   <property name="text">
                    <string/>
@@ -673,7 +791,7 @@ Content Bottom Bar */
                    <string>下载记录</string>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-image: url(:/icons/images/icon/download.png);</string>
+                   <string notr="true"/>
                   </property>
                   <property name="text">
                    <string/>
@@ -740,7 +858,7 @@ Content Bottom Bar */
                    <string>打开/关闭设置窗口</string>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-image: url(:/icons/images/icon/setting.png);</string>
+                   <string notr="true"/>
                   </property>
                   <property name="text">
                    <string/>
@@ -797,6 +915,12 @@ Content Bottom Bar */
           </property>
           <item>
            <widget class="QFrame" name="extraTopBox">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
               <width>16777215</width>
@@ -843,7 +967,7 @@ Content Bottom Bar */
                 <string>关闭设置窗口</string>
                </property>
                <property name="styleSheet">
-                <string notr="true">background-image: url(:/icons/images/icon/close-active.png);</string>
+                <string notr="true">background-image: url(:/icons/images/icon/close-setting.png)</string>
                </property>
                <property name="text">
                 <string/>
@@ -1076,7 +1200,7 @@ Content Bottom Bar */
                       <string>打开资源管理器选择路径</string>
                      </property>
                      <property name="styleSheet">
-                      <string notr="true">background-image: url(:/icons/images/icon/folder.png);</string>
+                      <string notr="true"/>
                      </property>
                      <property name="text">
                       <string/>
@@ -1180,10 +1304,373 @@ Content Bottom Bar */
                       <string>打开资源管理器选择路径</string>
                      </property>
                      <property name="styleSheet">
-                      <string notr="true">background-image: url(:/icons/images/icon/folder.png);</string>
+                      <string notr="true"/>
                      </property>
                      <property name="text">
                       <string/>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="themeColorBox">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+               </property>
+               <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_25">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="themeColorLabel">
+                  <property name="text">
+                   <string>主题颜色：</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QFrame" name="FristColorFrame">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="contextMenuPolicy">
+                   <enum>Qt::NoContextMenu</enum>
+                  </property>
+                  <property name="layoutDirection">
+                   <enum>Qt::LeftToRight</enum>
+                  </property>
+                  <property name="frameShape">
+                   <enum>QFrame::StyledPanel</enum>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Raised</enum>
+                  </property>
+                  <layout class="QHBoxLayout" name="horizontalLayout_19">
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
+                   <property name="sizeConstraint">
+                    <enum>QLayout::SetDefaultConstraint</enum>
+                   </property>
+                   <property name="leftMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <widget class="QRadioButton" name="Default">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="minimumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="layoutDirection">
+                      <enum>Qt::LeftToRight</enum>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QRadioButton" name="Red">
+                     <property name="minimumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QRadioButton" name="Orange">
+                     <property name="minimumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QRadioButton" name="Yellow">
+                     <property name="minimumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QFrame" name="SecondColorFrame">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="frameShape">
+                   <enum>QFrame::StyledPanel</enum>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Raised</enum>
+                  </property>
+                  <layout class="QHBoxLayout" name="horizontalLayout_20">
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
+                   <property name="leftMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <widget class="QRadioButton" name="Green">
+                     <property name="minimumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QRadioButton" name="Cyan">
+                     <property name="minimumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QRadioButton" name="Blue">
+                     <property name="minimumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QRadioButton" name="Purple">
+                     <property name="minimumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>30</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="themeOpacityBox">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+               </property>
+               <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_26">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="themeOpacityLabel">
+                  <property name="text">
+                   <string>透明度：</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QFrame" name="themeOpacityFrame">
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="frameShape">
+                   <enum>QFrame::StyledPanel</enum>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Raised</enum>
+                  </property>
+                  <layout class="QHBoxLayout" name="horizontalLayout_21" stretch="8,2">
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
+                   <property name="leftMargin">
+                    <number>5</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>5</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <widget class="QSlider" name="opacitySlider">
+                     <property name="minimum">
+                      <number>10</number>
+                     </property>
+                     <property name="maximum">
+                      <number>80</number>
+                     </property>
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="opacityRateLabel">
+                     <property name="text">
+                      <string>100%</string>
                      </property>
                     </widget>
                    </item>
@@ -1209,13 +1696,13 @@ Content Bottom Bar */
                  <number>10</number>
                 </property>
                 <property name="topMargin">
-                 <number>10</number>
+                 <number>9</number>
                 </property>
                 <property name="rightMargin">
                  <number>0</number>
                 </property>
                 <property name="bottomMargin">
-                 <number>10</number>
+                 <number>9</number>
                 </property>
                 <item>
                  <widget class="QPushButton" name="shareProjectButton">
@@ -1237,10 +1724,6 @@ Content Bottom Bar */
                   <property name="text">
                    <string>分享软件</string>
                   </property>
-                  <property name="icon">
-                   <iconset resource="main.qrc">
-                    <normaloff>:/icons/images/icon/share.png</normaloff>:/icons/images/icon/share.png</iconset>
-                  </property>
                  </widget>
                 </item>
                 <item>
@@ -1260,12 +1743,11 @@ Content Bottom Bar */
                   <property name="cursor">
                    <cursorShape>PointingHandCursor</cursorShape>
                   </property>
+                  <property name="styleSheet">
+                   <string notr="true"/>
+                  </property>
                   <property name="text">
                    <string>打开项目</string>
-                  </property>
-                  <property name="icon">
-                   <iconset resource="main.qrc">
-                    <normaloff>:/icons/images/icon/browse.png</normaloff>:/icons/images/icon/browse.png</iconset>
                   </property>
                  </widget>
                 </item>
@@ -1487,7 +1969,7 @@ Content Bottom Bar */
                    <string>最小化窗口</string>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-image: url(:/icons/images/icon/minimize.png);</string>
+                   <string notr="true"/>
                   </property>
                   <property name="text">
                    <string/>
@@ -1515,7 +1997,7 @@ Content Bottom Bar */
                    <string>窗口全屏</string>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-image: url(:/icons/images/icon/maximize.png);</string>
+                   <string notr="true"/>
                   </property>
                   <property name="text">
                    <string/>
@@ -1543,7 +2025,7 @@ Content Bottom Bar */
                    <string>关闭应用</string>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-image: url(:/icons/images/icon/close.png);</string>
+                   <string notr="true"/>
                   </property>
                   <property name="text">
                    <string/>
@@ -1848,7 +2330,7 @@ Content Bottom Bar */
                              <cursorShape>PointingHandCursor</cursorShape>
                             </property>
                             <property name="styleSheet">
-                             <string notr="true">background-image: url(:/icons/images/icon/folder.png);</string>
+                             <string notr="true"/>
                             </property>
                             <property name="text">
                              <string/>
@@ -2013,41 +2495,17 @@ Content Bottom Bar */
                        </property>
                        <item>
                         <widget class="QTableWidget" name="shareListTable">
-                         <property name="minimumSize">
-                          <size>
-                           <width>0</width>
-                           <height>0</height>
-                          </size>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>16777215</width>
-                           <height>16777215</height>
-                          </size>
-                         </property>
                          <property name="cursor" stdset="0">
                           <cursorShape>PointingHandCursor</cursorShape>
-                         </property>
-                         <property name="frameShape">
-                          <enum>QFrame::NoFrame</enum>
-                         </property>
-                         <property name="verticalScrollBarPolicy">
-                          <enum>Qt::ScrollBarAlwaysOn</enum>
-                         </property>
-                         <property name="horizontalScrollBarPolicy">
-                          <enum>Qt::ScrollBarAsNeeded</enum>
-                         </property>
-                         <property name="sizeAdjustPolicy">
-                          <enum>QAbstractScrollArea::AdjustToContents</enum>
                          </property>
                          <property name="editTriggers">
                           <set>QAbstractItemView::NoEditTriggers</set>
                          </property>
-                         <property name="selectionMode">
-                          <enum>QAbstractItemView::SingleSelection</enum>
-                         </property>
                          <property name="selectionBehavior">
                           <enum>QAbstractItemView::SelectRows</enum>
+                         </property>
+						 <property name="textElideMode">
+                          <enum>Qt::ElideRight</enum>
                          </property>
                          <attribute name="horizontalHeaderVisible">
                           <bool>true</bool>
@@ -2407,7 +2865,7 @@ Content Bottom Bar */
                                 <string>返回上一级目录</string>
                                </property>
                                <property name="icon">
-                                <iconset resource="main.qrc">
+                                <iconset>
                                  <normaloff>:/icons/images/icon/back.png</normaloff>:/icons/images/icon/back.png</iconset>
                                </property>
                                <property name="iconSize">
@@ -2452,7 +2910,7 @@ Content Bottom Bar */
                              <enum>QAbstractItemView::SelectRows</enum>
                             </property>
                             <attribute name="horizontalHeaderVisible">
-                             <bool>true</bool>
+                             <bool>false</bool>
                             </attribute>
                             <attribute name="horizontalHeaderCascadingSectionResizes">
                              <bool>false</bool>
@@ -2619,7 +3077,7 @@ Content Bottom Bar */
                           <enum>Qt::ElideRight</enum>
                          </property>
                          <attribute name="horizontalHeaderVisible">
-                          <bool>true</bool>
+                          <bool>false</bool>
                          </attribute>
                          <attribute name="horizontalHeaderMinimumSectionSize">
                           <number>50</number>

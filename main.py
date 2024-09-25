@@ -5,7 +5,7 @@ import traceback
 from multiprocessing import Queue
 from typing import Union
 
-from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QButtonGroup
 from PyQt5.Qt import QApplication, QIcon
 from PyQt5 import QtGui
 
@@ -16,6 +16,7 @@ from command.manage import ServiceProcessManager
 from model.sharing import FuseSharingModel
 from model.file import FileModel, DirModel
 from model.public_types import ShareType as shareType
+from model.public_types import ThemeColor as themeColor
 from model.qt_thread import *
 from model.browse import BrowseFileDictModel
 from utils.public_func import generate_uuid
@@ -28,6 +29,7 @@ class MainWindow(QMainWindow):
         # load ui
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self._merge_theme_radioButton()
 
         # setup ui_function
         from utils.ui_function import UiFunction
@@ -51,6 +53,17 @@ class MainWindow(QMainWindow):
 
         # show window
         self.show()
+
+    def _merge_theme_radioButton(self) -> None:
+        self.ui.themeColorButtonGroup = QButtonGroup()
+        self.ui.themeColorButtonGroup.addButton(self.ui.Default)
+        self.ui.themeColorButtonGroup.addButton(self.ui.Red)
+        self.ui.themeColorButtonGroup.addButton(self.ui.Orange)
+        self.ui.themeColorButtonGroup.addButton(self.ui.Yellow)
+        self.ui.themeColorButtonGroup.addButton(self.ui.Green)
+        self.ui.themeColorButtonGroup.addButton(self.ui.Cyan)
+        self.ui.themeColorButtonGroup.addButton(self.ui.Blue)
+        self.ui.themeColorButtonGroup.addButton(self.ui.Purple)
 
     def _load_settings(self) -> None:
         self._cancel_settings()
@@ -119,6 +132,12 @@ class MainWindow(QMainWindow):
             lambda: self._remove_download_list()
         )
 
+    def save_settings(self) -> None:
+        """
+        Expose save settings to the outside
+        :return: None
+        """
+
     def _save_settings(self) -> None:
         logs_path: str = self.ui.logPathEdit.text()
         download_path: str = self.ui.downloadPathEdit.text()
@@ -152,15 +171,32 @@ class MainWindow(QMainWindow):
             sysLogger.reload()
             sharerLogger.reload()
         settings.DOWNLOAD_DIR = download_path
+        checkedRadio = self.ui.themeColorButtonGroup.checkedButton()
+        theme_color = themeColor.dispatch(checkedRadio.objectName())
+        self._ui_function.save_theme(theme_color)
+        settings.THEME_COLOR = theme_color
+        settings.THEME_OPACITY = self.ui.opacitySlider.value()
         settings.dump()
         self._ui_function.show_info_messageBox("保存配置成功")
         sysLogger.info("保存配置成功")
+
+    def reset_settings(self) -> None:
+        """
+        Expose reset settings to the outside
+        :return: None
+        """
+
+        self._cancel_settings()
 
     def _cancel_settings(self) -> None:
         self.ui.saveSystemCheck.setChecked(settings.SAVE_SYSTEM_LOG)
         self.ui.saveShareCheck.setChecked(settings.SAVE_SHARER_LOG)
         self.ui.logPathEdit.setText(settings.LOGS_PATH)
         self.ui.downloadPathEdit.setText(settings.DOWNLOAD_DIR)
+        rollback_radioButton = getattr(self.ui, settings.THEME_COLOR.value)
+        rollback_radioButton.setChecked(True)
+        self.ui.opacitySlider.setValue(settings.THEME_OPACITY)
+        self._ui_function.reset_theme()
 
     def _update_file_combo(self) -> None:
         share_path: str = self.ui.sharePathEdit.text()
@@ -341,7 +377,7 @@ class MainWindow(QMainWindow):
         if fileDict:
             if (
                 self._ui_function.show_question_messageBox(
-                    f"当前正要下载文件: {fileDict.get('fileName', '未知文件名')}, 暂未实现取消下载功能, 确认是否下载？",
+                    f"当前正要下载文件: {fileDict.get('fileName', '未知文件名')}, 确认是否下载？",
                     "确认是否下载",
                     "没错, 我就要下载它",
                     "点错了",
@@ -518,7 +554,7 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         result = self._ui_function.show_question_messageBox("您正在退出程序，请确认是否退出？", "是否退出？")
-        if result == 0:
+        if result != 0:
             self._service_process.close_all()
             self._sharing_list.dump()
             event.accept()

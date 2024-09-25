@@ -42,14 +42,12 @@ pyftpdlib==1.5.7
 pyinstaller==5.13.2
 pyinstaller-hooks-contrib==2023.8
 pyperclip==1.8.2
-PyQt5==5.15.9
-pyqt5-plugins==5.15.9.2.3
-PyQt5-Qt5==5.15.2
+PyQt5==5.15.11
+PyQt5-Qt5==5.15.14; platform_system == "Darwin"
+PyQt5-Qt5==5.15.2; platform_system == "Windows"
 PyQt5_sip==12.15.0
 python-dotenv==1.0.0
 pywin32-ctypes==0.2.2
-qt5-applications==5.15.2.2.3
-qt5-tools==5.15.2.1.3
 requests==2.31.0
 sniffio==1.3.0
 starlette==0.27.0
@@ -59,3 +57,4 @@ typing_extensions==4.7.1
 urllib3==2.0.4
 uvicorn==0.23.2
 yarl==1.9.2
+zipp==3.20.1

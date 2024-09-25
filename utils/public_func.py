@@ -18,6 +18,7 @@ import os
 import sys
 import platform
 import uuid
+import json
 
 import toml
 
@@ -77,7 +78,13 @@ def generate_http_port(start_port: int) -> int:
 
 def generate_project_path() -> str:
     if getattr(sys, "frozen", False):
-        return os.path.dirname(sys.executable)
+        # MacOS的静态文件均放在Resources路径下
+        if get_system() == "Darwin":
+            return os.path.join(
+                os.path.dirname(os.path.dirname(sys.executable)), "Resources"
+            )
+        else:
+            return os.path.dirname(sys.executable)
     else:
         return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -101,3 +108,20 @@ def generate_product_version() -> str:
     tool_config = get_config_from_toml()
 
     return tool_config.get("file-sharer", {}).get("version", "0.1.0")
+
+
+def generate_color_card_map() -> dict:
+    project_path = generate_project_path()
+    color_card_json_path = os.path.join(
+        project_path, "static", "themes", "color_card.json"
+    )
+    if not os.path.exists(color_card_json_path):
+        color_card_json_path = os.path.join(project_path, "color_card.json")
+    if not os.path.exists(color_card_json_path):
+        return {}
+
+    with open(color_card_json_path) as f:
+        try:
+            return json.load(f)
+        except:
+            return {}

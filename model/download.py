@@ -40,9 +40,10 @@ class DownloadFileDictModel(list):
         if status is DownloadStatus.DOING:
             progressBar.setValue(msg)
         elif status is DownloadStatus.PAUSE:
+            button_str = self._window._ui_function._continue_button_str
             self._window._ui_function.progressBar_change_to_pause(progressBar)
             pushButton.clicked.disconnect()
-            self._setup_options_widget(index, fileObj, "继续下载", tableWidget)
+            self._setup_options_widget(index, fileObj, button_str, tableWidget)
         elif status is DownloadStatus.SUCCESS:
             progressBar.setValue(100)
             self._window._ui_function.pushButton_change_to_remove(pushButton)
@@ -50,9 +51,10 @@ class DownloadFileDictModel(list):
                 lambda: self._remove_download_item(fileObj, tableWidget)
             )
         else:
+            button_str = self._window._ui_function._reset_button_str
             self._window._ui_function.progressBar_change_to_failed(progressBar)
             pushButton.clicked.disconnect()
-            self._setup_options_widget(index, fileObj, "重新下载", tableWidget)
+            self._setup_options_widget(index, fileObj, button_str, tableWidget)
 
     def remove_download_list(self, tableWidget: QTableWidget) -> None:
         row_index = 0
