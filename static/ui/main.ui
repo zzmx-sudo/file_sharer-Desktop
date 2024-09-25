@@ -111,42 +111,27 @@ QComboBox {
     background-color: rgb(236, 236, 236)
 }
 QComboBox:hover {
-	border: 2px solid #409eff;
-}
-QComboBox:pressed {
-	background-color: #409eff;
+	border: 2px solid rgb(64, 158, 255);
 }
 QComboBox::drop-down {
 	subcontrol-origin: padding;
 	subcontrol-position: top right;
 	width: 25px;
 	border-left-width: 1px;
-	border-left-color: #409eff;
+	border-left-color: rgb(64, 158, 255);
 	border-left-style: solid;
-	border-top-right-radius: 3px;
-	border-bottom-right-radius: 3px;
 	background-position: center;
 	background-repeat: no-reperat;
 }
 QComboBox QAbstractItemView {
-	color: rgb(0, 0, 0);
+    border-radius: 5%%;
+	color: rgb(%(TextColor)s);
+	border: 2px solid rgb(64, 158, 255);
+	border-top: none;
+	outline: 0px;
+	padding: 5px;
 	background-color: rgb(236, 236, 236);
-	padding: 10px;
-	selection-background-color: #409eff;
-}
-QComboBox QAbstractItemView::item {
-    height: 36px;
-    broder-bottom-width: 1px;
-    broder-bottom-color: rgb(%(BaseColor)s);
-    border-bottom-style: solid
-}
-QComboBox QAbstractItemView::item:hover {
-    color: rgb(%(SpecialHovColor)s);
-    background-color: rgb(%(BaseColor)s)
-}
-QComboBox QAbstractItemView::item:selected {
-    color: rgb(%(SpecialHovColor)s);
-    background-color: rgb(%(DeepColor)s)
+	selection-background-color: rgb(64, 158, 255)
 }
 
 /* ///////////////////////////////////////////////////////////////////////////////

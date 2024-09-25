@@ -4,6 +4,7 @@ import webbrowser
 from typing import Union, Optional
 
 from PyQt5 import QtWidgets, QtGui
+from PyQt5.QtWidgets import QListView, QComboBox
 from PyQt5.QtCore import QPropertyAnimation, QEasingCurve, Qt, QEvent, QPoint
 from PyQt5.Qt import (
     QPushButton,
@@ -61,8 +62,25 @@ class UiFunction:
         self._main_window.setWindowFlags(Qt.FramelessWindowHint)
         self._main_window.mousePressEvent = self._mousePressEvent
         self._main_window.resizeEvent = self._resize_grips
+        # QCombox
+        self._elements.shareTypeCombo.setView(QListView())
+        self._elements.shareFileCombo.setView(QListView())
+        self._comboBox_style_add_minHeight(
+            self._elements.shareTypeCombo, self._elements.shareFileCombo
+        )
         # elements event connect
         self._setup_event_connect()
+
+    def _comboBox_style_add_minHeight(self, *comboBoxs: QComboBox) -> None:
+        for comboBox in comboBoxs:
+            ori_style = comboBox.styleSheet()
+            comboBox.setStyleSheet(
+                ori_style + """
+                    QComboBox QAbstractItemView::item {
+                        min-height: 20px;
+                    }
+                """
+            )
 
     def _setup_event_connect(self) -> None:
         # window elements
@@ -346,8 +364,8 @@ class UiFunction:
         self,
         msg: str,
         title: str,
-        yes_button_text: str = "确认",
-        no_button_text: str = "取消",
+        yes_button_text: str = "取消",
+        no_button_text: str = "确认",
     ) -> int:
         question = QMessageBox(
             QMessageBox.Question, title, msg, parent=self._main_window
@@ -1036,10 +1054,9 @@ class UiFunction:
     @property
     def MessageBoxNormalStyle(self) -> str:
         """弹框通用样式"""
-        theme_opacity = settings.THEME_OPACITY / 100
         return f"""
             QMessageBox {{
-                background-color: rgba({self.controlColor.BaseBgColor}, {theme_opacity:.2f});
+                background-color: rgb({self.controlColor.BaseBgColor});
                 border: 1px solid rgb({self.controlColor.BaseColor});
                 border-radius: 10%;
             }}
