@@ -22,8 +22,11 @@ jobs:
 
       - name: Install NSIS and 7Z
         run: |
-          choco install nsis -y
+          choco install nsis.unicode -y
           choco install 7zip -y
+
+      - name: Set code page to UTF-8
+        run: chcp 65001
 
       - name: Gen Current ChangeLog
         run: |
@@ -63,8 +66,11 @@ jobs:
 
       - name: Install NSIS and 7Z
         run: |
-          choco install nsis -y
+          choco install nsis.unicode -y
           choco install 7zip -y
+
+      - name: Set code page to UTF-8
+        run: chcp 65001
 
       - name: Compress windows Binary
         run: |
