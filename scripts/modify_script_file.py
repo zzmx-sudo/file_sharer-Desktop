@@ -55,7 +55,7 @@ def modify_nsis_file() -> None:
 
     def _modify_nsis_file(file_path: str) -> None:
         new_str = ""
-        with open(file_path, encoding="gbk") as f:
+        with open(file_path, encoding="utf-8") as f:
             for line in f.readlines():
                 if line.startswith("!define PRODUCT_VERSION"):
                     line = f'!define PRODUCT_VERSION "v{product_version}"\n'
@@ -64,7 +64,7 @@ def modify_nsis_file() -> None:
 
                 new_str += line
 
-        with open(file_path, "w", encoding="gbk") as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(new_str)
 
     _modify_nsis_file(nsis_file_64)
