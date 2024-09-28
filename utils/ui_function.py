@@ -75,7 +75,8 @@ class UiFunction:
         for comboBox in comboBoxs:
             ori_style = comboBox.styleSheet()
             comboBox.setStyleSheet(
-                ori_style + """
+                ori_style
+                + """
                     QComboBox QAbstractItemView::item {
                         min-height: 20px;
                     }

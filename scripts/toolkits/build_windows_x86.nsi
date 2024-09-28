@@ -1,7 +1,9 @@
-; °²×°³ÌĞò³õÊ¼¶¨Òå³£Á¿
-!define PRODUCT_NAME "ÎÄ¼ş¹²ÏíÖúÊÖ"
+Unicode true
+
+; å®‰è£…ç¨‹åºåˆå§‹å®šä¹‰å¸¸é‡
+!define PRODUCT_NAME "æ–‡ä»¶å…±äº«åŠ©æ‰‹"
 !define PRODUCT_VERSION "v0.1.0"
-!define PRODUCT_PUBLISHER "´ó±¦ÌìÌì¼ûØ¼"
+!define PRODUCT_PUBLISHER "å¤§å®å¤©å¤©è§ä¸¶"
 !define PRODUCT_WEB_SITE "https://github.com/zzmx-sudo/file_sharer-Desktop"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\file-sharer.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
@@ -12,48 +14,48 @@
 SetCompressor lzma
 SetCompressorDictSize 32
 
-; ------ MUI ÏÖ´ú½çÃæ¶¨Òå (1.67 °æ±¾ÒÔÉÏ¼æÈİ) ------
+; ------ MUI ç°ä»£ç•Œé¢å®šä¹‰ (1.67 ç‰ˆæœ¬ä»¥ä¸Šå…¼å®¹) ------
 !include "MUI.nsh"
 
-; MUI Ô¤¶¨Òå³£Á¿
+; MUI é¢„å®šä¹‰å¸¸é‡
 !define MUI_ABORTWARNING
 !define MUI_ICON "${PROJECT_DIR}\build\file-sharer\icon.ico"
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
 
-; ÓïÑÔÑ¡Ôñ´°¿Ú³£Á¿ÉèÖÃ
+; è¯­è¨€é€‰æ‹©çª—å£å¸¸é‡è®¾ç½®
 !define MUI_LANGDLL_REGISTRY_ROOT "${PRODUCT_UNINST_ROOT_KEY}"
 !define MUI_LANGDLL_REGISTRY_KEY "${PRODUCT_UNINST_KEY}"
 !define MUI_LANGDLL_REGISTRY_VALUENAME "NSIS:Language"
 
-; »¶Ó­Ò³Ãæ
+; æ¬¢è¿é¡µé¢
 !insertmacro MUI_PAGE_WELCOME
-; Ğí¿ÉĞ­ÒéÒ³Ãæ
+; è®¸å¯åè®®é¡µé¢
 !define MUI_LICENSEPAGE_CHECKBOX
 !insertmacro MUI_PAGE_LICENSE "${PROJECT_DIR}\licenses\license.txt"
-; °²×°Ä¿Â¼Ñ¡ÔñÒ³Ãæ
+; å®‰è£…ç›®å½•é€‰æ‹©é¡µé¢
 !insertmacro MUI_PAGE_DIRECTORY
-; °²×°¹ı³ÌÒ³Ãæ
+; å®‰è£…è¿‡ç¨‹é¡µé¢
 !insertmacro MUI_PAGE_INSTFILES
-; °²×°Íê³ÉÒ³Ãæ
+; å®‰è£…å®Œæˆé¡µé¢
 !define MUI_FINISHPAGE_RUN "$INSTDIR\file-sharer.exe"
 !insertmacro MUI_PAGE_FINISH
 
-; °²×°Ğ¶ÔØ¹ı³ÌÒ³Ãæ
+; å®‰è£…å¸è½½è¿‡ç¨‹é¡µé¢
 !insertmacro MUI_UNPAGE_INSTFILES
 
-; °²×°½çÃæ°üº¬µÄÓïÑÔÉèÖÃ
+; å®‰è£…ç•Œé¢åŒ…å«çš„è¯­è¨€è®¾ç½®
 !insertmacro MUI_LANGUAGE "English"
 !insertmacro MUI_LANGUAGE "SimpChinese"
 
-; °²×°Ô¤ÊÍ·ÅÎÄ¼ş
+; å®‰è£…é¢„é‡Šæ”¾æ–‡ä»¶
 !insertmacro MUI_RESERVEFILE_LANGDLL
 !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
-; ------ MUI ÏÖ´ú½çÃæ¶¨Òå½áÊø ------
+; ------ MUI ç°ä»£ç•Œé¢å®šä¹‰ç»“æŸ ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 !system 'mkdir "${INSTALLER_NAME}\.."'
 OutFile "${INSTALLER_NAME}"
-InstallDir "$PROGRAMFILES\ÎÄ¼ş¹²ÏíÖúÊÖ"
+InstallDir "$PROGRAMFILES\æ–‡ä»¶å…±äº«åŠ©æ‰‹"
 InstallDirRegKey HKLM "${PRODUCT_UNINST_KEY}" "UninstallString"
 ShowInstDetails show
 ShowUnInstDetails show
@@ -62,9 +64,9 @@ Section "MainSection" SEC01
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
   File "${PROJECT_DIR}\build\file-sharer\file-sharer.exe"
-  CreateDirectory "$SMPROGRAMS\ÎÄ¼ş¹²ÏíÖúÊÖ"
-  CreateShortCut "$SMPROGRAMS\ÎÄ¼ş¹²ÏíÖúÊÖ\ÎÄ¼ş¹²ÏíÖúÊÖ.lnk" "$INSTDIR\file-sharer.exe" "" "$INSTDIR\icon.ico"
-  CreateShortCut "$DESKTOP\ÎÄ¼ş¹²ÏíÖúÊÖ.lnk" "$INSTDIR\file-sharer.exe" "" "$INSTDIR\icon.ico"
+  CreateDirectory "$SMPROGRAMS\æ–‡ä»¶å…±äº«åŠ©æ‰‹"
+  CreateShortCut "$SMPROGRAMS\æ–‡ä»¶å…±äº«åŠ©æ‰‹\æ–‡ä»¶å…±äº«åŠ©æ‰‹.lnk" "$INSTDIR\file-sharer.exe" "" "$INSTDIR\icon.ico"
+  CreateShortCut "$DESKTOP\æ–‡ä»¶å…±äº«åŠ©æ‰‹.lnk" "$INSTDIR\file-sharer.exe" "" "$INSTDIR\icon.ico"
   SetOverwrite off
   File "${PROJECT_DIR}\build\file-sharer\pyproject.toml"
   File "${PROJECT_DIR}\build\file-sharer\file_sharing_backups.json"
@@ -73,9 +75,9 @@ Section "MainSection" SEC01
 SectionEnd
 
 Section -AdditionalIcons
-  WriteIniStr "$INSTDIR\´ò¿ªÏîÄ¿.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"
-  CreateShortCut "$SMPROGRAMS\ÎÄ¼ş¹²ÏíÖúÊÖ\Website.lnk" "$INSTDIR\´ò¿ªÏîÄ¿.url"
-  CreateShortCut "$SMPROGRAMS\ÎÄ¼ş¹²ÏíÖúÊÖ\Uninstall.lnk" "$INSTDIR\uninst.exe"
+  WriteIniStr "$INSTDIR\æ‰“å¼€é¡¹ç›®.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"
+  CreateShortCut "$SMPROGRAMS\æ–‡ä»¶å…±äº«åŠ©æ‰‹\Website.lnk" "$INSTDIR\æ‰“å¼€é¡¹ç›®.url"
+  CreateShortCut "$SMPROGRAMS\æ–‡ä»¶å…±äº«åŠ©æ‰‹\Uninstall.lnk" "$INSTDIR\uninst.exe"
 SectionEnd
 
 Section -Post
@@ -89,14 +91,14 @@ Section -Post
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
 SectionEnd
 
-#-- ¸ù¾İ NSIS ½Å±¾±à¼­¹æÔò£¬ËùÓĞ Function Çø¶Î±ØĞë·ÅÖÃÔÚ Section Çø¶ÎÖ®ºó±àĞ´£¬ÒÔ±ÜÃâ°²×°³ÌĞò³öÏÖÎ´¿ÉÔ¤ÖªµÄÎÊÌâ¡£--#
+#-- æ ¹æ® NSIS è„šæœ¬ç¼–è¾‘è§„åˆ™ï¼Œæ‰€æœ‰ Function åŒºæ®µå¿…é¡»æ”¾ç½®åœ¨ Section åŒºæ®µä¹‹åç¼–å†™ï¼Œä»¥é¿å…å®‰è£…ç¨‹åºå‡ºç°æœªå¯é¢„çŸ¥çš„é—®é¢˜ã€‚--#
 
 Function .onInit
   !insertmacro MUI_LANGDLL_DISPLAY
 FunctionEnd
 
 /******************************
- *  ÒÔÏÂÊÇ°²×°³ÌĞòµÄĞ¶ÔØ²¿·Ö  *
+ *  ä»¥ä¸‹æ˜¯å®‰è£…ç¨‹åºçš„å¸è½½éƒ¨åˆ†  *
  ******************************/
 
 Section Uninstall
@@ -106,12 +108,12 @@ Section Uninstall
   Delete "$INSTDIR\pyproject.toml"
   Delete "$INSTDIR\file-sharer.exe"
 
-  Delete "$SMPROGRAMS\ÎÄ¼ş¹²ÏíÖúÊÖ\Uninstall.lnk"
-  Delete "$SMPROGRAMS\ÎÄ¼ş¹²ÏíÖúÊÖ\Website.lnk"
-  Delete "$DESKTOP\ÎÄ¼ş¹²ÏíÖúÊÖ.lnk"
-  Delete "$SMPROGRAMS\ÎÄ¼ş¹²ÏíÖúÊÖ\ÎÄ¼ş¹²ÏíÖúÊÖ.lnk"
+  Delete "$SMPROGRAMS\æ–‡ä»¶å…±äº«åŠ©æ‰‹\Uninstall.lnk"
+  Delete "$SMPROGRAMS\æ–‡ä»¶å…±äº«åŠ©æ‰‹\Website.lnk"
+  Delete "$DESKTOP\æ–‡ä»¶å…±äº«åŠ©æ‰‹.lnk"
+  Delete "$SMPROGRAMS\æ–‡ä»¶å…±äº«åŠ©æ‰‹\æ–‡ä»¶å…±äº«åŠ©æ‰‹.lnk"
 
-  RMDir "$SMPROGRAMS\ÎÄ¼ş¹²ÏíÖúÊÖ"
+  RMDir "$SMPROGRAMS\æ–‡ä»¶å…±äº«åŠ©æ‰‹"
 
   RMDir /r "$INSTDIR\yarl"
   RMDir /r "$INSTDIR\PyQt5"
@@ -132,15 +134,15 @@ Section Uninstall
   SetAutoClose true
 SectionEnd
 
-#-- ¸ù¾İ NSIS ½Å±¾±à¼­¹æÔò£¬ËùÓĞ Function Çø¶Î±ØĞë·ÅÖÃÔÚ Section Çø¶ÎÖ®ºó±àĞ´£¬ÒÔ±ÜÃâ°²×°³ÌĞò³öÏÖÎ´¿ÉÔ¤ÖªµÄÎÊÌâ¡£--#
+#-- æ ¹æ® NSIS è„šæœ¬ç¼–è¾‘è§„åˆ™ï¼Œæ‰€æœ‰ Function åŒºæ®µå¿…é¡»æ”¾ç½®åœ¨ Section åŒºæ®µä¹‹åç¼–å†™ï¼Œä»¥é¿å…å®‰è£…ç¨‹åºå‡ºç°æœªå¯é¢„çŸ¥çš„é—®é¢˜ã€‚--#
 
 Function un.onInit
 !insertmacro MUI_UNGETLANGUAGE
-  MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "ÄúÈ·ÊµÒªÍêÈ«ÒÆ³ı $(^Name) £¬¼°ÆäËùÓĞµÄ×é¼ş£¿" IDYES +2
+  MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "æ‚¨ç¡®å®è¦å®Œå…¨ç§»é™¤ $(^Name) ï¼ŒåŠå…¶æ‰€æœ‰çš„ç»„ä»¶ï¼Ÿ" IDYES +2
   Abort
 FunctionEnd
 
 Function un.onUninstSuccess
   HideWindow
-  MessageBox MB_ICONINFORMATION|MB_OK "$(^Name) ÒÑ³É¹¦µØ´ÓÄúµÄ¼ÆËã»úÒÆ³ı¡£"
+  MessageBox MB_ICONINFORMATION|MB_OK "$(^Name) å·²æˆåŠŸåœ°ä»æ‚¨çš„è®¡ç®—æœºç§»é™¤ã€‚"
 FunctionEnd
