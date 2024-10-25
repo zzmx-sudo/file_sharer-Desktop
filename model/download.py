@@ -38,19 +38,25 @@ class DownloadFileDictModel(list):
             index, self._download_options_col
         )
         if status is DownloadStatus.DOING:
+            progressBar.setFormat("下载进度: %p%")
             progressBar.setValue(msg)
         elif status is DownloadStatus.PAUSE:
-            button_str = self._window._ui_function._continue_button_str
-            self._window._ui_function.progressBar_change_to_pause(progressBar)
-            pushButton.clicked.disconnect()
-            self._setup_options_widget(index, fileObj, button_str, tableWidget)
+            progressBar.setFormat("下载暂停")
+            # 可能会有两次回调, 第二次忽略
+            if self._options_is_button(index):
+                button_str = self._window._ui_function._continue_button_str
+                self._window._ui_function.progressBar_change_to_pause(progressBar)
+                pushButton.clicked.disconnect()
+                self._setup_options_widget(index, fileObj, button_str, tableWidget)
         elif status is DownloadStatus.SUCCESS:
             progressBar.setValue(100)
+            progressBar.setFormat("下载完成")
             self._window._ui_function.pushButton_change_to_remove(pushButton)
             pushButton.clicked.connect(
                 lambda: self._remove_download_item(fileObj, tableWidget)
             )
         else:
+            progressBar.setFormat(f"下载失败({msg})")
             button_str = self._window._ui_function._reset_button_str
             self._window._ui_function.progressBar_change_to_failed(progressBar)
             pushButton.clicked.disconnect()
@@ -71,6 +77,13 @@ class DownloadFileDictModel(list):
 
         self.clear()
         self.extend(ignore_urls)
+
+    def _options_is_button(self, index: int) -> bool:
+        call_widget = self._window.ui.downloadListTable.cellWidget(
+            index, self._download_options_col
+        )
+
+        return isinstance(call_widget, QPushButton)
 
     def _remove_download_item(self, fileObj: dict, tableWidget: QTableWidget) -> None:
         try:

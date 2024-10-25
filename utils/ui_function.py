@@ -832,7 +832,8 @@ class UiFunction:
         progressBar = QProgressBar()
         progressBar.setMaximum(100)
         progressBar.setMinimum(0)
-        progressBar.setFormat("下载进度: %p%")
+        progressBar.setValue(0)
+        progressBar.setFormat("等待下载中...")
         progressBar.setStyleSheet(self.progressBar_init_style())
 
         return progressBar

@@ -95,7 +95,19 @@ class DownloadHttpFileThread(QThread):
         try:
             async with session.get(url, headers=headers) as response:
                 full_size = local_size + response.content_length
-                if response.content_type != "application/octet-stream":
+                if response.content_type == "application/json":
+                    data = await response.json()
+                    if data.get("errno", 200) == 404:
+                        sysLogger.warning(f"文件分享后被删除, 文件路径: {relativePath}")
+                        self.signal.emit((fileObj, DownloadStatus.FAILED, "文件分享后被删除"))
+                        return
+                    else:
+                        sysLogger.warnint(
+                            f"对方系统异常, 服务端返回的信息: {data.get('errmsg', '未知异常')}"
+                        )
+                        self.signal.emit((fileObj, DownloadStatus.FAILED, "对方系统异常"))
+                        return
+                elif response.content_type != "application/octet-stream":
                     sysLogger.warning(f"下载文件失败, 失败原因: 对方系统异常, 文件路径: {relativePath}")
                     self.signal.emit((fileObj, DownloadStatus.FAILED, "对方系统异常"))
                     return
@@ -108,6 +120,7 @@ class DownloadHttpFileThread(QThread):
                     )
                     async for chunk in response.content.iter_chunked(self._chunk_size):
                         if self._is_pause(fileObj):
+                            self.signal.emit((fileObj, DownloadStatus.PAUSE, "暂停成功"))
                             return
                         f.write(chunk)
                         local_size += chunk.__sizeof__()
