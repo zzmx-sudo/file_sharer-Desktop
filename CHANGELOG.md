@@ -17,7 +17,6 @@
 - 修复保存设置时'NoneType'无'put'属性的报错
 - 修复macos打包后程序读取不到DATA_FILES中文件的问题
 - 修复下载时的偶现失败
-- 修复github actions通过NSIS打包程序乱码问题
 
 ## [0.1.1] - 20231019
 
