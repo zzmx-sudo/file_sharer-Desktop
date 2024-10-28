@@ -10,9 +10,10 @@
 
 from PyQt5 import QtGui, QtWidgets
 
-from . main_qrc import *
+from .main_qrc import *
 from utils.public_func import generate_product_version
 from settings import settings
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -47,7 +48,9 @@ class Ui_MainWindow(object):
         self.topLogoInfo = QtWidgets.QFrame(self.leftMenuBox)
         self.topLogoInfo.setMinimumSize(QtCore.QSize(0, 45))
         self.topLogoInfo.setMaximumSize(QtCore.QSize(16777215, 45))
-        self.topLogoInfo.setStyleSheet("background-image: url(:/icons/images/icon/logo.png);")
+        self.topLogoInfo.setStyleSheet(
+            "background-image: url(:/icons/images/icon/logo.png);"
+        )
         self.topLogoInfo.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.topLogoInfo.setFrameShadow(QtWidgets.QFrame.Raised)
         self.topLogoInfo.setObjectName("topLogoInfo")
@@ -153,7 +156,9 @@ class Ui_MainWindow(object):
         self.closeSettingButton.setMinimumSize(QtCore.QSize(28, 28))
         self.closeSettingButton.setMaximumSize(QtCore.QSize(28, 28))
         self.closeSettingButton.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        self.closeSettingButton.setStyleSheet("background-image: url(:/icons/images/icon/close-setting.png)")
+        self.closeSettingButton.setStyleSheet(
+            "background-image: url(:/icons/images/icon/close-setting.png)"
+        )
         self.closeSettingButton.setText("")
         self.closeSettingButton.setObjectName("closeSettingButton")
         self.horizontalLayout_5.addWidget(self.closeSettingButton)
@@ -277,10 +282,14 @@ class Ui_MainWindow(object):
         self.themeColorLabel.setObjectName("themeColorLabel")
         self.verticalLayout_25.addWidget(self.themeColorLabel)
         self.FristColorFrame = QtWidgets.QFrame(self.themeColorBox)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.FristColorFrame.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.FristColorFrame.sizePolicy().hasHeightForWidth()
+        )
         self.FristColorFrame.setSizePolicy(sizePolicy)
         self.FristColorFrame.setMinimumSize(QtCore.QSize(0, 30))
         self.FristColorFrame.setMaximumSize(QtCore.QSize(16777215, 30))
@@ -290,12 +299,16 @@ class Ui_MainWindow(object):
         self.FristColorFrame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.FristColorFrame.setObjectName("FristColorFrame")
         self.horizontalLayout_19 = QtWidgets.QHBoxLayout(self.FristColorFrame)
-        self.horizontalLayout_19.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)
+        self.horizontalLayout_19.setSizeConstraint(
+            QtWidgets.QLayout.SetDefaultConstraint
+        )
         self.horizontalLayout_19.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_19.setSpacing(0)
         self.horizontalLayout_19.setObjectName("horizontalLayout_19")
         self.Default = QtWidgets.QRadioButton(self.FristColorFrame)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.Default.sizePolicy().hasHeightForWidth())
@@ -493,7 +506,9 @@ class Ui_MainWindow(object):
         self.maximizeRestoreButton = QtWidgets.QPushButton(self.contentButtonBox)
         self.maximizeRestoreButton.setMinimumSize(QtCore.QSize(28, 28))
         self.maximizeRestoreButton.setMaximumSize(QtCore.QSize(28, 28))
-        self.maximizeRestoreButton.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.maximizeRestoreButton.setCursor(
+            QtGui.QCursor(QtCore.Qt.PointingHandCursor)
+        )
         self.maximizeRestoreButton.setStyleSheet("")
         self.maximizeRestoreButton.setText("")
         self.maximizeRestoreButton.setObjectName("maximizeRestoreButton")
@@ -649,7 +664,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout_15.setSpacing(0)
         self.horizontalLayout_15.setObjectName("horizontalLayout_15")
         self.shareListTable = QtWidgets.QTableWidget(self.shareListFrame)
-        self.shareListTable.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.shareListTable.viewport().setProperty(
+            "cursor", QtGui.QCursor(QtCore.Qt.PointingHandCursor)
+        )
         self.shareListTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.shareListTable.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.shareListTable.setTextElideMode(QtCore.Qt.ElideRight)
@@ -775,7 +792,11 @@ class Ui_MainWindow(object):
         self.backupButton.setMaximumSize(QtCore.QSize(130, 30))
         self.backupButton.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/icons/images/icon/back.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(
+            QtGui.QPixmap(":/icons/images/icon/back.png"),
+            QtGui.QIcon.Normal,
+            QtGui.QIcon.Off,
+        )
         self.backupButton.setIcon(icon)
         self.backupButton.setIconSize(QtCore.QSize(16, 16))
         self.backupButton.setObjectName("backupButton")
@@ -784,10 +805,14 @@ class Ui_MainWindow(object):
         self.downloadDirButton.setMinimumSize(QtCore.QSize(150, 30))
         self.downloadDirButton.setMaximumSize(QtCore.QSize(150, 30))
         self.downloadDirButton.setObjectName("downloadDirButton")
-        self.horizontalLayout_17.addWidget(self.downloadDirButton, 0, QtCore.Qt.AlignLeft)
+        self.horizontalLayout_17.addWidget(
+            self.downloadDirButton, 0, QtCore.Qt.AlignLeft
+        )
         self.verticalLayout_19.addWidget(self.backupButtonFrame, 0, QtCore.Qt.AlignLeft)
         self.fileListTable = QtWidgets.QTableWidget(self.fileListFrame)
-        self.fileListTable.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.fileListTable.viewport().setProperty(
+            "cursor", QtGui.QCursor(QtCore.Qt.PointingHandCursor)
+        )
         self.fileListTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.fileListTable.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.fileListTable.setObjectName("fileListTable")
@@ -832,10 +857,16 @@ class Ui_MainWindow(object):
         self.removeDownloadsButton = QtWidgets.QPushButton(self.downloadButtonFrame)
         self.removeDownloadsButton.setMinimumSize(QtCore.QSize(120, 30))
         self.removeDownloadsButton.setMaximumSize(QtCore.QSize(120, 30))
-        self.removeDownloadsButton.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.removeDownloadsButton.setCursor(
+            QtGui.QCursor(QtCore.Qt.PointingHandCursor)
+        )
         self.removeDownloadsButton.setObjectName("removeDownloadsButton")
-        self.horizontalLayout_18.addWidget(self.removeDownloadsButton, 0, QtCore.Qt.AlignLeft)
-        self.verticalLayout_23.addWidget(self.downloadButtonFrame, 0, QtCore.Qt.AlignLeft)
+        self.horizontalLayout_18.addWidget(
+            self.removeDownloadsButton, 0, QtCore.Qt.AlignLeft
+        )
+        self.verticalLayout_23.addWidget(
+            self.downloadButtonFrame, 0, QtCore.Qt.AlignLeft
+        )
         self.downloadListFrame = QtWidgets.QFrame(self.download)
         self.downloadListFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.downloadListFrame.setFrameShadow(QtWidgets.QFrame.Raised)
@@ -845,9 +876,15 @@ class Ui_MainWindow(object):
         self.verticalLayout_22.setSpacing(0)
         self.verticalLayout_22.setObjectName("verticalLayout_22")
         self.downloadListTable = QtWidgets.QTableWidget(self.downloadListFrame)
-        self.downloadListTable.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        self.downloadListTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.downloadListTable.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.downloadListTable.viewport().setProperty(
+            "cursor", QtGui.QCursor(QtCore.Qt.PointingHandCursor)
+        )
+        self.downloadListTable.setEditTriggers(
+            QtWidgets.QAbstractItemView.NoEditTriggers
+        )
+        self.downloadListTable.setSelectionBehavior(
+            QtWidgets.QAbstractItemView.SelectRows
+        )
         self.downloadListTable.setTextElideMode(QtCore.Qt.ElideRight)
         self.downloadListTable.setObjectName("downloadListTable")
         self.downloadListTable.setColumnCount(3)
@@ -949,7 +986,9 @@ class Ui_MainWindow(object):
         self.saveSettingButton.setText(_translate("MainWindow", "保存"))
         self.cancelSettingButton.setToolTip(_translate("MainWindow", "取消配置"))
         self.cancelSettingButton.setText(_translate("MainWindow", "取消"))
-        self.contentTitleLabel.setText(_translate("MainWindow", "File Sharer - LAN file sharing helper."))
+        self.contentTitleLabel.setText(
+            _translate("MainWindow", "File Sharer - LAN file sharing helper.")
+        )
         self.minimizeButton.setToolTip(_translate("MainWindow", "最小化窗口"))
         self.maximizeRestoreButton.setToolTip(_translate("MainWindow", "窗口全屏"))
         self.closeAppButton.setToolTip(_translate("MainWindow", "关闭应用"))
@@ -1016,4 +1055,6 @@ class Ui_MainWindow(object):
         item = self.downloadListTable.horizontalHeaderItem(2)
         item.setText(_translate("MainWindow", "操作"))
         self.authorLabel.setText(_translate("MainWindow", "By: 大宝天天见丶"))
-        self.versionLabel.setText(_translate("MainWindow", f"v{generate_product_version()}"))
+        self.versionLabel.setText(
+            _translate("MainWindow", f"v{generate_product_version()}")
+        )

@@ -34,6 +34,7 @@ packaging==23.1
 pathspec==0.11.2
 pefile==2023.2.7
 platformdirs==3.10.0
+pre-commit==3.5.0
 psutil==5.9.5
 py2app==0.28.6
 pydantic==2.2.0
