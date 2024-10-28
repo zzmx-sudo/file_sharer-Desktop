@@ -1,7 +1,7 @@
 cd ..
 PROJECT_PATH=`pwd`
 PYTHON_ENV_DIR="/Users/mr.cheng/PY_ENVS/file_sharer"
-PROJECT_NAME="file-sharer"
+PROJECT_NAME="FileSharer"
 PRODUCT_VERSION="v0.1.0"
 # 创建build文件夹
 if [ -d "${PROJECT_PATH}/build" ]; then
@@ -39,7 +39,7 @@ fi
 cp -r ${PROJECT_PATH}/build/dist/${PROJECT_NAME}.app ${PROJECT_PATH}/build/dmg/
 
 cd ${PROJECT_PATH}/build/
-create-dmg --volname "文件共享助手" \
+create-dmg --volname "${PROJECT_NAME}" \
   --volicon "${PROJECT_PATH}/static/ui/icon.ico" \
   --window-pos 200 120 \
   --window-size 600 300 \

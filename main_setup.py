@@ -35,10 +35,10 @@ OPTIONS = {
     ],
     "iconfile": PROJECT_PATH + "static/ui/icon.icns",
     "plist": {
-        "CFBundleName": "file-sharer",
-        "CFBundleDisplayName": "file-sharer",
+        "CFBundleName": "FileSharer",
+        "CFBundleDisplayName": "FileSharer",
         "CFBundleVersion": PRODUCT_VERSION,
-        "CFBundleIdentifier": "file-sharer",
+        "CFBundleIdentifier": "FileSharer",
         "NSHumanReadableCopyright": "Copyright © 2023 zzmx-sudo.",
     },
     "packages": ["PyQt5", "chardet", "cchardet", "uvicorn", "anyio"],

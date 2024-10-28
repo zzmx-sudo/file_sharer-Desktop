@@ -1,7 +1,7 @@
-Unicode true
+﻿Unicode true
 
 ; 安装程序初始定义常量
-!define PRODUCT_NAME "文件共享助手"
+!define PRODUCT_NAME "FileSharer"
 !define PRODUCT_VERSION "v0.1.0"
 !define PRODUCT_PUBLISHER "大宝天天见丶"
 !define PRODUCT_WEB_SITE "https://github.com/zzmx-sudo/file_sharer-Desktop"
@@ -55,7 +55,7 @@ SetCompressorDictSize 64
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 !system 'mkdir "${INSTALLER_NAME}\.."'
 OutFile "${INSTALLER_NAME}"
-InstallDir "$PROGRAMFILES\文件共享助手"
+InstallDir "$PROGRAMFILES\FileSharer"
 InstallDirRegKey HKLM "${PRODUCT_UNINST_KEY}" "UninstallString"
 ShowInstDetails show
 ShowUnInstDetails show
@@ -64,9 +64,9 @@ Section "MainSection" SEC01
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
   File "${PROJECT_DIR}\build\file-sharer\file-sharer.exe"
-  CreateDirectory "$SMPROGRAMS\文件共享助手"
-  CreateShortCut "$SMPROGRAMS\文件共享助手\文件共享助手.lnk" "$INSTDIR\file-sharer.exe" "" "$INSTDIR\icon.ico"
-  CreateShortCut "$DESKTOP\文件共享助手.lnk" "$INSTDIR\file-sharer.exe" "" "$INSTDIR\icon.ico"
+  CreateDirectory "$SMPROGRAMS\FileSharer"
+  CreateShortCut "$SMPROGRAMS\FileSharer\FileSharer.lnk" "$INSTDIR\file-sharer.exe" "" "$INSTDIR\icon.ico"
+  CreateShortCut "$DESKTOP\FileSharer.lnk" "$INSTDIR\file-sharer.exe" "" "$INSTDIR\icon.ico"
   SetOverwrite off
   File "${PROJECT_DIR}\build\file-sharer\pyproject.toml"
   File "${PROJECT_DIR}\build\file-sharer\file_sharing_backups.json"
@@ -75,9 +75,9 @@ Section "MainSection" SEC01
 SectionEnd
 
 Section -AdditionalIcons
-  WriteIniStr "$INSTDIR\打开项目.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"
-  CreateShortCut "$SMPROGRAMS\文件共享助手\Website.lnk" "$INSTDIR\打开项目.url"
-  CreateShortCut "$SMPROGRAMS\文件共享助手\Uninstall.lnk" "$INSTDIR\uninst.exe"
+  WriteIniStr "$INSTDIR\home.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"
+  CreateShortCut "$SMPROGRAMS\FileSharer\Website.lnk" "$INSTDIR\home.url"
+  CreateShortCut "$SMPROGRAMS\FileSharer\Uninstall.lnk" "$INSTDIR\uninst.exe"
 SectionEnd
 
 Section -Post
@@ -108,12 +108,12 @@ Section Uninstall
   Delete "$INSTDIR\pyproject.toml"
   Delete "$INSTDIR\file-sharer.exe"
 
-  Delete "$SMPROGRAMS\文件共享助手\Uninstall.lnk"
-  Delete "$SMPROGRAMS\文件共享助手\Website.lnk"
-  Delete "$DESKTOP\文件共享助手.lnk"
-  Delete "$SMPROGRAMS\文件共享助手\文件共享助手.lnk"
+  Delete "$SMPROGRAMS\FileSharer\Uninstall.lnk"
+  Delete "$SMPROGRAMS\FileSharer\Website.lnk"
+  Delete "$DESKTOP\FileSharer.lnk"
+  Delete "$SMPROGRAMS\FileSharer\FileSharer.lnk"
 
-  RMDir "$SMPROGRAMS\文件共享助手"
+  RMDir "$SMPROGRAMS\FileSharer"
 
   RMDir /r "$INSTDIR\yarl"
   RMDir /r "$INSTDIR\PyQt5"

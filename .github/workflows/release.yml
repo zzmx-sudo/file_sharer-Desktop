@@ -4,9 +4,19 @@ on:
       - 'v*'
 
 jobs:
+  remove-old-artifacts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Remove old artifacts
+        uses: c-hive/gha-remove-artifacts@v1
+        with:
+          age: '3 days'
+
   Build-Win-x64:
     name: Build-Win-x64
     runs-on: windows-latest
+    needs: ['remove-old-artifacts']
     steps:
       - name: Clone code
         uses: actions/checkout@v3
@@ -47,10 +57,12 @@ jobs:
             current_change_log.md
             build/installer/*.exe
             build/installer/*.7z
+          retention-days: 3
 
   Build-Win-x86:
     name: Build-Win-x86
     runs-on: windows-latest
+    needs: ['remove-old-artifacts']
     steps:
       - name: Clone code
         uses: actions/checkout@v3
@@ -85,10 +97,12 @@ jobs:
           path: |
             build/installer/*.exe
             build/installer/*.7z
+          retention-days: 3
 
   Build-MacOs:
     name: Build-MacOs
     runs-on: macos-12
+    needs: ['remove-old-artifacts']
     steps:
       - name: Clone code
         uses: actions/checkout@v3
@@ -115,6 +129,7 @@ jobs:
         with:
           name: Build-MacOs
           path: build/installer/*.dmg
+          retention-days: 3
   
   Release:
     runs-on: ubuntu-latest
