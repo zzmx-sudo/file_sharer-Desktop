@@ -1,6 +1,16 @@
 # file_sharer-Desktop changed log
 
 
+## [0.2.1] - 20241029
+### 特征
+
+- 完善下载状态显示
+- 为`git commit`执行black格式化
+
+### 修复
+
+- 修复git actions打包的windows程序安装/卸载出现乱码问题
+
 ## [0.2.0] - 20240928
 ### 特性
 
