@@ -17,7 +17,8 @@ DATA_FILES = [
     PROJECT_PATH + "static/themes/color_card.json",
 ]
 OPTIONS = {
-    "argv_emulation": True,
+    # Fix for #22
+    # "argv_emulation": True,
     "includes": [
         "imp",
         "aiofiles",
