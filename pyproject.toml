@@ -1,15 +1,8 @@
 [file-sharer]
-version = "0.2.1"
+version = "0.2.2"
 saveSystemLog = true
 saveShareLog = true
-logsPath = "/Users/mr.cheng/GitSourceCodes/file_sharer-Desktop/logs"
-downloadPath = "/Users/mr.cheng/GitSourceCodes/file_sharer-Desktop/Download"
+logsPath = "F:\\GitSource\\file_sharer-Desktop\\logs"
+downloadPath = "F:\\GitSource\\file_sharer-Desktop\\Download"
 theme_color = "Default"
 theme_opacity = 80
-
-[tool.black]
-line-length = 88
-target-version = [ "py38",]
-include = "\\.py$"
-extend-exclude = "    /(static)/\n"
-respect-gitignore = true

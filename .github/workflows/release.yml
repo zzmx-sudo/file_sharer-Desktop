@@ -130,7 +130,7 @@ jobs:
           name: Build-MacOs
           path: build/installer/*.dmg
           retention-days: 3
-  
+
   Release:
     runs-on: ubuntu-latest
     needs: [Build-Win-x64, Build-Win-x86, Build-MacOs]

@@ -195,7 +195,7 @@ QScrollBar::handle:horizontal {
     min-width: 25px;
     border-radius: 4px
 }
-QScrollBar::handle:vertical {	
+QScrollBar::handle:vertical {
     background: #409eff;
     min-height: 25px;
     border-radius: 4px
@@ -306,7 +306,7 @@ QToolTip {
 
 /* ///////////////////////////////////////////////////////////////////////////////
 AppBg */
-#AppBg {	
+#AppBg {
 	background-color: #ffffff;
 	border: 1px solid #409eff;
 }

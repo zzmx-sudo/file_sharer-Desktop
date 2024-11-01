@@ -14,6 +14,7 @@ from PyQt5.Qt import (
     QHBoxLayout,
     QApplication,
     QProgressBar,
+    QPixmap,
 )
 from PyQt5.QtGui import QMouseEvent, QColor, QIcon
 import pyperclip as clip
@@ -359,6 +360,7 @@ class UiFunction:
             }}
         """
         )
+        info.setIconPixmap(QPixmap(":/icons/images/icon/logo.png").scaled(50, 50))
         info.exec_()
 
     def show_question_messageBox(
@@ -910,7 +912,7 @@ class UiFunction:
         return f"""
             QPushButton {{
                 background-color: rgb({control_color.LightBgColor});
-                color: rgb({control_color.TextColor}); 
+                color: rgb({control_color.TextColor});
                 text-align: left;
                 border: none;
                 margin: 0;
