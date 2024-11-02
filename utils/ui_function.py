@@ -353,6 +353,7 @@ class UiFunction:
             }}
             QMessageBox QPushButton {{
                 border: 1px solid rgb({self.controlColor.BaseColor});
+                color: rgb({self.controlColor.TextColor});
                 width: {okButtonWidth}
             }}
             QMessageBox QPushButton:hover {{
@@ -418,7 +419,14 @@ class UiFunction:
         """
         )
         question.setDefaultButton(noButton)
-        question.setStyleSheet(self.MessageBoxNormalStyle)
+        question.setStyleSheet(
+            self.MessageBoxNormalStyle
+            + f"""
+            QLabel {{
+                color: rgb({self.controlColor.TextColor});;
+            }}
+            """
+        )
         return question.exec_()
 
     def show_critical_messageBox(self, msg: str) -> None:
@@ -431,16 +439,17 @@ class UiFunction:
         okButton.setCursor(QtGui.QCursor(Qt.PointingHandCursor))
         critical.setStyleSheet(
             self.MessageBoxNormalStyle
-            + """
-            QLabel {
+            + f"""
+            QLabel {{
                 color: red;
-            }
-            QMessageBox QPushButton {
+            }}
+            QMessageBox QPushButton {{
                 border: 1px solid red;
-            }
-            QMessageBox QPushButton:hover {
+                color: rgb({self.controlColor.TextColor});
+            }}
+            QMessageBox QPushButton:hover {{
                 background-color: #ffffff;
-            }
+            }}
             """
         )
         critical.exec_()
