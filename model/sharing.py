@@ -66,7 +66,7 @@ class FuseSharingModel(list):
         backup_file_path: str = os.path.join(
             settings.BASE_DIR, "file_sharing_backups.json"
         )
-        with open(backup_file_path, "w") as f:
+        with open(backup_file_path, "w", encoding="utf-8") as f:
             json.dump(
                 backup_result, f, indent=4, separators=(",", ": "), ensure_ascii=False
             )
@@ -83,7 +83,7 @@ class FuseSharingModel(list):
             sysLogger.info("file_sharing_backups.json文件不存在, 跳过历史分享记录加载")
             return model
 
-        with open(backup_file_path) as f:
+        with open(backup_file_path, encoding="utf-8") as f:
             try:
                 backup_result = json.loads(f.read())
             except json.JSONDecodeError:
