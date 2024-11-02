@@ -146,7 +146,7 @@ class FuseSettings:
                 }
             }
         )
-        with open(settings_file, "w") as f:
+        with open(settings_file, "w", encoding="utf-8") as f:
             toml.dump(tool_config, f)
 
     def style_sheet(

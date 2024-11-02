@@ -120,7 +120,7 @@ def generate_color_card_map() -> dict:
     if not os.path.exists(color_card_json_path):
         return {}
 
-    with open(color_card_json_path) as f:
+    with open(color_card_json_path, encoding="utf-8") as f:
         try:
             return json.load(f)
         except:
