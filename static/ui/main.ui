@@ -1657,10 +1657,10 @@ Content Bottom Bar */
                    <item>
                     <widget class="QSlider" name="opacitySlider">
                      <property name="minimum">
-                      <number>10</number>
+                      <number>1</number>
                      </property>
                      <property name="maximum">
-                      <number>80</number>
+                      <number>100</number>
                      </property>
                      <property name="orientation">
                       <enum>Qt::Horizontal</enum>

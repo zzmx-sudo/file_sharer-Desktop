@@ -61,6 +61,7 @@ class UiFunction:
         self._bottom_grip = CustomGrip(self._main_window, Qt.BottomEdge)
         # main window event connect
         self._main_window.setWindowFlags(Qt.FramelessWindowHint)
+        self._main_window.setAttribute(Qt.WA_TranslucentBackground, True)
         self._main_window.mousePressEvent = self._mousePressEvent
         self._main_window.resizeEvent = self._resize_grips
         # QCombox
@@ -343,7 +344,7 @@ class UiFunction:
             self._main_window.tr(ok_button_text), QMessageBox.YesRole
         )
         okButton.setCursor(QtGui.QCursor(Qt.PointingHandCursor))
-        okButtonWidth = max(len(ok_button_text), 60)
+        okButtonWidth = max(len(ok_button_text) * 15, 60)
         info.setWindowFlag(Qt.FramelessWindowHint)
         info.setStyleSheet(
             self.MessageBoxNormalStyle

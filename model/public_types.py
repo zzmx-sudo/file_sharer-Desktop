@@ -31,6 +31,14 @@ class DownloadStatus(int, Enum):
     FAILED = 3
 
 
+# verify status
+class VerifyStatus(int, Enum):
+    INFO = 0
+    WARN = 1
+    FATAL = 2
+    DONE = 3
+
+
 # theme color
 class ThemeColor(str, Enum):
     Default = "Default"
