@@ -19,6 +19,7 @@ from model.public_types import ShareType as shareType
 from model.public_types import ThemeColor as themeColor
 from model.qt_thread import *
 from model.browse import BrowseFileDictModel
+from model.assert_env import AssertEnvWindow
 from utils.public_func import generate_uuid
 
 
@@ -51,8 +52,8 @@ class MainWindow(QMainWindow):
         # connect event
         self._setup_event_connect()
 
-        # show window
-        self.show()
+        # show window after assert env successful.
+        # self.show()
 
     def _merge_theme_radioButton(self) -> None:
         self.ui.themeColorButtonGroup = QButtonGroup()
@@ -582,5 +583,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(":/icons/icon.ico"))
     window = MainWindow()
+    assert_window = AssertEnvWindow()
+    assert_window.all_safe.connect(window.show)
     sys.excepthook = window.except_hook
     sys.exit(app.exec_())

@@ -1,8 +1,8 @@
 [file-sharer]
-version = "0.2.2"
+version = "0.3.0"
 saveSystemLog = true
 saveShareLog = true
 logsPath = "F:\\GitSource\\file_sharer-Desktop\\logs"
 downloadPath = "F:\\GitSource\\file_sharer-Desktop\\Download"
 theme_color = "Default"
-theme_opacity = 80
+theme_opacity = 100
