@@ -29,7 +29,7 @@
 已支持的平台:
 
 - windows7及以上
-- MacOS 12(其他版本暂无条件测试, 可先下载尝鲜)
+- MacOS 12及以上
 
 软件变化请查看：[更新日志](https://github.com/zzmx-sudo/file_sharer-LAN/blob/master/CHANGELOG.md)<br>
 软件下载请到：[发布页面](https://github.com/zzmx-sudo/file_sharer-Desktop/releases)<br>
