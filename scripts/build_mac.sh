@@ -39,16 +39,24 @@ fi
 cp -r ${PROJECT_PATH}/build/dist/${PROJECT_NAME}.app ${PROJECT_PATH}/build/dmg/
 
 cd ${PROJECT_PATH}/build/
-create-dmg --volname "${PROJECT_NAME}" \
-  --volicon "${PROJECT_PATH}/static/ui/icon.ico" \
-  --window-pos 200 120 \
-  --window-size 600 300 \
-  --icon-size 100 \
-  --icon "${PROJECT_NAME}.app" 175 120 \
-  --hide-extension "${PROJECT_NAME}.app" \
-  --app-drop-link 425 120 \
-  "installer/file_sharer-desktop_${PRODUCT_VERSION}-macos.dmg" \
-  "./dmg/"
+if [ "$1" == "arm64" ]; then
+  ARCH_NAME="arm64"
+else
+  ARCH_NAME="x64"
+fi
+# macos-13 runner Maybe due to `Resource busy` failure, try up to 3 times
+for i in {1..3}; do
+  create-dmg --volname "${PROJECT_NAME}" \
+    --volicon "${PROJECT_PATH}/static/ui/icon.ico" \
+    --window-pos 200 120 \
+    --window-size 600 300 \
+    --icon-size 100 \
+    --icon "${PROJECT_NAME}.app" 175 120 \
+    --hide-extension "${PROJECT_NAME}.app" \
+    --app-drop-link 425 120 \
+    "installer/file_sharer-desktop_${PRODUCT_VERSION}-macos-${ARCH_NAME}.dmg" \
+    "./dmg/" && break || sleep 5
+done
 
 # 打包结束
 echo ******************* Build complete! *******************

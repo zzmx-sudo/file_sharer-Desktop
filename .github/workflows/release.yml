@@ -99,9 +99,9 @@ jobs:
             build/installer/*.7z
           retention-days: 3
 
-  Build-MacOs:
-    name: Build-MacOs
-    runs-on: macos-12
+  Build-MacOs-x64:
+    name: Build-MacOs-x64
+    runs-on: macos-13
     needs: ['remove-old-artifacts']
     steps:
       - name: Clone code
@@ -122,18 +122,50 @@ jobs:
         run: |
           cd ./scripts
           python modify_script_file.py
-          sh build_mac.sh
+          sh build_mac.sh x64
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: Build-MacOs
+          name: Build-MacOs-x64
+          path: build/installer/*.dmg
+          retention-days: 3
+
+  Build-MacOs-arm64:
+    name: Build-MacOs-arm64
+    runs-on: macos-latest
+    needs: [ 'remove-old-artifacts' ]
+    steps:
+      - name: Clone code
+        uses: actions/checkout@v3
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+
+      - name: Install Dependencies with pip
+        run: pip install -r requirements.txt
+
+      - name: Install Create-dmg
+        run: brew install create-dmg
+
+      - name: Compress Macos Binary
+        run: |
+          cd ./scripts
+          python modify_script_file.py
+          sh build_mac.sh arm64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Build-MacOs-arm64
           path: build/installer/*.dmg
           retention-days: 3
 
   Release:
     runs-on: ubuntu-latest
-    needs: [Build-Win-x64, Build-Win-x86, Build-MacOs]
+    needs: [Build-Win-x64, Build-Win-x86, Build-MacOs-x64, Build-MacOs-arm64]
 
     steps:
       - name: Download Win-x64 artifact
@@ -147,10 +179,16 @@ jobs:
           name: Build-Win-x86
           path: ./x86
 
-      - name: Download Macos artifact
+      - name: Download Macos-x64 artifact
         uses: actions/download-artifact@v3
         with:
-          name: Build-MacOs
+          name: Build-MacOs-x64
+          path: ./macos
+
+      - name: Download Macos-arm64 artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: Build-MacOs-arm64
           path: ./macos
 
       - name: Create GitHub Release

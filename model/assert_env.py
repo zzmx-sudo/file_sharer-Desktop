@@ -1,4 +1,6 @@
-import os
+__all__ = ["AssertEnvWindow"]
+
+
 from typing import Tuple
 
 from PyQt5 import QtWidgets, QtCore
