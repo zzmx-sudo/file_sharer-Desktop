@@ -101,7 +101,7 @@ jobs:
 
   Build-MacOs-x64:
     name: Build-MacOs-x64
-    runs-on: macos-13
+    runs-on: macos-latest-large
     needs: ['remove-old-artifacts']
     steps:
       - name: Clone code
@@ -133,7 +133,7 @@ jobs:
 
   Build-MacOs-arm64:
     name: Build-MacOs-arm64
-    runs-on: macos-latest
+    runs-on: macos-latest-xlarge
     needs: [ 'remove-old-artifacts' ]
     steps:
       - name: Clone code
