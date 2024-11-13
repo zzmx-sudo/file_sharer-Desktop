@@ -332,7 +332,7 @@ QSlider::handle:horizontal:hover {
 QTooltip */
 QToolTip {
 	color: rgb(%(BaseColor)s);
-	background-color: rgba(%(BaseBgColor)s, %(ThemeOpacity).2f);
+	background-color: rgb(%(BaseBgColor)s);
 	border: 1px solid rgb(%(BaseColor)s);
 	background-image: none;
 	background-position: left center;
