@@ -127,7 +127,7 @@ class FuseSettings:
         self._wrapper.WSGI_PORT = available_http_port
 
     def dump(self) -> None:
-        settings_file = os.path.join(self.BASE_DIR, "pyproject.toml")
+        settings_file = os.path.join(self.BASE_DIR, "customize.toml")
         try:
             tool_config = toml.load(settings_file)
         except Exception:
@@ -136,7 +136,6 @@ class FuseSettings:
         tool_config.update(
             {
                 "file-sharer": {
-                    "version": self.VERSION,
                     "saveSystemLog": self.SAVE_SYSTEM_LOG,
                     "saveShareLog": self.SAVE_SHARER_LOG,
                     "logsPath": self.LOGS_PATH,

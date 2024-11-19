@@ -300,6 +300,7 @@ class DownloadFtpFileThread(QThread):
             with ftp_client.transfercmd(f"RETR {fileName}", None) as conn:
                 while True:
                     if self._is_pause(fileDict):
+                        self.signal.emit((fileDict, DownloadStatus.PAUSE, "暂停成功"))
                         return
                     try:
                         data = conn.recv(self._chunk_size)

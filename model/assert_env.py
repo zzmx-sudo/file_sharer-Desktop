@@ -38,7 +38,9 @@ class AssertThread(QThread):
         :return:
         """
         if not get_config_from_toml():
-            self.single.emit((VerifyStatus.WARN, "pyproject.toml文件不存在或损坏, 将使用默认配置"))
+            self.single.emit(
+                (VerifyStatus.WARN, "customize.toml和pyproject.toml文件不存在或损坏, 将使用默认配置")
+            )
 
         self.single.emit(
             (VerifyStatus.INFO, f"日志路径: {settings.LOGS_PATH}, 如需修改请在设置中配置, 保存后生效")

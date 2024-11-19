@@ -92,10 +92,15 @@ def generate_project_path() -> str:
         return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-def get_config_from_toml() -> dict:
+def get_config_from_toml(is_customize: bool = True) -> dict:
     project_path = generate_project_path()
     tool_config = {}
-    settings_file = os.path.join(project_path, "pyproject.toml")
+    if is_customize:
+        settings_file = os.path.join(project_path, "customize.toml")
+        if not os.path.exists(settings_file):
+            settings_file = os.path.join(project_path, "pyproject.toml")
+    else:
+        settings_file = os.path.join(project_path, "pyproject.toml")
     if not os.path.exists(settings_file):
         return tool_config
 
@@ -108,7 +113,7 @@ def get_config_from_toml() -> dict:
 
 
 def generate_product_version() -> str:
-    tool_config = get_config_from_toml()
+    tool_config = get_config_from_toml(False)
 
     return tool_config.get("file-sharer", {}).get("version", "0.1.0")
 
