@@ -20,6 +20,7 @@ from model.public_types import ThemeColor as themeColor
 from model.qt_thread import *
 from model.browse import BrowseFileDictModel
 from model.assert_env import AssertEnvWindow
+from model.tray_icon import TrayIcon
 from utils.public_func import generate_uuid
 
 
@@ -54,6 +55,15 @@ class MainWindow(QMainWindow):
 
         # show window after assert env successful.
         # self.show()
+
+    def show_normal(self):
+        """
+        环境校验完成并无异常后, 打开主窗口
+        :return: None
+        """
+        ti = TrayIcon(self)
+        ti.show()
+        self.show()
 
     def _merge_theme_radioButton(self) -> None:
         self.ui.themeColorButtonGroup = QButtonGroup()
@@ -584,6 +594,6 @@ if __name__ == "__main__":
     app.setWindowIcon(QIcon(":/icons/icon.ico"))
     window = MainWindow()
     assert_window = AssertEnvWindow()
-    assert_window.all_safe.connect(window.show)
+    assert_window.all_safe.connect(lambda: window.show_normal())
     sys.excepthook = window.except_hook
     sys.exit(app.exec_())
