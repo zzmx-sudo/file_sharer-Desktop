@@ -5,7 +5,13 @@ import traceback
 from multiprocessing import Queue
 from typing import Union
 
-from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QButtonGroup
+from PyQt5.QtWidgets import (
+    QMainWindow,
+    QFileDialog,
+    QLineEdit,
+    QButtonGroup,
+    QPushButton,
+)
 from PyQt5.Qt import QApplication, QIcon
 from PyQt5 import QtGui
 
@@ -20,6 +26,7 @@ from model.public_types import ThemeColor as themeColor
 from model.qt_thread import *
 from model.browse import BrowseFileDictModel
 from model.assert_env import AssertEnvWindow
+from model.tray_icon import TrayIcon
 from utils.public_func import generate_uuid
 
 
@@ -54,6 +61,15 @@ class MainWindow(QMainWindow):
 
         # show window after assert env successful.
         # self.show()
+
+    def show_normal(self):
+        """
+        环境校验完成并无异常后, 打开主窗口
+        :return: None
+        """
+        self.ti = TrayIcon(self)
+        self.ti.show()
+        self.show()
 
     def _merge_theme_radioButton(self) -> None:
         self.ui.themeColorButtonGroup = QButtonGroup()
@@ -198,6 +214,44 @@ class MainWindow(QMainWindow):
         rollback_radioButton.setChecked(True)
         self.ui.opacitySlider.setValue(settings.THEME_OPACITY)
         self._ui_function.reset_theme()
+
+    def open_all_share(self) -> None:
+        """
+        打开所有的共享
+        :return: None
+        """
+        open_count = 0
+        for row in range(self.ui.shareListTable.rowCount()):
+            status_item = self.ui.shareListTable.item(
+                row, self._ui_function._share_status_col
+            )
+            if status_item.text() == self._ui_function._isNot_sharing_str:
+                button_widget = self.ui.shareListTable.cellWidget(
+                    row, self._ui_function._share_options_col
+                )
+                open_button = button_widget.findChild(QPushButton, "open_close")
+                open_button.click()
+                open_count += 1
+        self._ui_function.show_info_messageBox(f"操作成功, 本次成功打开分享个数: {open_count}")
+
+    def close_all_share(self) -> None:
+        """
+        关闭所有的共享
+        :return: None
+        """
+        close_count = 0
+        for row in range(self.ui.shareListTable.rowCount()):
+            status_item = self.ui.shareListTable.item(
+                row, self._ui_function._share_status_col
+            )
+            if status_item.text() == self._ui_function._is_sharing_str:
+                button_widget = self.ui.shareListTable.cellWidget(
+                    row, self._ui_function._share_options_col
+                )
+                close_button = button_widget.findChild(QPushButton, "open_close")
+                close_button.click()
+                close_count += 1
+        self._ui_function.show_info_messageBox(f"操作成功, 本次成功关闭分享个数: {close_count}")
 
     def _update_file_combo(self) -> None:
         share_path: str = self.ui.sharePathEdit.text()
@@ -584,6 +638,6 @@ if __name__ == "__main__":
     app.setWindowIcon(QIcon(":/icons/icon.ico"))
     window = MainWindow()
     assert_window = AssertEnvWindow()
-    assert_window.all_safe.connect(window.show)
+    assert_window.all_safe.connect(lambda: window.show_normal())
     sys.excepthook = window.except_hook
     sys.exit(app.exec_())
