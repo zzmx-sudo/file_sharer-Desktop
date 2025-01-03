@@ -68,6 +68,7 @@ class AssertEnvWindow(QDialog):
         self.verticalLayout.setObjectName("verticalLayout")
         self.text_edit = QtWidgets.QTextEdit(self)
         self.text_edit.setObjectName("text_edit")
+        self.text_edit.setReadOnly(True)
         self.verticalLayout.addWidget(self.text_edit)
         self.buttonFrame = QtWidgets.QFrame(self)
         self.buttonFrame.setMinimumSize(QtCore.QSize(0, 40))

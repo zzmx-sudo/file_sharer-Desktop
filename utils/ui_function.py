@@ -363,7 +363,11 @@ class UiFunction:
         """
         )
         info.setIconPixmap(QPixmap(":/icons/images/icon/logo.png").scaled(50, 50))
+        # 在QMessageBox弹出前配置最后窗口关闭程序不退出, 以修复当主窗口隐藏时关闭弹框后程序退出的BUG
+        QApplication.setQuitOnLastWindowClosed(False)
         info.exec_()
+        # QMessageBox结束后配置最后窗口关闭程序退出, 以修复无法关闭程序的BUG
+        QApplication.setQuitOnLastWindowClosed(True)
 
     def show_question_messageBox(
         self,
@@ -569,6 +573,8 @@ class UiFunction:
         )
 
     def save_theme(self, theme_color: themeColor):
+        # The TrayIcon reset styleSheet
+        self._main_window.ti.resetStyleSheet(theme_color)
         # The selected menu button changes color
         ori_menu_style = self.select_menu_style()
         new_menu_style = self.select_menu_style(theme_color)
