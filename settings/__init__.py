@@ -62,7 +62,6 @@ class FuseSettings:
         if self._wrapper is empty:
             self._setup()
             self._load()
-            self._available_http_port()
         val = getattr(self._wrapper, item)
         self.__dict__[item] = val
 
@@ -169,6 +168,20 @@ class FuseSettings:
     @property
     def initStyle(self) -> str:
         return self.style_sheet()
+
+    def init_wsgi_port(self) -> int:
+        """
+        获取有效WSGI端口
+
+        Returns:
+            int: 可用的WSGI端口
+        """
+        if self._wrapper is empty:
+            self._setup()
+            self._load()
+        self._available_http_port()
+
+        return self._wrapper.WSGI_PORT
 
 
 settings = FuseSettings("prod")

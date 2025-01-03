@@ -48,7 +48,9 @@ class AssertThread(QThread):
         self.single.emit(
             (VerifyStatus.INFO, f"下载路径: {settings.DOWNLOAD_DIR}, 如需修改请在设置中配置, 保存后生效")
         )
-        self.single.emit((VerifyStatus.INFO, f"预使用HTTP端口: {settings.WSGI_PORT}, 请勿占用"))
+        self.single.emit(
+            (VerifyStatus.INFO, f"预使用HTTP端口: {settings.init_wsgi_port()}, 请勿占用")
+        )
         self.single.emit((VerifyStatus.INFO, f"当前使用主题: {settings.THEME_COLOR}"))
         self.single.emit((VerifyStatus.INFO, f"当前使用透明度: {settings.THEME_OPACITY}%"))
 

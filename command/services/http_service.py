@@ -57,7 +57,9 @@ class HttpService(BaseService):
 
         self._app = FastAPI()
         self._setup()
-        uvicorn.run(app=self._app, host=settings.LOCAL_HOST, port=settings.WSGI_PORT)
+        uvicorn.run(
+            app=self._app, host=settings.LOCAL_HOST, port=settings.init_wsgi_port()
+        )
 
     def _setup(self) -> None:
         self._setup_middleware()
