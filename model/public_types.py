@@ -15,6 +15,7 @@ from collections import namedtuple
 # URI
 FILE_LIST_URI: str = "/file_list"
 DOWNLOAD_URI: str = "/download"
+HIT_LOG: str = "hit_log"
 
 
 # share type

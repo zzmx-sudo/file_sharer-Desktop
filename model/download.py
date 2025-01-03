@@ -6,6 +6,7 @@ from PyQt5.Qt import QTableWidget, QApplication, QPushButton, QProgressBar
 
 from utils.logger import sysLogger
 from model.public_types import DownloadStatus
+from utils.public_func import update_downloadUrl_with_hitLog
 from main import MainWindow
 
 
@@ -157,6 +158,7 @@ class DownloadFileDictModel(list):
         widget = self._window._ui_function.pushButton_change_to_widget(reset_str)
 
         reset_button = widget.findChild(QPushButton, "restartButton")
+        update_downloadUrl_with_hitLog(fileObj)
         reset_button.clicked.connect(
             lambda: self._window._append_download_fileList([fileObj])
         )
