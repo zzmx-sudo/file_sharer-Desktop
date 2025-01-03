@@ -19,12 +19,20 @@ DOWNLOAD_URI: str = "/download"
 
 # share type
 class ShareType(str, Enum):
+    """
+    分享类型枚举类
+    """
+
     http = "http"
     ftp = "ftp"
 
 
 # download status
 class DownloadStatus(int, Enum):
+    """
+    下载状态枚举类
+    """
+
     DOING = 0
     PAUSE = 1
     SUCCESS = 2
@@ -33,6 +41,10 @@ class DownloadStatus(int, Enum):
 
 # verify status
 class VerifyStatus(int, Enum):
+    """
+    校验状态枚举类
+    """
+
     INFO = 0
     WARN = 1
     FATAL = 2
@@ -41,6 +53,10 @@ class VerifyStatus(int, Enum):
 
 # theme color
 class ThemeColor(str, Enum):
+    """
+    主题(颜色)枚举类
+    """
+
     Default = "Default"
     Red = "Red"
     Orange = "Orange"
@@ -52,13 +68,19 @@ class ThemeColor(str, Enum):
 
     @classmethod
     def dispatch(cls, color: Union[str, "ThemeColor"]) -> Optional["ThemeColor"]:
+        """
+        主题枚举值分配
+
+        Args:
+            color: 待分配的颜色值
+
+        Returns:
+            Optional["ThemeColor"]: 主题枚举值或None(传入不合法参数时)
+        """
         if not isinstance(color, cls):
-            if isinstance(color, str):
-                for obj in cls:
-                    if obj == color:
-                        return obj
-                return None
-            else:
+            try:
+                return cls(color)
+            except:
                 return None
 
         return color
@@ -95,7 +117,7 @@ ControlColorStruct = namedtuple(
 
 
 # color card struct - The elements is ControlColorStruct
-def _namedtuple():
+def _namedtuple() -> "ColorCardStruct":
     struct = namedtuple(
         "ColorCardStruct",
         [x.value for x in ThemeColor],

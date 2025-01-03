@@ -12,6 +12,7 @@ import asyncio
 import ssl
 from multiprocessing import Queue
 from traceback import format_exc
+from typing import Sequence, Dict, Any, List, Union, Tuple
 
 import requests
 import aiohttp
@@ -27,12 +28,24 @@ from .public_types import DownloadStatus
 class WatchResultThread(QThread):
     signal = pyqtSignal(str)
 
-    def __init__(self, output_q: Queue) -> None:
+    def __init__(self, output_q: Queue):
+        """
+        监听浏览线程类初始化函数
+
+        Args:
+            output_q: 输出进程队列
+        """
         super(WatchResultThread, self).__init__()
         self.run_flag = True
         self._output_q = output_q
 
     def run(self) -> None:
+        """
+        线程运行入口函数
+
+        Returns:
+            None
+        """
         while self.run_flag:
             file_uuid = self._output_q.get()
             self.signal.emit(file_uuid)
@@ -41,12 +54,24 @@ class WatchResultThread(QThread):
 class LoadBrowseUrlThread(QThread):
     signal = pyqtSignal(dict)
 
-    def __init__(self, browse_url: str) -> None:
+    def __init__(self, browse_url: str):
+        """
+        加载分享链接线程类初始化函数
+
+        Args:
+            browse_url: 分享链接
+        """
         super(LoadBrowseUrlThread, self).__init__()
         self._browse_url = browse_url
         self.run_flag = True
 
     def run(self) -> None:
+        """
+        线程运行入口函数
+
+        Returns:
+            None
+        """
         os.environ["NO_PROXY"] = "127.0.0.1"
         result = {}
         try:
@@ -68,14 +93,22 @@ class LoadBrowseUrlThread(QThread):
 class DownloadHttpFileThread(QThread):
     signal = pyqtSignal(tuple)
 
-    def __init__(self, fileList: list) -> None:
+    def __init__(self, fileList: Sequence[Dict[str, Any]]):
+        """
+        下载HTTP分享文件线程类初始化函数
+
+        Args:
+            fileList: 待下载文件对象列表
+        """
         super(DownloadHttpFileThread, self).__init__()
-        self._file_list = fileList
+        self._file_list = list(fileList)
         self._chunk_size = 1048576
         self.run_flag = True
         self._pause_fileObjs = []
 
-    async def _download(self, session: aiohttp.ClientSession, fileObj: dict) -> None:
+    async def _download(
+        self, session: aiohttp.ClientSession, fileObj: Dict[str, Any]
+    ) -> None:
         if self._is_pause(fileObj):
             return
         url = fileObj["downloadUrl"]
@@ -159,6 +192,12 @@ class DownloadHttpFileThread(QThread):
             await asyncio.wait(tasks)
 
     def run(self) -> None:
+        """
+        线程运行入口函数
+
+        Returns:
+            None
+        """
         os.environ["NO_PROXY"] = "127.0.0.1"
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
@@ -172,7 +211,7 @@ class DownloadHttpFileThread(QThread):
 
         loop.close()
 
-    def _append_up_to_five_files(self) -> list:
+    def _append_up_to_five_files(self) -> List[Dict[str, Any]]:
         downloading_list = []
         while self._file_list:
             fileObj = self._file_list.pop(0)
@@ -185,16 +224,34 @@ class DownloadHttpFileThread(QThread):
 
         return downloading_list
 
-    def append(self, fileList: list) -> None:
+    def append(self, fileList: Sequence[Dict[str, Any]]) -> None:
+        """
+        追加下载文件对象列表
+
+        Args:
+            fileList: 待追加文件对象列表
+
+        Returns:
+            None
+        """
         self._file_list.extend(fileList)
 
-    def pause(self, fileObj: dict) -> None:
+    def pause(self, fileObj: Dict[str, Any]) -> None:
+        """
+        暂停下载文件对象
+
+        Args:
+            fileObj: 需暂停下载的文件对象
+
+        Returns:
+            None
+        """
         if fileObj in self._pause_fileObjs:
             return
         self._pause_fileObjs.append(fileObj)
         self.signal.emit((fileObj, DownloadStatus.PAUSE, "暂停成功"))
 
-    def _is_pause(self, fileObj: dict) -> bool:
+    def _is_pause(self, fileObj: Dict[str, Any]) -> bool:
         if fileObj in self._pause_fileObjs:
             self._pause_fileObjs.remove(fileObj)
             return True
@@ -204,7 +261,13 @@ class DownloadHttpFileThread(QThread):
 class DownloadFtpFileThread(QThread):
     signal = pyqtSignal(tuple)
 
-    def __init__(self, fileList: list) -> None:
+    def __init__(self, fileList: Sequence[Dict[str, Any]]):
+        """
+        下载FTP分享文件线程类初始化函数
+
+        Args:
+            fileList: 待下载文件对象列表
+        """
         super(DownloadFtpFileThread, self).__init__()
         self._file_list = [fileList]
         self.run_flag = True
@@ -212,6 +275,12 @@ class DownloadFtpFileThread(QThread):
         self._pause_fileObjs = []
 
     def run(self) -> None:
+        """
+        线程运行入口函数
+
+        Returns:
+            None
+        """
         os.environ["NO_PROXY"] = "127.0.0.1"
         while self.run_flag:
             if self._file_list:
@@ -239,7 +308,9 @@ class DownloadFtpFileThread(QThread):
             else:
                 time.sleep(3)
 
-    def _generate_ftp_client(self, ftp_param: dict) -> tuple:
+    def _generate_ftp_client(
+        self, ftp_param: Dict[str, Union[str, int]]
+    ) -> Tuple[bool, Union[str, FTP]]:
         if not ftp_param:
             return (False, "获取FTP必要参数失败")
         host = ftp_param.get("host")
@@ -264,7 +335,9 @@ class DownloadFtpFileThread(QThread):
             ftp.encoding = "utf-8"
             return (True, ftp)
 
-    def _download_file(self, cwd: str, ftp_client: FTP, fileDict: dict) -> None:
+    def _download_file(
+        self, cwd: str, ftp_client: FTP, fileDict: Dict[str, Any]
+    ) -> None:
         if self._is_pause(fileDict):
             return
         relativePath = fileDict["relativePath"]
@@ -324,7 +397,7 @@ class DownloadFtpFileThread(QThread):
             ftp_client.voidresp()
             self.signal.emit((fileDict, DownloadStatus.SUCCESS, "下载成功"))
 
-    def _get_ftp_param(self, fileDict: dict) -> dict:
+    def _get_ftp_param(self, fileDict: Dict[str, Any]) -> Dict[str, Union[str, int]]:
         os.environ["NO_PROXY"] = "127.0.0.1"
         headers = {"X-Client": "file-sharer client"}
         try:
@@ -362,16 +435,34 @@ class DownloadFtpFileThread(QThread):
 
         return result
 
-    def append(self, fileList: list) -> None:
+    def append(self, fileList: Sequence[Dict[str, Any]]) -> None:
+        """
+        追加下载文件对象列表
+
+        Args:
+            fileList: 待追加文件对象列表
+
+        Returns:
+            None
+        """
         self._file_list.append(fileList)
 
-    def pause(self, fileObj: dict) -> None:
+    def pause(self, fileObj: Dict[str, Any]) -> None:
+        """
+        暂停下载文件对象
+
+        Args:
+            fileObj: 需暂停下载的文件对象
+
+        Returns:
+            None
+        """
         if fileObj in self._pause_fileObjs:
             return
         self._pause_fileObjs.append(fileObj)
         self.signal.emit((fileObj, DownloadStatus.PAUSE, "暂停成功"))
 
-    def _is_pause(self, fileObj: dict) -> bool:
+    def _is_pause(self, fileObj: Dict[str, Any]) -> bool:
         if fileObj in self._pause_fileObjs:
             self._pause_fileObjs.remove(fileObj)
             return True

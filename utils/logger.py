@@ -11,7 +11,10 @@ from exceptions import NotImplException
 
 
 class BaseLogger:
-    def __init__(self) -> None:
+    def __init__(self):
+        """
+        logger基类初始化函数
+        """
         self._logger = None
 
     def __getattr__(self, item: str) -> Callable:
@@ -23,11 +26,23 @@ class BaseLogger:
         return base_func
 
     def reload(self) -> None:
+        """
+        重制logger对象
+
+        Returns:
+            None
+        """
         # 一定要先clear(),否则无限递归
         self.__dict__.clear()
         self._logger = None
 
     def configure(self) -> None:
+        """
+        配置logger对象
+
+        Returns:
+            None
+        """
         if not os.path.isdir(settings.LOGS_PATH):
             os.makedirs(settings.LOGS_PATH)
 
@@ -96,14 +111,32 @@ class BaseLogger:
 
     @property
     def configured(self) -> bool:
+        """
+        判断是否有配置
+
+        Returns:
+            bool: 是否有配置
+        """
         return self._logger is not None
 
     @property
     def logger_name(self) -> str:
+        """
+        logger名称, 需子类定义
+
+        Returns:
+            str: logger名称
+        """
         raise NotImplException("实现logger对象的类必须有定义`logger_name`属性")
 
     @property
     def log_file(self) -> str:
+        """
+        logger文件名, 需子类定义
+
+        Returns:
+            str: logger文件名
+        """
         raise NotImplException("实现logger对象的类必须有定义`log_file`属性")
 
 

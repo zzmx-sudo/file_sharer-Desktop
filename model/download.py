@@ -1,5 +1,7 @@
 __all__ = ["DownloadFileDictModel"]
 
+from typing import Dict, Any, Tuple
+
 from PyQt5.Qt import QTableWidget, QApplication, QPushButton, QProgressBar
 
 from utils.logger import sysLogger
@@ -9,14 +11,32 @@ from main import MainWindow
 
 class DownloadFileDictModel(list):
     def __init__(self, window: MainWindow):
+        """
+        下载文件集类初始化函数
+
+        Args:
+            window: 主程序窗口对象
+        """
         super(DownloadFileDictModel, self).__init__()
         self._window = window
         self._download_progress_col = 1
         self._download_options_col = 2
 
     def update_download_status(
-        self, status_tuple: tuple, tableWidget: QTableWidget
+        self,
+        status_tuple: Tuple[Dict[str, Any], DownloadStatus, str],
+        tableWidget: QTableWidget,
     ) -> None:
+        """
+        更新下载状态
+
+        Args:
+            status_tuple: 欲更新的状态数据
+            tableWidget: 显示下载记录的表格控件
+
+        Returns:
+            None
+        """
         if not isinstance(status_tuple, tuple) or len(status_tuple) != 3:
             sysLogger.error(f"获取的下载状态数据有误, 原始信息: {status_tuple}")
             return
@@ -63,6 +83,15 @@ class DownloadFileDictModel(list):
             self._setup_options_widget(index, fileObj, button_str, tableWidget)
 
     def remove_download_list(self, tableWidget: QTableWidget) -> None:
+        """
+        清空已完成下载记录
+
+        Args:
+            tableWidget: 显示下载记录的表格控件
+
+        Returns:
+            None
+        """
         row_index = 0
         ignore_urls = []
         for url in self:
@@ -78,6 +107,25 @@ class DownloadFileDictModel(list):
         self.clear()
         self.extend(ignore_urls)
 
+    def is_empty(self) -> bool:
+        """
+        判断当前下载记录是否为空
+
+        Returns:
+            bool: 当前下载记录是否为空
+        """
+        return not self
+
+    @property
+    def length(self) -> int:
+        """
+        下载记录的个数
+
+        Returns:
+            int: 下载记录的个数
+        """
+        return len(self)
+
     def _options_is_button(self, index: int) -> bool:
         call_widget = self._window.ui.downloadListTable.cellWidget(
             index, self._download_options_col
@@ -85,7 +133,9 @@ class DownloadFileDictModel(list):
 
         return isinstance(call_widget, QPushButton)
 
-    def _remove_download_item(self, fileObj: dict, tableWidget: QTableWidget) -> None:
+    def _remove_download_item(
+        self, fileObj: Dict[str, Any], tableWidget: QTableWidget
+    ) -> None:
         try:
             index = self.index(fileObj)
         except ValueError:
@@ -100,7 +150,7 @@ class DownloadFileDictModel(list):
     def _setup_options_widget(
         self,
         index: int,
-        fileObj: dict,
+        fileObj: Dict[str, Any],
         reset_str: str,
         tableWidget: QTableWidget,
     ) -> None:
@@ -119,10 +169,3 @@ class DownloadFileDictModel(list):
         self._window.ui.downloadListTable.setCellWidget(
             index, self._download_options_col, widget
         )
-
-    def is_empty(self) -> bool:
-        return not self
-
-    @property
-    def length(self) -> int:
-        return len(self)

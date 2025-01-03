@@ -1,7 +1,7 @@
 __all__ = ["UiFunction"]
 
 import webbrowser
-from typing import Union, Optional
+from typing import Union, Optional, Dict, Any, Sequence, Tuple
 
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import QListView, QComboBox
@@ -30,7 +30,13 @@ from settings import settings
 
 
 class UiFunction:
-    def __init__(self, window: MainWindow) -> None:
+    def __init__(self, window: MainWindow):
+        """
+        UI处理类初始化函数
+
+        Args:
+            window: 主程序窗口对象
+        """
         self._main_window = window
         self._elements = self._main_window.ui
         self._maximize_flag: bool = False
@@ -54,6 +60,12 @@ class UiFunction:
         self._theme_opacity = settings.THEME_OPACITY
 
     def setup(self) -> None:
+        """
+        初始化必要的UI处理
+
+        Returns:
+            None
+        """
         # main window scale
         self._left_grip = CustomGrip(self._main_window, Qt.LeftEdge)
         self._right_grip = CustomGrip(self._main_window, Qt.RightEdge)
@@ -72,6 +84,1016 @@ class UiFunction:
         )
         # elements event connect
         self._setup_event_connect()
+
+    def show_info_messageBox(
+        self,
+        msg: str,
+        title: str = "消息提示",
+        msg_color: str = "black",
+        ok_button_text: str = "好的",
+    ) -> None:
+        """
+        显示Information类型弹框
+
+        Args:
+            msg: 弹框的内容
+            title: 弹框的标题
+            msg_color: 弹框内容的颜色
+            ok_button_text: 确认按钮的文本
+
+        Returns:
+            None
+        """
+        info = QMessageBox(
+            QMessageBox.Information, title, msg, parent=self._main_window
+        )
+        okButton = info.addButton(
+            self._main_window.tr(ok_button_text), QMessageBox.YesRole
+        )
+        okButton.setCursor(QtGui.QCursor(Qt.PointingHandCursor))
+        okButtonWidth = max(len(ok_button_text) * 15, 60)
+        info.setWindowFlag(Qt.FramelessWindowHint)
+        info.setStyleSheet(
+            self.MessageBoxNormalStyle
+            + f"""
+            QLabel {{
+                color: {msg_color}
+            }}
+            QMessageBox QPushButton {{
+                border: 1px solid rgb({self.controlColor.BaseColor});
+                color: rgb({self.controlColor.TextColor});
+                width: {okButtonWidth}
+            }}
+            QMessageBox QPushButton:hover {{
+                background-color: rgb({self.controlColor.SpecialHovColor});
+            }}
+        """
+        )
+        info.setIconPixmap(QPixmap(":/icons/images/icon/logo.png").scaled(50, 50))
+        # 在QMessageBox弹出前配置最后窗口关闭程序不退出, 以修复当主窗口隐藏时关闭弹框后程序退出的BUG
+        QApplication.setQuitOnLastWindowClosed(False)
+        info.exec_()
+        # QMessageBox结束后配置最后窗口关闭程序退出, 以修复无法关闭程序的BUG
+        QApplication.setQuitOnLastWindowClosed(True)
+
+    def show_question_messageBox(
+        self,
+        msg: str,
+        title: str,
+        yes_button_text: str = "取消",
+        no_button_text: str = "确认",
+    ) -> int:
+        """
+        显示Question类型弹框
+
+        Args:
+            msg: 弹框的内容
+            title: 弹框的标题
+            yes_button_text: 确认按钮的文本
+            no_button_text: 取消按钮的文本
+
+        Returns:
+            int: 按钮点击事件的返回值
+        """
+        question = QMessageBox(
+            QMessageBox.Question, title, msg, parent=self._main_window
+        )
+        question.setWindowFlag(Qt.FramelessWindowHint)
+        yesButton = question.addButton(
+            self._main_window.tr(yes_button_text), QMessageBox.YesRole
+        )
+        yesButton.setCursor(QtGui.QCursor(Qt.PointingHandCursor))
+        yesButtonWidth = max(len(yes_button_text) * 15, 60)
+        yesButton.setStyleSheet(
+            f"""
+            QPushButton {{
+                color: rgb({self.controlColor.SpecialHovColor});
+                background-color: rgb({self.controlColor.BaseColor});
+                width: {yesButtonWidth}
+            }}
+            QPushButton:hover {{
+                border: none;
+                background-color: rgb({self.controlColor.DeepColor})
+            }}
+            QPushButton:pressed {{
+                border: 2px solid rgb({self.controlColor.SpecialHovColor});
+            }}
+        """
+        )
+        noButton = question.addButton(
+            self._main_window.tr(no_button_text), QMessageBox.NoRole
+        )
+        noButton.setCursor(QtGui.QCursor(Qt.PointingHandCursor))
+        noButtonWidth = max(len(no_button_text) * 15, 60)
+        noButton.setStyleSheet(
+            f"""
+            QPushButton {{
+                border: none;
+                color: rgb({self.controlColor.TextColor});
+                background-color: rgb({self.controlColor.DeepBgColor});
+                width: {noButtonWidth}
+            }}
+            QPushButton:hover {{
+                border: none;
+                background-color: rgb({self.controlColor.Deep2BgColor});
+            }}
+            QPushButton:pressed {{
+                border: 2px solid rgb({self.controlColor.SpecialHovColor});
+            }}
+        """
+        )
+        question.setDefaultButton(noButton)
+        question.setStyleSheet(
+            self.MessageBoxNormalStyle
+            + f"""
+            QLabel {{
+                color: rgb({self.controlColor.TextColor});;
+            }}
+            """
+        )
+        return question.exec_()
+
+    def show_critical_messageBox(self, msg: str) -> None:
+        """
+        显示Critical类型的弹框
+
+        Args:
+            msg: 弹框的内容
+
+        Returns:
+            None
+        """
+        full_msg = f"程序出现BUG, 你可以将复现方式和该弹框截图至项目GitHub提交Lssues, 原始错误信息:\n{msg}"
+        critical = QMessageBox(
+            QMessageBox.Critical, "程序出错", full_msg, parent=self._main_window
+        )
+        critical.setWindowFlag(Qt.FramelessWindowHint)
+        okButton = critical.addButton(self._main_window.tr("好的"), QMessageBox.YesRole)
+        okButton.setCursor(QtGui.QCursor(Qt.PointingHandCursor))
+        critical.setStyleSheet(
+            self.MessageBoxNormalStyle
+            + f"""
+            QLabel {{
+                color: red;
+            }}
+            QMessageBox QPushButton {{
+                border: 1px solid red;
+                color: rgb({self.controlColor.TextColor});
+            }}
+            QMessageBox QPushButton:hover {{
+                background-color: #ffffff;
+            }}
+            """
+        )
+        critical.exec_()
+
+    def add_share_table_item(
+        self: MainWindow, fileObj: Union[FileModel, DirModel]
+    ) -> None:
+        """
+        追加分享记录到分享列表表格控件
+
+        Args:
+            fileObj: 待添加分享记录的文件/文件夹对象
+
+        Returns:
+            None
+        """
+        if self.ui.shareListTable.rowCount() <= self._sharing_list.length:
+            self.ui.shareListTable.setRowCount(self.ui.shareListTable.rowCount() + 1)
+
+        share_number = fileObj.rowIndex + 1
+        share_number_item = QTableWidgetItem(str(share_number))
+        share_number_item.setTextAlignment(Qt.AlignCenter)
+        self.ui.shareListTable.setItem(
+            fileObj.rowIndex, self._ui_function._share_number_col, share_number_item
+        )
+        share_type = "FTP" if fileObj.shareType is shareType.ftp else "HTTP"
+        share_type_item = QTableWidgetItem(share_type)
+        share_type_item.setTextAlignment(Qt.AlignCenter)
+        self.ui.shareListTable.setItem(
+            fileObj.rowIndex, self._ui_function._share_type_col, share_type_item
+        )
+        target_path_item = QTableWidgetItem(fileObj.targetPath)
+        target_path_item.setTextAlignment(Qt.AlignCenter)
+        self.ui.shareListTable.setItem(
+            fileObj.rowIndex, self._ui_function._share_targetPath_col, target_path_item
+        )
+        browse_number_item = QTableWidgetItem("0")
+        browse_number_item.setTextAlignment(Qt.AlignCenter)
+        self.ui.shareListTable.setItem(
+            fileObj.rowIndex, self._ui_function._browse_number_col, browse_number_item
+        )
+
+        open_close_button = QPushButton("")
+        open_close_button.setObjectName("open_close")
+
+        def _open_close_button_clicked(
+            fileObj: Union[FileModel, DirModel], button: QPushButton
+        ) -> None:
+            if fileObj.isSharing:
+                button_text = "打开共享"
+                self.close_share(fileObj)
+                fileObj.isSharing = False
+                share_status_item = QTableWidgetItem(
+                    self._ui_function._isNot_sharing_str
+                )
+                share_status_item.setTextAlignment(Qt.AlignCenter)
+                self.ui.shareListTable.setItem(
+                    fileObj.rowIndex,
+                    self._ui_function._share_status_col,
+                    share_status_item,
+                )
+            else:
+                button_text = "取消共享"
+                self.open_share(fileObj)
+                fileObj.isSharing = True
+                share_status_item = QTableWidgetItem(self._ui_function._is_sharing_str)
+                share_status_item.setTextAlignment(Qt.AlignCenter)
+                self.ui.shareListTable.setItem(
+                    fileObj.rowIndex,
+                    self._ui_function._share_status_col,
+                    share_status_item,
+                )
+            button.setText(button_text)
+            button.setStyleSheet(
+                self._ui_function.open_close_button_style(fileObj.isSharing)
+            )
+            background, foreground = self._ui_function.status_item_back_foreground(
+                fileObj.isSharing
+            )
+            share_status_item.setBackground(background)
+            share_status_item.setForeground(foreground)
+
+        fileObj.isSharing = not fileObj.isSharing
+        _open_close_button_clicked(fileObj, open_close_button)
+        open_close_button.clicked.connect(
+            lambda: _open_close_button_clicked(fileObj, open_close_button)
+        )
+
+        copy_browse_button = QPushButton("复制分享链接")
+        copy_browse_button.setObjectName("copy_browse")
+        copy_browse_button.setStyleSheet(self._ui_function.copy_browse_button_style())
+
+        def _copy_browse_button_clicked(fileObj: Union[FileModel, DirModel]) -> None:
+            clip.copy(fileObj.browse_url)
+            if not fileObj.isSharing:
+                self._ui_function.show_info_messageBox(
+                    "复制成功\n该分享已被取消,请打开分享后再发送给小伙伴哦~", msg_color="red"
+                )
+            else:
+                self._ui_function.show_info_messageBox("复制成功,快去发送给小伙伴吧^_^")
+
+        copy_browse_button.clicked.connect(lambda: _copy_browse_button_clicked(fileObj))
+
+        remove_share_button = QPushButton("移除分享记录")
+        remove_share_button.setObjectName("remove_share")
+        remove_share_button.setStyleSheet(self._ui_function.remove_share_button_style())
+
+        def _remove_share_button_clicked(fileObj: Union[FileModel, DirModel]) -> None:
+            self.remove_share(fileObj)
+
+        remove_share_button.clicked.connect(
+            lambda: _remove_share_button_clicked(fileObj)
+        )
+
+        widget = QWidget()
+        hLayout = QHBoxLayout()
+        hLayout.addWidget(open_close_button)
+        hLayout.addWidget(copy_browse_button)
+        hLayout.addWidget(remove_share_button)
+        hLayout.setContentsMargins(0, 1, 0, 1)
+        hLayout.setSpacing(2)
+        widget.setLayout(hLayout)
+        self.ui.shareListTable.setCellWidget(
+            fileObj.rowIndex, self._ui_function._share_options_col, widget
+        )
+
+    def save_theme(self, theme_color: themeColor) -> None:
+        """
+        保存主题
+
+        Args:
+            theme_color: 主题颜色
+
+        Returns:
+            None
+        """
+        # The TrayIcon reset styleSheet
+        self._main_window.ti.resetStyleSheet(theme_color)
+        # The selected menu button changes color
+        ori_menu_style = self.select_menu_style()
+        new_menu_style = self.select_menu_style(theme_color)
+        for button in self._elements.leftTopBox.findChildren(QPushButton):
+            if button.objectName() == self._clicked_menu_name:
+                button.setStyleSheet(
+                    button.styleSheet().replace(ori_menu_style, new_menu_style)
+                )
+                break
+        # The settingButton changes color
+        ori_settingBt_style = self.select_setting_style()
+        new_settingBt_style = self.select_setting_style(theme_color)
+        self._elements.settingButton.setStyleSheet(
+            self._elements.settingButton.styleSheet().replace(
+                ori_settingBt_style, new_settingBt_style
+            )
+        )
+        # The shareListTable Item changes color
+        for row in range(self._elements.shareListTable.rowCount()):
+            status_item = self._elements.shareListTable.item(
+                row, self._share_status_col
+            )
+            is_sharing = status_item.text() == self._is_sharing_str
+            background, foreground = self.status_item_back_foreground(
+                is_sharing, theme_color
+            )
+            status_item.setBackground(background)
+            status_item.setForeground(foreground)
+            button_widget = self._elements.shareListTable.cellWidget(
+                row, self._share_options_col
+            )
+            for button in button_widget.findChildren(QPushButton):
+                if button.objectName() == "open_close":
+                    button.setStyleSheet(
+                        self.open_close_button_style(is_sharing, theme_color)
+                    )
+                elif button.objectName() == "copy_browse":
+                    button.setStyleSheet(self.copy_browse_button_style(theme_color))
+                else:
+                    button.setStyleSheet(self.remove_share_button_style(theme_color))
+            QApplication.processEvents()
+        # The fileListTable Item changes color
+        for row in range(self._elements.fileListTable.rowCount()):
+            button = self._elements.fileListTable.cellWidget(row, 0)
+            button.setStyleSheet(self.file_dir_button_style(theme_color))
+            QApplication.processEvents()
+        # The downloadListTable Item changes color
+        for row in range(self._elements.downloadListTable.rowCount()):
+            progressBar = self._elements.downloadListTable.cellWidget(
+                row, self._download_progress_col
+            )
+            button_widget = self._elements.downloadListTable.cellWidget(
+                row, self._download_options_col
+            )
+            # 正在下载或下载完成状态
+            if isinstance(button_widget, QPushButton):
+                progressBar.setStyleSheet(self.progressBar_init_style(theme_color))
+                if button_widget.text() == self._pause_button_str:
+                    button_widget.setStyleSheet(
+                        self.download_pause_button_style(theme_color)
+                    )
+                else:
+                    button_widget.setStyleSheet(
+                        self.download_remove_button_style(theme_color)
+                    )
+                continue
+            for button in button_widget.findChildren(QPushButton):
+                if button.objectName() == "restartButton":
+                    button.setStyleSheet(self.download_reset_button_style(theme_color))
+                    # 下载失败状态
+                    if button.text() == self._reset_button_str:
+                        progressBar.setStyleSheet(
+                            self.progressBar_failed_style(theme_color)
+                        )
+                    # 暂停下载状态
+                    else:
+                        progressBar.setStyleSheet(
+                            self.progressBar_pause_style(theme_color)
+                        )
+                else:
+                    button.setStyleSheet(self.download_remove_button_style(theme_color))
+            QApplication.processEvents()
+
+    def reset_theme(self) -> None:
+        """
+        重置主题
+
+        Returns:
+            None
+        """
+        self._change_theme_color()
+        self._change_theme_opacity()
+
+    def remove_share_row(self: MainWindow, rowIndex: int) -> None:
+        """
+        从分享列表表格控件删除指定行记录
+
+        Args:
+            rowIndex: 待删除行记录的行号
+
+        Returns:
+            None
+        """
+        self.ui.shareListTable.removeRow(rowIndex)
+        share_row_count = self.ui.shareListTable.rowCount()
+        for row in range(rowIndex, share_row_count):
+            self.ui.shareListTable.item(
+                row, self._ui_function._share_number_col
+            ).setText(str(row + 1))
+
+    def show_error_browse(self: MainWindow) -> None:
+        """
+        显示加载分享链接失败
+
+        Returns:
+            None
+        """
+        # TODO:单元格配置为CellWidget后,不能通过setItem设置为普通单元格,暂用以下方法解决,后续再寻找更合适方案
+        self.ui.fileListTable.setRowCount(0)
+        self.ui.fileListTable.setRowCount(1)
+        table_item = QTableWidgetItem("加载失败,请输入正确的分享链接后再加载哦~")
+        table_item.setForeground(QColor(255, 0, 0))
+        self.ui.fileListTable.setItem(0, 0, table_item)
+
+    def show_not_found_browse(self: MainWindow) -> None:
+        """
+        显示加载分享链接对应文件/文件夹不存在
+
+        Returns:
+            None
+        """
+        self.ui.fileListTable.setRowCount(0)
+        self.ui.fileListTable.setRowCount(1)
+        table_item = QTableWidgetItem("目标的文件/文件夹不存在,请确认对方有开启分享后再加载哦~")
+        table_item.setForeground(QColor(255, 0, 0))
+        self.ui.fileListTable.setItem(0, 0, table_item)
+
+    def show_server_error_browse(self: MainWindow) -> None:
+        """
+        显示加载分享链接时服务器异常
+
+        Returns:
+            None
+        """
+        self.ui.fileListTable.setRowCount(0)
+        self.ui.fileListTable.setRowCount(1)
+        table_item = QTableWidgetItem("对方分享服务异常,请确认对方分享服务正常后再加载哦~")
+        table_item.setForeground(QColor(154, 96, 2))
+        self.ui.fileListTable.setItem(0, 0, table_item)
+
+    def show_file_list(
+        self: MainWindow, fileDict: Union[Dict[str, Any], BrowseFileDictModel]
+    ) -> None:
+        """
+        显示加载链接文件列表
+
+        Args:
+            fileDict: 文件列表对象
+
+        Returns:
+            None
+        """
+        if not fileDict["isDir"]:
+            self.ui.fileListTable.setRowCount(0)
+            self.ui.fileListTable.setRowCount(1)
+            file_button = self._UIClass.generate_file_button(self, fileDict)
+            self.ui.fileListTable.setCellWidget(0, 0, file_button)
+            self.ui.downloadDirButton.setEnabled(False)
+        else:
+            self._UIClass.set_dir_table(self, fileDict)
+            self.ui.downloadDirButton.setEnabled(True)
+
+    def generate_file_button(
+        self: MainWindow, fileDict: Union[Dict[str, Any], BrowseFileDictModel]
+    ) -> QPushButton:
+        """
+        生成文件按钮控件
+
+        Args:
+            fileDict: 文件对象
+
+        Returns:
+            QPushButton: 文件按钮控件
+        """
+        file_name = fileDict["fileName"]
+        button = QPushButton(file_name)
+        button.setStyleSheet(self._ui_function.file_dir_button_style())
+        file_icon = QIcon()
+        file_icon.addPixmap(
+            QtGui.QPixmap(":/icons/images/icon/file.png"), QIcon.Normal, QIcon.Off
+        )
+        button.setIcon(file_icon)
+        button.clicked.connect(lambda: self.create_download_record_and_start(fileDict))
+        return button
+
+    def generate_dir_button(self: MainWindow, fileDict: Dict[str, Any]) -> QPushButton:
+        """
+        生成文件夹按钮控件
+
+        Args:
+            fileDict: 文件夹对象
+
+        Returns:
+            QPushButton: 文件夹按钮控件
+        """
+        dir_name = fileDict["fileName"]
+        button = QPushButton(dir_name)
+        button.setStyleSheet(self._ui_function.file_dir_button_style())
+        dir_icon = QIcon()
+        dir_icon.addPixmap(
+            QtGui.QPixmap(":/icons/images/icon/folder_new.png"), QIcon.Normal, QIcon.Off
+        )
+        button.setIcon(dir_icon)
+        button.clicked.connect(lambda: self.enter_dir(fileDict))
+        return button
+
+    def set_dir_table(
+        self: MainWindow, fileDict: Union[Dict[str, Any], BrowseFileDictModel]
+    ) -> None:
+        """
+        配置文件夹下各子文件/子文件夹按钮控件
+
+        Args:
+            fileDict: 文件列表对象
+
+        Returns:
+            None
+        """
+        self.ui.fileListTable.setRowCount(0)
+        children = fileDict.get("children")
+        if not children:
+            self.ui.fileListTable.setRowCount(1)
+            table_item = QTableWidgetItem("该文件夹下空空如也~")
+            table_item.setForeground(QColor(154, 96, 2))
+            self.ui.fileListTable.setItem(0, 0, table_item)
+            return
+        else:
+            self.ui.fileListTable.setRowCount(len(children))
+            for index, childDict in enumerate(children):
+                if childDict["isDir"]:
+                    table_item = self._UIClass.generate_dir_button(self, childDict)
+                else:
+                    table_item = self._UIClass.generate_file_button(self, childDict)
+                self.ui.fileListTable.setCellWidget(index, 0, table_item)
+
+    def add_download_table_item(
+        self: MainWindow, fileList: Sequence[Dict[str, Any]]
+    ) -> None:
+        """
+        追加下载记录到下载列表表格控件
+
+        Args:
+            fileList: 下载文件对象列表
+
+        Returns:
+            None
+        """
+        if fileList[0]["isDir"]:
+            table_fileList = fileList[1:]
+        else:
+            table_fileList = fileList
+
+        row_count = self._download_data.length
+        shareType = fileList[0]["stareType"]
+        for fileObj in table_fileList:
+            fileName = fileObj["relativePath"]
+            try:
+                index = self._download_data.index(fileObj)
+            except ValueError:
+                row_index = row_count
+                row_count += 1
+                self.ui.downloadListTable.setRowCount(row_count)
+                fileName_item = QTableWidgetItem(fileName)
+                fileName_item.setForeground(QColor(0, 0, 0))
+                fileName_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+                self.ui.downloadListTable.setItem(
+                    row_index, self._ui_function._download_fileName_col, fileName_item
+                )
+
+                init_progressBar = self._ui_function.init_download_progressBar()
+                self.ui.downloadListTable.setCellWidget(
+                    row_index,
+                    self._ui_function._download_progress_col,
+                    init_progressBar,
+                )
+                self._download_data.append(fileObj)
+            else:
+                row_index = index
+                self.ui.downloadListTable.item(
+                    row_index, self._ui_function._download_fileName_col
+                ).setText(fileName)
+
+                progressBar = self.ui.downloadListTable.cellWidget(
+                    row_index, self._ui_function._download_progress_col
+                )
+                self._ui_function.progressBar_change_to_normal(progressBar)
+
+            init_pushButton = self._ui_function.init_download_pushButton(
+                shareType, fileObj
+            )
+            self.ui.downloadListTable.setCellWidget(
+                row_index, self._ui_function._download_options_col, init_pushButton
+            )
+
+            QApplication.processEvents()
+
+    def init_download_pushButton(
+        self, shareType: str, fileObj: Dict[str, Any]
+    ) -> QPushButton:
+        """
+        初始化下载记录的按钮控件
+
+        Args:
+            shareType: 下载记录对应文件的分享类型
+            fileObj: 下载记录对应的文件对象
+
+        Returns:
+            QPushButton: 下载记录的按钮控件
+        """
+
+        def _pause_download(shareType: str, fileObj: dict):
+            if shareType == "http":
+                if self._main_window._download_http_thread is None:
+                    self.show_info_messageBox("暂停失败, 下载线程还未初始化, 请等待所有文件加入下载成功后再点击")
+                    return
+                self._main_window._download_http_thread.pause(fileObj)
+            else:
+                if self._main_window._download_ftp_thread is None:
+                    self.show_info_messageBox("暂停失败, 下载线程还未初始化, 请等待所有文件加入下载成功后再点击")
+                    return
+                self._main_window._download_ftp_thread.pause(fileObj)
+
+        pushButton = QPushButton(self._pause_button_str)
+        pushButton.setStyleSheet(self.download_pause_button_style())
+        pushButton.clicked.connect(lambda: _pause_download(shareType, fileObj))
+
+        return pushButton
+
+    def pushButton_change_to_remove(
+        self, pushButton: QPushButton, buttonText: str = "移除该记录"
+    ) -> None:
+        """
+        下载记录按钮控件改为移除该条下载记录
+
+        Args:
+            pushButton: 下载记录对应的按钮控件
+            buttonText: 按钮控件需修改为的文本
+
+        Returns:
+            None
+        """
+        pushButton.clicked.disconnect()
+        pushButton.setText(buttonText)
+        pushButton.setStyleSheet(self.download_remove_button_style())
+
+    def pushButton_change_to_widget(self, restart_str: str = "重新下载") -> QWidget:
+        """
+        下载记录按钮控件改为QWidget
+
+        Args:
+            restart_str: 重置按钮的文本
+
+        Returns:
+            QWidget: 改为的QWidget控件
+        """
+        restart_button = QPushButton(restart_str)
+        restart_button.setObjectName("restartButton")
+        restart_button.setStyleSheet(self.download_reset_button_style())
+
+        remove_button = QPushButton("移除该记录")
+        remove_button.setObjectName("removeButton")
+        remove_button.setStyleSheet(self.download_remove_button_style())
+
+        widget = QWidget()
+        hLayout = QHBoxLayout()
+        hLayout.addWidget(restart_button)
+        hLayout.addWidget(remove_button)
+        hLayout.setContentsMargins(0, 1, 0, 1)
+        hLayout.setSpacing(2)
+        widget.setLayout(hLayout)
+
+        return widget
+
+    def init_download_progressBar(self) -> QProgressBar:
+        """
+        初始化下载进度条控件
+
+        Returns:
+            QProgressBar: 初始化的下载进度条控件
+        """
+        progressBar = QProgressBar()
+        progressBar.setMaximum(100)
+        progressBar.setMinimum(0)
+        progressBar.setValue(0)
+        progressBar.setFormat("等待下载中...")
+        progressBar.setStyleSheet(self.progressBar_init_style())
+
+        return progressBar
+
+    def progressBar_change_to_pause(self, progressBar: QProgressBar) -> None:
+        """
+        下载进度条状态改为暂停
+
+        Args:
+            progressBar: 下载进度条控件
+
+        Returns:
+            None
+        """
+        progressBar.setStyleSheet(self.progressBar_pause_style())
+
+    def progressBar_change_to_failed(self, progressBar: QProgressBar) -> None:
+        """
+        下载进度条状态改为失败
+
+        Args:
+            progressBar: 下载进度条控件
+
+        Returns:
+            None
+        """
+        progressBar.setStyleSheet(self.progressBar_failed_style())
+
+    def progressBar_change_to_normal(self, progressBar: QProgressBar) -> None:
+        """
+        下载进度条状态改为正常
+
+        Args:
+            progressBar: 下载进度条控件
+
+        Returns:
+            None
+        """
+        progressBar.setStyleSheet(self.progressBar_init_style())
+
+    def select_menu_style(self, theme_color: Optional[themeColor] = None) -> str:
+        """
+        选中的menu按钮的样式
+
+        Args:
+            theme_color: 主题颜色
+
+        Returns:
+            str: 选中的menu按钮的样式
+        """
+        theme_color = theme_color or settings.THEME_COLOR
+        control_color = self._control_color(theme_color)
+        return f"""
+            border-left: 3px solid rgb({control_color.BaseColor});
+            background-color: rgb({control_color.LightBgColor});
+        """
+
+    def select_setting_style(self, theme_color: Optional[themeColor] = None) -> str:
+        """
+        setting齿轮按钮选中时的样式
+
+        Args:
+            theme_color: 主题颜色
+
+        Returns:
+            str: setting齿轮按钮选中时的样式
+        """
+        theme_color = theme_color or settings.THEME_COLOR
+        control_color = self._control_color(theme_color)
+        return f"""
+            border: 2px solid rgb({control_color.BaseColor});
+            background-color: rgb({control_color.SpecialHovColor});
+        """
+
+    def open_close_button_style(
+        self, is_sharing: bool, theme_color: Optional[themeColor] = None
+    ) -> str:
+        """
+        打开/关闭分享按钮的样式
+
+        Args:
+            is_sharing: 是否为分享中状态
+            theme_color: 主题颜色
+
+        Returns:
+            str: 打开/关闭分享按钮的样式
+        """
+        theme_color = theme_color or settings.THEME_COLOR
+        if is_sharing:
+            return self._negative_button_style(theme_color)
+        else:
+            return self._positive_button_style(theme_color)
+
+    def status_item_back_foreground(
+        self, is_sharing: bool, theme_color: Optional[themeColor] = None
+    ) -> Tuple[QColor, QColor]:
+        """
+        分享状态单元格的后背景色和前背景色
+
+        Args:
+            is_sharing: 是否为分享中状态
+            theme_color: 主题颜色
+
+        Returns:
+            Tuple[QColor, QColor]: 后背景色和前背景色
+        """
+        theme_color = theme_color or settings.THEME_COLOR
+        control_color = self._control_color(theme_color)
+        if is_sharing:
+            background = control_color.BaseColor
+            foreground = control_color.SpecialHovColor
+        else:
+            background = control_color.DeepBgColor
+            foreground = control_color.TextColor
+        return QColor(*[int(x) for x in background.split(",")]), QColor(
+            *[int(x) for x in foreground.split(",")]
+        )
+
+    def copy_browse_button_style(self, theme_color: Optional[themeColor] = None) -> str:
+        """
+        复制分享链接按钮的样式
+
+        Args:
+            theme_color: 主题颜色
+
+        Returns:
+            str: 复制分享链接按钮的样式
+        """
+        theme_color = theme_color or settings.THEME_COLOR
+        return self._positive_button_style(theme_color)
+
+    def remove_share_button_style(
+        self, theme_color: Optional[themeColor] = None
+    ) -> str:
+        """
+        移除分享按钮的样式
+
+        Args:
+            theme_color: 主题颜色
+
+        Returns:
+            str: 移除分享按钮的样式
+        """
+        theme_color = theme_color or settings.THEME_COLOR
+        return self._negative_button_style(theme_color)
+
+    def file_dir_button_style(self, theme_color: Optional[themeColor] = None) -> str:
+        """
+        客户端页加载的文件/文件夹按钮的样式
+
+        Args:
+            theme_color: 主题颜色
+
+        Returns:
+            str: 客户端页加载的文件/文件夹按钮的样式
+        """
+        theme_color = theme_color or settings.THEME_COLOR
+        control_color = self._control_color(theme_color)
+        return f"""
+            QPushButton {{
+                background-color: rgb({control_color.LightBgColor});
+                color: rgb({control_color.TextColor});
+                text-align: left;
+                border: none;
+                margin: 0;
+                padding-left: 10px;
+            }}
+            QPushButton:hover {{border: 1px solid rgb({control_color.BaseColor});}}
+            QPushButton:pressed {{border: 3px solid rgb({control_color.BaseColor});}}
+        """
+
+    def progressBar_init_style(self, theme_color: Optional[themeColor] = None) -> str:
+        """
+        下载进度条初始化时的样式
+
+        Args:
+            theme_color: 主题颜色
+
+        Returns:
+            str: 下载进度初始化时的样式
+        """
+        theme_color = theme_color or settings.THEME_COLOR
+        control_color = self._control_color(theme_color)
+        return f"""
+            QProgressBar {{
+                border: 2px solid rgb({control_color.BaseColor});
+                border-radius: 5px;
+                color: rgb({control_color.TextColor});
+                background-color: rgb({control_color.LightBgColor});
+                text-align: center;
+            }}
+            QProgressBar::chunk {{
+                background: QLinearGradient(x1:0,y1:0,x2:2,y2:0,stop:0 rgb({control_color.DeepBgColor}),stop:1 rgb({control_color.BaseColor}));
+            }}
+        """
+
+    def progressBar_pause_style(self, theme_color: Optional[themeColor] = None) -> str:
+        """
+        下载进度条状态为暂停时的样式
+
+        Args:
+            theme_color: 主题颜色
+
+        Returns:
+            str: 下载进度条状态为暂停时的样式
+        """
+        theme_color = theme_color or settings.THEME_COLOR
+        control_color = self._control_color(theme_color)
+        return f"""
+            QProgressBar {{
+                border: 2px solid rgb({control_color.BaseColor});
+                border-radius: 5px;
+                color: rgb({control_color.TextColor});
+                background-color: rgb({control_color.LightBgColor});
+                text-align: center;
+            }}
+            QProgressBar::chunk {{
+                background-color: rgb({control_color.DeepBgColor});
+            }}
+        """
+
+    def progressBar_failed_style(self, theme_color: Optional[themeColor] = None) -> str:
+        """
+        下载进度条状态为失败时的样式
+
+        Args:
+            theme_color: 主题颜色
+
+        Returns:
+            str: 下载进度条状态为失败时的样式
+        """
+        theme_color = theme_color or settings.THEME_COLOR
+        control_color = self._control_color(theme_color)
+        return f"""
+            QProgressBar {{
+                border: 2px solid red;
+                border-radius: 5px;
+                color: rgb({control_color.TextColor});
+                background-color: rgb({control_color.LightBgColor});
+                text-align: center;
+            }}
+            QProgressBar::chunk {{
+                background-color: red;
+            }}
+        """
+
+    def download_pause_button_style(
+        self, theme_color: Optional[themeColor] = None
+    ) -> str:
+        """
+        暂停下载按钮的样式
+
+        Args:
+            theme_color: 主题颜色
+
+        Returns:
+            str: 暂停下载按钮的样式
+        """
+        theme_color = theme_color or settings.THEME_COLOR
+        return self._negative_button_style(theme_color)
+
+    def download_remove_button_style(
+        self, theme_color: Optional[themeColor] = None
+    ) -> str:
+        """
+        移除下载记录按钮的样式
+
+        Args:
+            theme_color: 主题颜色
+
+        Returns:
+            str: 移除下载记录按钮的样式
+        """
+        theme_color = theme_color or settings.THEME_COLOR
+        return self._negative_button_style(theme_color)
+
+    def download_reset_button_style(
+        self, theme_color: Optional[themeColor] = None
+    ) -> str:
+        """
+        重新下载按钮的样式
+
+        Args:
+            theme_color: 主题颜色
+
+        Returns:
+            str: 重新下载按钮的样式
+        """
+        theme_color = theme_color or settings.THEME_COLOR
+        return self._positive_button_style(theme_color)
+
+    @property
+    def controlColor(self) -> ControlColor:
+        """
+        当前主题样式对象
+
+        Returns:
+            ControlColor: 当前主题样式对象
+        """
+        return self._control_color(self._theme_color)
+
+    @property
+    def MessageBoxNormalStyle(self) -> str:
+        """
+        弹框通用样式
+
+        Returns:
+            str: 弹框通用样式
+        """
+        return f"""
+            QMessageBox {{
+                background-color: rgb({self.controlColor.BaseBgColor});
+                border: 1px solid rgb({self.controlColor.BaseColor});
+                border-radius: 10%;
+            }}
+            QLabel {{border: none; font-size: 14px;}}
+            QMessageBox QPushButton {{width: 60px; height: 40px; border-radius: 10px;}}
+        """
 
     def _comboBox_style_add_minHeight(self, *comboBoxs: QComboBox) -> None:
         for comboBox in comboBoxs:
@@ -167,7 +1189,7 @@ class UiFunction:
         )
         self._elements.opacityRateLabel.setText(f"{theme_opacity}%")
 
-    def _init_maximizeRestoreButton_style(self):
+    def _init_maximizeRestoreButton_style(self) -> None:
         maximize_image = self._maximize_image(self._theme_color)
         restore_image = self._restore_image(self._theme_color)
         if not self._maximize_flag:
@@ -330,688 +1352,7 @@ class UiFunction:
             (screen.height() - window.height()) / 2,
         )
 
-    def show_info_messageBox(
-        self,
-        msg: str,
-        title: str = "消息提示",
-        msg_color: str = "black",
-        ok_button_text: str = "好的",
-    ) -> None:
-        info = QMessageBox(
-            QMessageBox.Information, title, msg, parent=self._main_window
-        )
-        okButton = info.addButton(
-            self._main_window.tr(ok_button_text), QMessageBox.YesRole
-        )
-        okButton.setCursor(QtGui.QCursor(Qt.PointingHandCursor))
-        okButtonWidth = max(len(ok_button_text) * 15, 60)
-        info.setWindowFlag(Qt.FramelessWindowHint)
-        info.setStyleSheet(
-            self.MessageBoxNormalStyle
-            + f"""
-            QLabel {{
-                color: {msg_color}
-            }}
-            QMessageBox QPushButton {{
-                border: 1px solid rgb({self.controlColor.BaseColor});
-                color: rgb({self.controlColor.TextColor});
-                width: {okButtonWidth}
-            }}
-            QMessageBox QPushButton:hover {{
-                background-color: rgb({self.controlColor.SpecialHovColor});
-            }}
-        """
-        )
-        info.setIconPixmap(QPixmap(":/icons/images/icon/logo.png").scaled(50, 50))
-        # 在QMessageBox弹出前配置最后窗口关闭程序不退出, 以修复当主窗口隐藏时关闭弹框后程序退出的BUG
-        QApplication.setQuitOnLastWindowClosed(False)
-        info.exec_()
-        # QMessageBox结束后配置最后窗口关闭程序退出, 以修复无法关闭程序的BUG
-        QApplication.setQuitOnLastWindowClosed(True)
-
-    def show_question_messageBox(
-        self,
-        msg: str,
-        title: str,
-        yes_button_text: str = "取消",
-        no_button_text: str = "确认",
-    ) -> int:
-        question = QMessageBox(
-            QMessageBox.Question, title, msg, parent=self._main_window
-        )
-        question.setWindowFlag(Qt.FramelessWindowHint)
-        yesButton = question.addButton(
-            self._main_window.tr(yes_button_text), QMessageBox.YesRole
-        )
-        yesButton.setCursor(QtGui.QCursor(Qt.PointingHandCursor))
-        yesButtonWidth = max(len(yes_button_text) * 15, 60)
-        yesButton.setStyleSheet(
-            f"""
-            QPushButton {{
-                color: rgb({self.controlColor.SpecialHovColor});
-                background-color: rgb({self.controlColor.BaseColor});
-                width: {yesButtonWidth}
-            }}
-            QPushButton:hover {{
-                border: none;
-                background-color: rgb({self.controlColor.DeepColor})
-            }}
-            QPushButton:pressed {{
-                border: 2px solid rgb({self.controlColor.SpecialHovColor});
-            }}
-        """
-        )
-        noButton = question.addButton(
-            self._main_window.tr(no_button_text), QMessageBox.NoRole
-        )
-        noButton.setCursor(QtGui.QCursor(Qt.PointingHandCursor))
-        noButtonWidth = max(len(no_button_text) * 15, 60)
-        noButton.setStyleSheet(
-            f"""
-            QPushButton {{
-                border: none;
-                color: rgb({self.controlColor.TextColor});
-                background-color: rgb({self.controlColor.DeepBgColor});
-                width: {noButtonWidth}
-            }}
-            QPushButton:hover {{
-                border: none;
-                background-color: rgb({self.controlColor.Deep2BgColor});
-            }}
-            QPushButton:pressed {{
-                border: 2px solid rgb({self.controlColor.SpecialHovColor});
-            }}
-        """
-        )
-        question.setDefaultButton(noButton)
-        question.setStyleSheet(
-            self.MessageBoxNormalStyle
-            + f"""
-            QLabel {{
-                color: rgb({self.controlColor.TextColor});;
-            }}
-            """
-        )
-        return question.exec_()
-
-    def show_critical_messageBox(self, msg: str) -> None:
-        full_msg = f"程序出现BUG, 你可以将复现方式和该弹框截图至项目GitHub提交Lssues, 原始错误信息:\n{msg}"
-        critical = QMessageBox(
-            QMessageBox.Critical, "程序出错", full_msg, parent=self._main_window
-        )
-        critical.setWindowFlag(Qt.FramelessWindowHint)
-        okButton = critical.addButton(self._main_window.tr("好的"), QMessageBox.YesRole)
-        okButton.setCursor(QtGui.QCursor(Qt.PointingHandCursor))
-        critical.setStyleSheet(
-            self.MessageBoxNormalStyle
-            + f"""
-            QLabel {{
-                color: red;
-            }}
-            QMessageBox QPushButton {{
-                border: 1px solid red;
-                color: rgb({self.controlColor.TextColor});
-            }}
-            QMessageBox QPushButton:hover {{
-                background-color: #ffffff;
-            }}
-            """
-        )
-        critical.exec_()
-
-    def add_share_table_item(
-        self: MainWindow, fileObj: Union[FileModel, DirModel]
-    ) -> None:
-        if self.ui.shareListTable.rowCount() <= self._sharing_list.length:
-            self.ui.shareListTable.setRowCount(self.ui.shareListTable.rowCount() + 1)
-
-        share_number = fileObj.rowIndex + 1
-        share_number_item = QTableWidgetItem(str(share_number))
-        share_number_item.setTextAlignment(Qt.AlignCenter)
-        self.ui.shareListTable.setItem(
-            fileObj.rowIndex, self._ui_function._share_number_col, share_number_item
-        )
-        share_type = "FTP" if fileObj.shareType is shareType.ftp else "HTTP"
-        share_type_item = QTableWidgetItem(share_type)
-        share_type_item.setTextAlignment(Qt.AlignCenter)
-        self.ui.shareListTable.setItem(
-            fileObj.rowIndex, self._ui_function._share_type_col, share_type_item
-        )
-        target_path_item = QTableWidgetItem(fileObj.targetPath)
-        target_path_item.setTextAlignment(Qt.AlignCenter)
-        self.ui.shareListTable.setItem(
-            fileObj.rowIndex, self._ui_function._share_targetPath_col, target_path_item
-        )
-        browse_number_item = QTableWidgetItem("0")
-        browse_number_item.setTextAlignment(Qt.AlignCenter)
-        self.ui.shareListTable.setItem(
-            fileObj.rowIndex, self._ui_function._browse_number_col, browse_number_item
-        )
-
-        open_close_button = QPushButton("")
-        open_close_button.setObjectName("open_close")
-
-        def _open_close_button_clicked(
-            fileObj: Union[FileModel, DirModel], button: QPushButton
-        ) -> None:
-            if fileObj.isSharing:
-                button_text = "打开共享"
-                self.close_share(fileObj)
-                fileObj.isSharing = False
-                share_status_item = QTableWidgetItem(
-                    self._ui_function._isNot_sharing_str
-                )
-                share_status_item.setTextAlignment(Qt.AlignCenter)
-                self.ui.shareListTable.setItem(
-                    fileObj.rowIndex,
-                    self._ui_function._share_status_col,
-                    share_status_item,
-                )
-            else:
-                button_text = "取消共享"
-                self.open_share(fileObj)
-                fileObj.isSharing = True
-                share_status_item = QTableWidgetItem(self._ui_function._is_sharing_str)
-                share_status_item.setTextAlignment(Qt.AlignCenter)
-                self.ui.shareListTable.setItem(
-                    fileObj.rowIndex,
-                    self._ui_function._share_status_col,
-                    share_status_item,
-                )
-            button.setText(button_text)
-            button.setStyleSheet(
-                self._ui_function.open_close_button_style(fileObj.isSharing)
-            )
-            background, foreground = self._ui_function.status_item_back_foreground(
-                fileObj.isSharing
-            )
-            share_status_item.setBackground(background)
-            share_status_item.setForeground(foreground)
-
-        fileObj.isSharing = not fileObj.isSharing
-        _open_close_button_clicked(fileObj, open_close_button)
-        open_close_button.clicked.connect(
-            lambda: _open_close_button_clicked(fileObj, open_close_button)
-        )
-
-        copy_browse_button = QPushButton("复制分享链接")
-        copy_browse_button.setObjectName("copy_browse")
-        copy_browse_button.setStyleSheet(self._ui_function.copy_browse_button_style())
-
-        def _copy_browse_button_clicked(fileObj: Union[FileModel, DirModel]) -> None:
-            clip.copy(fileObj.browse_url)
-            if not fileObj.isSharing:
-                self._ui_function.show_info_messageBox(
-                    "复制成功\n该分享已被取消,请打开分享后再发送给小伙伴哦~", msg_color="red"
-                )
-            else:
-                self._ui_function.show_info_messageBox("复制成功,快去发送给小伙伴吧^_^")
-
-        copy_browse_button.clicked.connect(lambda: _copy_browse_button_clicked(fileObj))
-
-        remove_share_button = QPushButton("移除分享记录")
-        remove_share_button.setObjectName("remove_share")
-        remove_share_button.setStyleSheet(self._ui_function.remove_share_button_style())
-
-        def _remove_share_button_clicked(fileObj: Union[FileModel, DirModel]) -> None:
-            self.remove_share(fileObj)
-
-        remove_share_button.clicked.connect(
-            lambda: _remove_share_button_clicked(fileObj)
-        )
-
-        widget = QWidget()
-        hLayout = QHBoxLayout()
-        hLayout.addWidget(open_close_button)
-        hLayout.addWidget(copy_browse_button)
-        hLayout.addWidget(remove_share_button)
-        hLayout.setContentsMargins(0, 1, 0, 1)
-        hLayout.setSpacing(2)
-        widget.setLayout(hLayout)
-        self.ui.shareListTable.setCellWidget(
-            fileObj.rowIndex, self._ui_function._share_options_col, widget
-        )
-
-    def save_theme(self, theme_color: themeColor):
-        # The TrayIcon reset styleSheet
-        self._main_window.ti.resetStyleSheet(theme_color)
-        # The selected menu button changes color
-        ori_menu_style = self.select_menu_style()
-        new_menu_style = self.select_menu_style(theme_color)
-        for button in self._elements.leftTopBox.findChildren(QPushButton):
-            if button.objectName() == self._clicked_menu_name:
-                button.setStyleSheet(
-                    button.styleSheet().replace(ori_menu_style, new_menu_style)
-                )
-                break
-        # The settingButton changes color
-        ori_settingBt_style = self.select_setting_style()
-        new_settingBt_style = self.select_setting_style(theme_color)
-        self._elements.settingButton.setStyleSheet(
-            self._elements.settingButton.styleSheet().replace(
-                ori_settingBt_style, new_settingBt_style
-            )
-        )
-        # The shareListTable Item changes color
-        for row in range(self._elements.shareListTable.rowCount()):
-            status_item = self._elements.shareListTable.item(
-                row, self._share_status_col
-            )
-            is_sharing = status_item.text() == self._is_sharing_str
-            background, foreground = self.status_item_back_foreground(
-                is_sharing, theme_color
-            )
-            status_item.setBackground(background)
-            status_item.setForeground(foreground)
-            button_widget = self._elements.shareListTable.cellWidget(
-                row, self._share_options_col
-            )
-            for button in button_widget.findChildren(QPushButton):
-                if button.objectName() == "open_close":
-                    button.setStyleSheet(
-                        self.open_close_button_style(is_sharing, theme_color)
-                    )
-                elif button.objectName() == "copy_browse":
-                    button.setStyleSheet(self.copy_browse_button_style(theme_color))
-                else:
-                    button.setStyleSheet(self.remove_share_button_style(theme_color))
-            QApplication.processEvents()
-        # The fileListTable Item changes color
-        for row in range(self._elements.fileListTable.rowCount()):
-            button = self._elements.fileListTable.cellWidget(row, 0)
-            button.setStyleSheet(self.file_dir_button_style(theme_color))
-            QApplication.processEvents()
-        # The downloadListTable Item changes color
-        for row in range(self._elements.downloadListTable.rowCount()):
-            progressBar = self._elements.downloadListTable.cellWidget(
-                row, self._download_progress_col
-            )
-            button_widget = self._elements.downloadListTable.cellWidget(
-                row, self._download_options_col
-            )
-            # 正在下载或下载完成状态
-            if isinstance(button_widget, QPushButton):
-                progressBar.setStyleSheet(self.progressBar_init_style(theme_color))
-                if button_widget.text() == self._pause_button_str:
-                    button_widget.setStyleSheet(
-                        self.download_pause_button_style(theme_color)
-                    )
-                else:
-                    button_widget.setStyleSheet(
-                        self.download_remove_button_style(theme_color)
-                    )
-                continue
-            for button in button_widget.findChildren(QPushButton):
-                if button.objectName() == "restartButton":
-                    button.setStyleSheet(self.download_reset_button_style(theme_color))
-                    # 下载失败状态
-                    if button.text() == self._reset_button_str:
-                        progressBar.setStyleSheet(
-                            self.progressBar_failed_style(theme_color)
-                        )
-                    # 暂停下载状态
-                    else:
-                        progressBar.setStyleSheet(
-                            self.progressBar_pause_style(theme_color)
-                        )
-                else:
-                    button.setStyleSheet(self.download_remove_button_style(theme_color))
-            QApplication.processEvents()
-
-    def reset_theme(self):
-        self._change_theme_color()
-        self._change_theme_opacity()
-
-    def remove_share_row(self: MainWindow, rowIndex: int) -> None:
-        self.ui.shareListTable.removeRow(rowIndex)
-        share_row_count = self.ui.shareListTable.rowCount()
-        for row in range(rowIndex, share_row_count):
-            self.ui.shareListTable.item(
-                row, self._ui_function._share_number_col
-            ).setText(str(row + 1))
-
-    def show_error_browse(self: MainWindow) -> None:
-        # TODO:单元格配置为CellWidget后,不能通过setItem设置为普通单元格,暂用以下方法解决,后续再寻找更合适方案
-        self.ui.fileListTable.setRowCount(0)
-        self.ui.fileListTable.setRowCount(1)
-        table_item = QTableWidgetItem("加载失败,请输入正确的分享链接后再加载哦~")
-        table_item.setForeground(QColor(255, 0, 0))
-        self.ui.fileListTable.setItem(0, 0, table_item)
-
-    def show_not_found_browse(self: MainWindow) -> None:
-        self.ui.fileListTable.setRowCount(0)
-        self.ui.fileListTable.setRowCount(1)
-        table_item = QTableWidgetItem("目标的文件/文件夹不存在,请确认对方有开启分享后再加载哦~")
-        table_item.setForeground(QColor(255, 0, 0))
-        self.ui.fileListTable.setItem(0, 0, table_item)
-
-    def show_server_error_browse(self: MainWindow) -> None:
-        self.ui.fileListTable.setRowCount(0)
-        self.ui.fileListTable.setRowCount(1)
-        table_item = QTableWidgetItem("对方分享服务异常,请确认对方分享服务正常后再加载哦~")
-        table_item.setForeground(QColor(154, 96, 2))
-        self.ui.fileListTable.setItem(0, 0, table_item)
-
-    def show_file_list(
-        self: MainWindow, fileDict: Union[dict, BrowseFileDictModel]
-    ) -> None:
-        if not fileDict["isDir"]:
-            self.ui.fileListTable.setRowCount(0)
-            self.ui.fileListTable.setRowCount(1)
-            file_button = self._UIClass.generate_file_button(self, fileDict)
-            self.ui.fileListTable.setCellWidget(0, 0, file_button)
-            self.ui.downloadDirButton.setEnabled(False)
-        else:
-            self._UIClass.set_dir_table(self, fileDict)
-            self.ui.downloadDirButton.setEnabled(True)
-
-    def generate_file_button(
-        self: MainWindow, fileDict: Union[dict, BrowseFileDictModel]
-    ) -> QPushButton:
-        file_name = fileDict["fileName"]
-        button = QPushButton(file_name)
-        button.setStyleSheet(self._ui_function.file_dir_button_style())
-        file_icon = QIcon()
-        file_icon.addPixmap(
-            QtGui.QPixmap(":/icons/images/icon/file.png"), QIcon.Normal, QIcon.Off
-        )
-        button.setIcon(file_icon)
-        button.clicked.connect(lambda: self.create_download_record_and_start(fileDict))
-        return button
-
-    def set_dir_table(
-        self: MainWindow, fileDict: Union[dict, BrowseFileDictModel]
-    ) -> None:
-        self.ui.fileListTable.setRowCount(0)
-        children = fileDict.get("children")
-        if not children:
-            self.ui.fileListTable.setRowCount(1)
-            table_item = QTableWidgetItem("该文件夹下空空如也~")
-            table_item.setForeground(QColor(154, 96, 2))
-            self.ui.fileListTable.setItem(0, 0, table_item)
-            return
-        else:
-            self.ui.fileListTable.setRowCount(len(children))
-            for index, childDict in enumerate(children):
-                if childDict["isDir"]:
-                    table_item = self._UIClass.generate_dir_button(self, childDict)
-                else:
-                    table_item = self._UIClass.generate_file_button(self, childDict)
-                self.ui.fileListTable.setCellWidget(index, 0, table_item)
-
-    def generate_dir_button(self: MainWindow, fileDict: dict) -> QPushButton:
-        dir_name = fileDict["fileName"]
-        button = QPushButton(dir_name)
-        button.setStyleSheet(self._ui_function.file_dir_button_style())
-        dir_icon = QIcon()
-        dir_icon.addPixmap(
-            QtGui.QPixmap(":/icons/images/icon/folder_new.png"), QIcon.Normal, QIcon.Off
-        )
-        button.setIcon(dir_icon)
-        button.clicked.connect(lambda: self.enter_dir(fileDict))
-        return button
-
-    def add_download_table_item(self: MainWindow, fileList: list) -> None:
-        if fileList[0]["isDir"]:
-            table_fileList = fileList[1:]
-        else:
-            table_fileList = fileList
-
-        row_count = self._download_data.length
-        shareType = fileList[0]["stareType"]
-        for fileObj in table_fileList:
-            fileName = fileObj["relativePath"]
-            try:
-                index = self._download_data.index(fileObj)
-            except ValueError:
-                row_index = row_count
-                row_count += 1
-                self.ui.downloadListTable.setRowCount(row_count)
-                fileName_item = QTableWidgetItem(fileName)
-                fileName_item.setForeground(QColor(0, 0, 0))
-                fileName_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-                self.ui.downloadListTable.setItem(
-                    row_index, self._ui_function._download_fileName_col, fileName_item
-                )
-
-                init_progressBar = self._ui_function.init_download_progressBar()
-                self.ui.downloadListTable.setCellWidget(
-                    row_index,
-                    self._ui_function._download_progress_col,
-                    init_progressBar,
-                )
-                self._download_data.append(fileObj)
-            else:
-                row_index = index
-                self.ui.downloadListTable.item(
-                    row_index, self._ui_function._download_fileName_col
-                ).setText(fileName)
-
-                progressBar = self.ui.downloadListTable.cellWidget(
-                    row_index, self._ui_function._download_progress_col
-                )
-                self._ui_function.progressBar_change_to_normal(progressBar)
-
-            init_pushButton = self._ui_function.init_download_pushButton(
-                shareType, fileObj
-            )
-            self.ui.downloadListTable.setCellWidget(
-                row_index, self._ui_function._download_options_col, init_pushButton
-            )
-
-            QApplication.processEvents()
-
-    def init_download_pushButton(self, shareType: str, fileObj: dict) -> QPushButton:
-        def _pause_download(shareType: str, fileObj: dict):
-            if shareType == "http":
-                if self._main_window._download_http_thread is None:
-                    self.show_info_messageBox("暂停失败, 下载线程还未初始化, 请等待所有文件加入下载成功后再点击")
-                    return
-                self._main_window._download_http_thread.pause(fileObj)
-            else:
-                if self._main_window._download_ftp_thread is None:
-                    self.show_info_messageBox("暂停失败, 下载线程还未初始化, 请等待所有文件加入下载成功后再点击")
-                    return
-                self._main_window._download_ftp_thread.pause(fileObj)
-
-        pushButton = QPushButton(self._pause_button_str)
-        pushButton.setStyleSheet(self.download_pause_button_style())
-        pushButton.clicked.connect(lambda: _pause_download(shareType, fileObj))
-
-        return pushButton
-
-    def pushButton_change_to_remove(
-        self, pushButton: QPushButton, buttonText: str = "移除该记录"
-    ) -> None:
-        pushButton.clicked.disconnect()
-        pushButton.setText(buttonText)
-        pushButton.setStyleSheet(self.download_remove_button_style())
-
-    def pushButton_change_to_widget(self, restart_str: str = "重新下载") -> QWidget:
-        restart_button = QPushButton(restart_str)
-        restart_button.setObjectName("restartButton")
-        restart_button.setStyleSheet(self.download_reset_button_style())
-
-        remove_button = QPushButton("移除该记录")
-        remove_button.setObjectName("removeButton")
-        remove_button.setStyleSheet(self.download_remove_button_style())
-
-        widget = QWidget()
-        hLayout = QHBoxLayout()
-        hLayout.addWidget(restart_button)
-        hLayout.addWidget(remove_button)
-        hLayout.setContentsMargins(0, 1, 0, 1)
-        hLayout.setSpacing(2)
-        widget.setLayout(hLayout)
-
-        return widget
-
-    def init_download_progressBar(self) -> QProgressBar:
-        progressBar = QProgressBar()
-        progressBar.setMaximum(100)
-        progressBar.setMinimum(0)
-        progressBar.setValue(0)
-        progressBar.setFormat("等待下载中...")
-        progressBar.setStyleSheet(self.progressBar_init_style())
-
-        return progressBar
-
-    def progressBar_change_to_pause(self, progressBar: QProgressBar) -> None:
-        progressBar.setStyleSheet(self.progressBar_pause_style())
-
-    def progressBar_change_to_failed(self, progressBar: QProgressBar) -> None:
-        progressBar.setStyleSheet(self.progressBar_failed_style())
-
-    def progressBar_change_to_normal(self, progressBar: QProgressBar) -> None:
-        progressBar.setStyleSheet(self.progressBar_init_style())
-
-    def select_menu_style(self, theme_color: Optional[themeColor] = None) -> str:
-        """选中的menu按钮的样式"""
-        theme_color = theme_color or settings.THEME_COLOR
-        control_color = self._control_color(theme_color)
-        return f"""
-            border-left: 3px solid rgb({control_color.BaseColor});
-            background-color: rgb({control_color.LightBgColor});
-        """
-
-    def select_setting_style(self, theme_color: Optional[themeColor] = None) -> str:
-        """setting齿轮按钮选中时的样式"""
-        theme_color = theme_color or settings.THEME_COLOR
-        control_color = self._control_color(theme_color)
-        return f"""
-            border: 2px solid rgb({control_color.BaseColor});
-            background-color: rgb({control_color.SpecialHovColor});
-        """
-
-    def open_close_button_style(
-        self, is_sharing: bool, theme_color: Optional[themeColor] = None
-    ) -> str:
-        """打开/关闭分享按钮的样式"""
-        theme_color = theme_color or settings.THEME_COLOR
-        if is_sharing:
-            return self._negative_button_style(theme_color)
-        else:
-            return self._positive_button_style(theme_color)
-
-    def status_item_back_foreground(
-        self, is_sharing: bool, theme_color: Optional[themeColor] = None
-    ) -> [QColor, QColor]:
-        """分享状态单元格的后背景色和前背景色"""
-        theme_color = theme_color or settings.THEME_COLOR
-        control_color = self._control_color(theme_color)
-        if is_sharing:
-            background = control_color.BaseColor
-            foreground = control_color.SpecialHovColor
-        else:
-            background = control_color.DeepBgColor
-            foreground = control_color.TextColor
-        return QColor(*[int(x) for x in background.split(",")]), QColor(
-            *[int(x) for x in foreground.split(",")]
-        )
-
-    def copy_browse_button_style(self, theme_color: Optional[themeColor] = None) -> str:
-        """复制分享链接按钮的样式"""
-        theme_color = theme_color or settings.THEME_COLOR
-        return self._positive_button_style(theme_color)
-
-    def remove_share_button_style(
-        self, theme_color: Optional[themeColor] = None
-    ) -> str:
-        """移除分享按钮的样式"""
-        theme_color = theme_color or settings.THEME_COLOR
-        return self._negative_button_style(theme_color)
-
-    def file_dir_button_style(self, theme_color: Optional[themeColor] = None) -> str:
-        """客户端页加载的文件/文件夹按钮的样式"""
-        theme_color = theme_color or settings.THEME_COLOR
-        control_color = self._control_color(theme_color)
-        return f"""
-            QPushButton {{
-                background-color: rgb({control_color.LightBgColor});
-                color: rgb({control_color.TextColor});
-                text-align: left;
-                border: none;
-                margin: 0;
-                padding-left: 10px;
-            }}
-            QPushButton:hover {{border: 1px solid rgb({control_color.BaseColor});}}
-            QPushButton:pressed {{border: 3px solid rgb({control_color.BaseColor});}}
-        """
-
-    def progressBar_init_style(self, theme_color: Optional[themeColor] = None) -> str:
-        """下载进度初始化时的样式"""
-        theme_color = theme_color or settings.THEME_COLOR
-        control_color = self._control_color(theme_color)
-        return f"""
-            QProgressBar {{
-                border: 2px solid rgb({control_color.BaseColor});
-                border-radius: 5px;
-                color: rgb({control_color.TextColor});
-                background-color: rgb({control_color.LightBgColor});
-                text-align: center;
-            }}
-            QProgressBar::chunk {{
-                background: QLinearGradient(x1:0,y1:0,x2:2,y2:0,stop:0 rgb({control_color.DeepBgColor}),stop:1 rgb({control_color.BaseColor}));
-            }}
-        """
-
-    def progressBar_pause_style(self, theme_color: Optional[themeColor] = None) -> str:
-        """下载进度暂停时的样式"""
-        theme_color = theme_color or settings.THEME_COLOR
-        control_color = self._control_color(theme_color)
-        return f"""
-            QProgressBar {{
-                border: 2px solid rgb({control_color.BaseColor});
-                border-radius: 5px;
-                color: rgb({control_color.TextColor});
-                background-color: rgb({control_color.LightBgColor});
-                text-align: center;
-            }}
-            QProgressBar::chunk {{
-                background-color: rgb({control_color.DeepBgColor});
-            }}
-        """
-
-    def progressBar_failed_style(self, theme_color: Optional[themeColor] = None) -> str:
-        """下载进度失败时的样式"""
-        theme_color = theme_color or settings.THEME_COLOR
-        control_color = self._control_color(theme_color)
-        return f"""
-            QProgressBar {{
-                border: 2px solid red;
-                border-radius: 5px;
-                color: rgb({control_color.TextColor});
-                background-color: rgb({control_color.LightBgColor});
-                text-align: center;
-            }}
-            QProgressBar::chunk {{
-                background-color: red;
-            }}
-        """
-
-    def download_pause_button_style(
-        self, theme_color: Optional[themeColor] = None
-    ) -> str:
-        """暂停下载按钮的样式"""
-        theme_color = theme_color or settings.THEME_COLOR
-        return self._negative_button_style(theme_color)
-
-    def download_remove_button_style(
-        self, theme_color: Optional[themeColor] = None
-    ) -> str:
-        """移除下载记录按钮的样式"""
-        theme_color = theme_color or settings.THEME_COLOR
-        return self._negative_button_style(theme_color)
-
-    def download_reset_button_style(
-        self, theme_color: Optional[themeColor] = None
-    ) -> str:
-        """重新下载按钮的样式"""
-        theme_color = theme_color or settings.THEME_COLOR
-        return self._positive_button_style(theme_color)
-
     def _positive_button_style(self, theme_color: themeColor) -> str:
-        """积极/正面的按钮样式"""
         control_color = self._control_color(theme_color)
         return f"""
             QPushButton {{
@@ -1028,7 +1369,6 @@ class UiFunction:
         """
 
     def _negative_button_style(self, theme_color: themeColor) -> str:
-        """消极/负面的按钮样式"""
         control_color = self._control_color(theme_color)
         return f"""
             QPushButton {{
@@ -1044,8 +1384,7 @@ class UiFunction:
             }}
         """
 
-    def _maximize_image(self, theme_color: Optional[themeColor] = None):
-        """放大按钮背景图片"""
+    def _maximize_image(self, theme_color: Optional[themeColor] = None) -> str:
         theme_color = theme_color or settings.THEME_COLOR
         dirName = self._control_color(theme_color).DirName
 
@@ -1053,8 +1392,7 @@ class UiFunction:
             background-image: url(:/icons/images/icon/{dirName}/maximize.png)
         """
 
-    def _restore_image(self, theme_color: Optional[themeColor] = None):
-        """缩小按钮背景图片"""
+    def _restore_image(self, theme_color: Optional[themeColor] = None) -> str:
         theme_color = theme_color or settings.THEME_COLOR
         dirName = self._control_color(theme_color).DirName
 
@@ -1063,23 +1401,4 @@ class UiFunction:
         """
 
     def _control_color(self, theme_color: themeColor) -> ControlColor:
-        """控件颜色集"""
         return settings.controlColor(theme_color)
-
-    @property
-    def controlColor(self) -> ControlColor:
-        """当前控件颜色集"""
-        return self._control_color(self._theme_color)
-
-    @property
-    def MessageBoxNormalStyle(self) -> str:
-        """弹框通用样式"""
-        return f"""
-            QMessageBox {{
-                background-color: rgb({self.controlColor.BaseBgColor});
-                border: 1px solid rgb({self.controlColor.BaseColor});
-                border-radius: 10%;
-            }}
-            QLabel {{border: none; font-size: 14px;}}
-            QMessageBox QPushButton {{width: 60px; height: 40px; border-radius: 10px;}}
-        """

@@ -12,6 +12,12 @@ from settings import settings
 
 class TrayIcon(QSystemTrayIcon):
     def __init__(self, parent=None):
+        """
+        系统托盘图标类初始化函数
+
+        Args:
+            parent: 主程序窗口对象
+        """
         super(TrayIcon, self).__init__(parent)
         self._main_window = parent
         self.is_show_window = True
@@ -33,11 +39,7 @@ class TrayIcon(QSystemTrayIcon):
         self.menu.setAttribute(Qt.WA_TranslucentBackground, True)
         self._setup_event_connect()
 
-    def _setup_event_connect(self):
-        """
-        注册/初始化各控件事件
-        :return: None
-        """
+    def _setup_event_connect(self) -> None:
         self.rich_share_action.triggered.connect(
             lambda: self._main_window.open_all_share()
         )
@@ -52,7 +54,9 @@ class TrayIcon(QSystemTrayIcon):
     def show_hide_window(self) -> None:
         """
         显示/隐藏主界面
-        :return: None
+
+        Returns:
+            None
         """
         if self.is_show_window:
             self.parent().hide()
@@ -63,11 +67,15 @@ class TrayIcon(QSystemTrayIcon):
 
         self.is_show_window = not self.is_show_window
 
-    def iconClicked(self, reason):
+    def iconClicked(self, reason) -> None:
         """
         处理图标点击事件
-        :param reason:
-        :return: None
+
+        Args:
+            reason: 点击携带的参数对象
+
+        Returns:
+            None
         """
         if reason in [2, 3]:
             self.parent().show()
@@ -78,27 +86,37 @@ class TrayIcon(QSystemTrayIcon):
             else:
                 self._main_window.showNormal()
 
-    def quit(self):
+    def quit(self) -> None:
         """
         处理点击图标退出按钮事件
-        :return: None
+
+        Returns:
+            None
         """
         if self._main_window.close():
             self.setVisible(False)
 
-    def resetStyleSheet(self, theme_color: themeColor = settings.THEME_COLOR):
+    def resetStyleSheet(self, theme_color: themeColor = settings.THEME_COLOR) -> None:
         """
         重置/修改样式
-        :param theme_color: 主题颜色
-        :return: None
+
+        Args:
+            theme_color: 主题颜色
+
+        Returns:
+            None
         """
         self.menu.setStyleSheet(self.styleSheet(theme_color))
 
     def styleSheet(self, theme_color: themeColor = settings.THEME_COLOR) -> str:
         """
         全局样式表
-        :param theme_color: 主题颜色
-        :return: str
+
+        Args:
+            theme_color: 主题颜色
+
+        Returns:
+            str: 全局样式表
         """
         control_color = settings.controlColor(theme_color)
         return f"""

@@ -20,11 +20,27 @@ class UuidServerMode(dict):
 
 
 class FtpService(BaseService):
-    def __init__(self, input_q: Queue, output_q: Queue) -> None:
+    def __init__(self, input_q: Queue, output_q: Queue):
+        """
+        FTP共享服务类初始化函数
+
+        Args:
+            input_q: 输入的进程队列
+            output_q: 输出的进程队列
+        """
         super(FtpService, self).__init__(input_q, output_q)
         self._uuid_ftpServer_params = UuidServerMode()
 
     def _add_share(self, fileObj: Union[FileModel, DirModel]) -> None:
+        """
+        添加共享文件或文件夹
+
+        Args:
+            fileObj: 待添加共享的文件或文件夹对象
+
+        Returns:
+            None
+        """
         self._sharing_dict.update({fileObj.uuid: fileObj})
         need_start_new_server: bool = True
         for ftpServer in self._uuid_ftpServer_params.values():
@@ -36,6 +52,15 @@ class FtpService(BaseService):
             self._start_new_server(fileObj)
 
     def _remove_share(self, uuid: str) -> None:
+        """
+        移除共享文件或文件夹
+
+        Args:
+            uuid: 待移除共享文件或文件夹的uuid
+
+        Returns:
+            None
+        """
         if uuid in self._sharing_dict:
             del self._sharing_dict[uuid]
 
@@ -73,6 +98,12 @@ class FtpService(BaseService):
         self._uuid_ftpServer_params[fileObj.uuid] = server
 
     def run(self) -> None:
+        """
+        FTP服务进程运行入口函数
+
+        Returns:
+            None
+        """
         self.watch()
         super(FtpService, self).run()
 

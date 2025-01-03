@@ -29,7 +29,13 @@ class configurable(object):
 class FuseSettings:
     _wrapper = empty
 
-    def __init__(self, mode: str) -> None:
+    def __init__(self, mode: str):
+        """
+        融合配置类初始化函数
+
+        Args:
+            mode: 配置模式
+        """
         self.__mode = mode
 
     def _setup(self) -> None:
@@ -126,6 +132,12 @@ class FuseSettings:
         self._wrapper.WSGI_PORT = available_http_port
 
     def dump(self) -> None:
+        """
+        转存
+
+        Returns:
+            None
+        """
         settings_file = os.path.join(self.BASE_DIR, "customize.toml")
         try:
             tool_config = toml.load(settings_file)
@@ -152,6 +164,16 @@ class FuseSettings:
         theme_color: Optional[themeColor] = None,
         theme_opacity: Optional[int] = None,
     ) -> str:
+        """
+        主程序窗口全局样式表
+
+        Args:
+            theme_color: 主题颜色
+            theme_opacity: 透明度
+
+        Returns:
+            str: 主程序窗口全局样式表
+        """
         theme_color = theme_color or self.THEME_COLOR
         theme_opacity = theme_opacity or self.THEME_OPACITY
         control_color = getattr(self.COLOR_CARD, theme_color.value)
@@ -162,11 +184,26 @@ class FuseSettings:
     def controlColor(
         self, theme_color: Optional[themeColor] = None
     ) -> ControlColorStruct:
+        """
+        主题样式对象
+
+        Args:
+            theme_color: 主题颜色
+
+        Returns:
+            ControlColorStruct: 主题样式对象
+        """
         theme_color = theme_color or self.THEME_COLOR
         return getattr(self.COLOR_CARD, theme_color.value)
 
     @property
     def initStyle(self) -> str:
+        """
+        初始化主程序窗口全局样式表
+
+        Returns:
+            str: 初始化主程序窗口全局样式表
+        """
         return self.style_sheet()
 
     def init_wsgi_port(self) -> int:

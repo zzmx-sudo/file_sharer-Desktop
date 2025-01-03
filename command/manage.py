@@ -12,7 +12,13 @@ from .services import HttpService, FtpService
 
 
 class ServiceProcessManager:
-    def __init__(self, output_q: Queue) -> None:
+    def __init__(self, output_q: Queue):
+        """
+        共享服务进程管理器类初始化函数
+
+        Args:
+            output_q: 结果输出的进程队列
+        """
         self._http_service = None
         self._ftp_service = None
         self._http_input_q = None
@@ -20,6 +26,15 @@ class ServiceProcessManager:
         self._output_q = output_q
 
     def add_share(self, fileObj: Union[FileModel, DirModel]) -> bool:
+        """
+        添加分享文件或文件夹
+
+        Args:
+            fileObj: 待添加共享的文件或文件夹对象
+
+        Returns:
+            bool: 是否成功添加
+        """
         share_type = fileObj.shareType
         if share_type is ptype.ShareType.http:
             return self._add_http_share(fileObj)
@@ -31,6 +46,15 @@ class ServiceProcessManager:
             return False
 
     def remove_share(self, uuid: str) -> bool:
+        """
+        移除分享文件或文件夹
+
+        Args:
+            uuid: 待移除共享文件或文件夹的uuid
+
+        Returns:
+            bool: 是否成功移除
+        """
         share_type = uuid[0]
         if share_type == "f":
             self._remove_http_share(uuid)
@@ -42,6 +66,16 @@ class ServiceProcessManager:
             return False
 
     def modify_settings(self, key: str, value: Union[bool, str]) -> bool:
+        """
+        同步更改配置项
+
+        Args:
+            key: 配置参数名
+            value: 配置参数的值
+
+        Returns:
+            bool: 是否成功同步更改
+        """
         if self._http_input_q is not None:
             self._http_input_q.put(("settings", (key, value)))
         if self._ftp_input_q is not None:
@@ -50,6 +84,12 @@ class ServiceProcessManager:
         return True
 
     def close_ftp(self) -> bool:
+        """
+        关闭FTP共享服务
+
+        Returns:
+            bool: 是否成功关闭FTP共享服务
+        """
         if self._ftp_service is not None:
             self._kill_process(self._ftp_service.pid)
 
@@ -60,6 +100,12 @@ class ServiceProcessManager:
         return True
 
     def close_all(self) -> bool:
+        """
+        关闭所有共享服务, 包括HTTP服务和FTP服务
+
+        Returns:
+            bool: 是否成功关闭所有服务
+        """
         self.close_ftp()
         if self._http_service is not None:
             self._kill_process(self._http_service.pid)

@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QFrame, QHBoxLayout, QSizeGrip
 
 
 class CustomGrip(QWidget):
-    def __init__(self, parent: QMainWindow, position: Qt.Edge) -> None:
+    def __init__(self, parent: QMainWindow, position: Qt.Edge):
         # SETUP UI
         QWidget.__init__(self)
         self.parent = parent

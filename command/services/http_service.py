@@ -2,7 +2,7 @@ __all__ = ["HttpService"]
 
 import os
 import re
-from typing import Union, Any, AsyncGenerator
+from typing import Union, Any, AsyncGenerator, Dict
 from multiprocessing import Queue
 from urllib.parse import quote
 from email.utils import formatdate
@@ -20,7 +20,7 @@ from utils.logger import sharerLogger, sysLogger
 
 
 class MyRequest:
-    def __init__(self, scope: Scope) -> None:
+    def __init__(self, scope: Scope):
         self._setup(scope)
 
     def _setup(self, scope: Scope) -> None:
@@ -38,18 +38,49 @@ class MyRequest:
 
 
 class HttpService(BaseService):
-    def __init__(self, input_q: Queue, output_q: Queue) -> None:
+    def __init__(self, input_q: Queue, output_q: Queue):
+        """
+        HTTP共享服务类初始化函数
+
+        Args:
+            input_q: 输入的进程队列
+            output_q: 输出的进程队列
+        """
         super(HttpService, self).__init__(input_q, output_q)
         self._app = None
 
     def _add_share(self, fileObj: Union[FileModel, DirModel]) -> None:
+        """
+        添加共享文件或文件夹
+
+        Args:
+            fileObj: 待添加共享的文件或文件夹对象
+
+        Returns:
+            None
+        """
         self._sharing_dict.update({fileObj.uuid: fileObj})
 
     def _remove_share(self, uuid: str) -> None:
+        """
+        移除共享文件或文件夹
+
+        Args:
+            uuid: 待移除共享文件或文件夹的uuid
+
+        Returns:
+            None
+        """
         if uuid in self._sharing_dict:
             del self._sharing_dict[uuid]
 
     def run(self) -> None:
+        """
+        HTTP服务进程运行入口函数
+
+        Returns:
+            None
+        """
         self.watch()
         super(HttpService, self).run()
 
@@ -62,13 +93,26 @@ class HttpService(BaseService):
         )
 
     def _setup(self) -> None:
+        """
+        初始化HTTP服务配置, 意在初始化中间件和路由
+
+        Returns:
+            None
+        """
         self._setup_middleware()
         self._setup_router()
 
     def _setup_middleware(self) -> None:
+        """
+        初始化中间件
+
+        Returns:
+            None
+        """
+
         async def generate_fileObj_recursive(
             uuid: str, parentObj: Union[None, DirModel] = None
-        ) -> Union[None, FileModel, DirModel]:
+        ) -> Union[FileModel, DirModel, None]:
             if parentObj is None:
                 try:
                     parent_uuid, other_uuid = uuid.split(">", 1)
@@ -108,9 +152,13 @@ class HttpService(BaseService):
             4. 是否下载文件夹
             5. 是否用非客户端下载FTP服务文件/文件夹
             6. 文件/文件夹对象往后传递给视图
-            :param request: fastapi request对象
-            :param cell_next: 后续中间件/视图回调函数
-            :return: Response: fastapi支持的 response对象
+
+            Args:
+                request: request对象
+                cell_next: 后续中间件/视图回调函数
+
+            Returns:
+                Response: response对象
             """
             _request = MyRequest(request.scope)
             client_ip = _request["client"][0] if _request["client"] else "未知IP"
@@ -161,6 +209,13 @@ class HttpService(BaseService):
             return response
 
     def _setup_router(self) -> None:
+        """
+        初始化路由
+
+        Returns:
+            None
+        """
+
         async def file_generator(
             file_path: str, offset: int, chunk_size: int
         ) -> AsyncGenerator:
@@ -210,7 +265,7 @@ class HttpService(BaseService):
             )
 
         @self._app.get("%s/{uuid}" % ptype.FILE_LIST_URI)
-        async def file_list(uuid: str, request: Request) -> dict:
+        async def file_list(uuid: str, request: Request) -> Dict[str, Any]:
             fileObj = request.scope.get("fileObj")
             fileObj: Union[None, FileModel, DirModel]
             if not fileObj:
@@ -225,7 +280,9 @@ class HttpService(BaseService):
             return {"errno": 200, "errmsg": "", "data": data}
 
         @self._app.get("%s/{uuid}" % ptype.DOWNLOAD_URI)
-        async def download(uuid: str, request: Request) -> Any:
+        async def download(
+            uuid: str, request: Request
+        ) -> Union[Dict[str, Any], StreamingResponse]:
             fileObj = request.scope.get("fileObj")
             fileObj: Union[None, FileModel, DirModel]
             if not fileObj:

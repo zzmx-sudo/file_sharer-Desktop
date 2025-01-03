@@ -17,9 +17,18 @@ class AssertThread(QThread):
     single = pyqtSignal(tuple)
 
     def __init__(self):
+        """
+        校验环境线程类初始化函数
+        """
         super(AssertThread, self).__init__()
 
     def run(self) -> None:
+        """
+        检验环境线程入口函数
+
+        Returns:
+            None
+        """
         # verify pyproject.toml
         self._verify_pyproject_toml()
         # verify local ip
@@ -32,10 +41,12 @@ class AssertThread(QThread):
         self.single.emit((VerifyStatus.INFO, f"本机IP: {settings.LOCAL_HOST}"))
         self.single.emit((VerifyStatus.DONE, "校验完成, 点击按钮后进入"))
 
-    def _verify_pyproject_toml(self):
+    def _verify_pyproject_toml(self) -> None:
         """
-        校验pyproject.toml文件内容
-        :return:
+        校验配置文件是否正常
+
+        Returns:
+            None
         """
         if not get_config_from_toml():
             self.single.emit(
@@ -59,6 +70,9 @@ class AssertEnvWindow(QDialog):
     all_safe = pyqtSignal()
 
     def __init__(self):
+        """
+        校验环境窗口初始化函数
+        """
         super(AssertEnvWindow, self).__init__()
         self.resize(400, 300)
         self.setStyleSheet(self.styleSheet)
@@ -101,10 +115,12 @@ class AssertEnvWindow(QDialog):
         self.show()
         self._verify()
 
-    def _verify(self):
+    def _verify(self) -> None:
         """
-        开启线程校验各类环境参数
-        :return: None
+        开启校验
+
+        Returns:
+            None
         """
         self.assert_thread = AssertThread()
         self.assert_thread.single.connect(self._append_text_edit)
@@ -112,9 +128,13 @@ class AssertEnvWindow(QDialog):
 
     def _append_text_edit(self, verify_res: Tuple[VerifyStatus, str]) -> None:
         """
-        将校验结果追加到text_edit
-        :param verify_res: 校验结果
-        :return: None
+        将校验结果追加到text_edit控件中
+
+        Args:
+            verify_res: 校验的结果
+
+        Returns:
+            None
         """
         status, msg = verify_res
         if status is VerifyStatus.INFO:
@@ -133,19 +153,23 @@ class AssertEnvWindow(QDialog):
             self._show_button()
             self.button.clicked.connect(lambda: self._enter_mainWindow())
 
-    def _enter_mainWindow(self):
+    def _enter_mainWindow(self) -> None:
         """
-        进入程序窗口
-        :return: None
+        进入主程序窗口
+
+        Returns:
+            None
         """
         self.assert_thread.quit()
         self.all_safe.emit()
         self.close()
 
-    def _quit_app(self):
+    def _quit_app(self) -> None:
         """
-        退出程序
-        :return: None
+        退出主程序
+
+        Returns:
+            None
         """
         self.assert_thread.quit()
         self.close()
@@ -153,8 +177,12 @@ class AssertEnvWindow(QDialog):
     def _info_message_format(self, msg: str) -> str:
         """
         INFO级别格式化信息
-        :param msg: 原始信息
-        :return: 格式化后信息
+
+        Args:
+            msg: 原始信息(待格式化信息)
+
+        Returns:
+            str: 格式化后的信息
         """
         return f"""
         <font color="grey">[INFO]: {msg}</font>
@@ -163,8 +191,12 @@ class AssertEnvWindow(QDialog):
     def _warn_message_format(self, msg: str) -> str:
         """
         WARNING级别格式化信息
-        :param msg: 原始信息
-        :return: 格式化后信息
+
+        Args:
+            msg: 原始信息(待格式化信息)
+
+        Returns:
+            str: 格式化后的信息
         """
         return f"""
         <font color="orange">[WARN]: {msg}</font>
@@ -173,17 +205,23 @@ class AssertEnvWindow(QDialog):
     def _fatal_message_format(self, msg: str) -> str:
         """
         FATAL级别格式化信息
-        :param msg: 原始信息
-        :return: 格式化后信息
+
+        Args:
+            msg: 原始信息(待格式化信息)
+
+        Returns:
+            str: 格式化后的信息
         """
         return f"""
         <font color="red">[FATAL]: {msg}</font>
         """
 
-    def _show_button(self):
+    def _show_button(self) -> None:
         """
         显示button按钮
-        :return: None
+
+        Returns:
+            None
         """
         self.animation = QPropertyAnimation(self.button, b"maximumHeight")
         self.animation.setDuration(500)
@@ -195,8 +233,10 @@ class AssertEnvWindow(QDialog):
     @property
     def styleSheet(self) -> str:
         """
-        全局样式表
-        :return: str
+        校验环境窗口全局样式表
+
+        Returns:
+            str: 校验环境窗口全局样式表
         """
         return """
         * {
