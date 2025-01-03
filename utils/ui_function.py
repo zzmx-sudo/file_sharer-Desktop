@@ -27,6 +27,9 @@ from model.public_types import ThemeColor as themeColor
 from model.public_types import ControlColorStruct as ControlColor
 from model.browse import BrowseFileDictModel
 from settings import settings
+from utils.public_func import (
+    window_reservation_when_box_destroyed as window_reservation,
+)
 
 
 class UiFunction:
@@ -85,6 +88,7 @@ class UiFunction:
         # elements event connect
         self._setup_event_connect()
 
+    @window_reservation
     def show_info_messageBox(
         self,
         msg: str,
@@ -130,12 +134,9 @@ class UiFunction:
         """
         )
         info.setIconPixmap(QPixmap(":/icons/images/icon/logo.png").scaled(50, 50))
-        # 在QMessageBox弹出前配置最后窗口关闭程序不退出, 以修复当主窗口隐藏时关闭弹框后程序退出的BUG
-        QApplication.setQuitOnLastWindowClosed(False)
         info.exec_()
-        # QMessageBox结束后配置最后窗口关闭程序退出, 以修复无法关闭程序的BUG
-        QApplication.setQuitOnLastWindowClosed(True)
 
+    @window_reservation
     def show_question_messageBox(
         self,
         msg: str,
@@ -213,6 +214,7 @@ class UiFunction:
         )
         return question.exec_()
 
+    @window_reservation
     def show_critical_messageBox(self, msg: str) -> None:
         """
         显示Critical类型的弹框

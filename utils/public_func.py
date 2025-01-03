@@ -19,9 +19,10 @@ import sys
 import platform
 import uuid
 import json
-from typing import Dict, Any
+from typing import Dict, Any, Callable
 
 import toml
+from PyQt5.Qt import QApplication
 
 
 def get_system() -> str:
@@ -209,3 +210,26 @@ def generate_color_card_map() -> Dict[str, str]:
             return json.load(f)
         except:
             return {}
+
+
+def window_reservation_when_box_destroyed(show_box: Callable) -> Callable:
+    """
+    在弹框前/后分别配置最后窗口关闭时程序不退出和最后窗口关闭时程序退出,
+    来修复主窗口隐藏时弹框关闭导致程序退出的BUG
+
+    Args:
+        show_box: 弹框执行函数
+
+    Returns:
+        Callable: 装饰后的弹框执行函数
+    """
+
+    def _inner(*args, **kwargs) -> Any:
+        # 在QMessageBox弹出前配置最后窗口关闭程序不退出, 以修复当主窗口隐藏时关闭弹框后程序退出的BUG
+        QApplication.setQuitOnLastWindowClosed(False)
+        result = show_box(*args, **kwargs)
+        # QMessageBox结束后配置最后窗口关闭程序退出, 以修复无法关闭程序的BUG
+        QApplication.setQuitOnLastWindowClosed(True)
+        return result
+
+    return _inner
