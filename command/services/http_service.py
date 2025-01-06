@@ -168,39 +168,50 @@ class HttpService(BaseService):
             # 文件是否存在判断
             if fileObj is None or not fileObj.isExists:
                 sharerLogger.warning(
-                    "访问错误路径或文件/文件夹已不存在, 访问链接: %s, 用户IP: %s"
-                    % (_request["path"], client_ip)
+                    f"访问错误路径或文件/文件夹已不存在, 访问链接: {_request['path']}, 用户IP: {client_ip}"
                 )
                 return JSONResponse({"errno": 404, "errmsg": "错误的路径或文件已不存在！"})
             # 浏览/下载记录写入日志
             if uri == ptype.FILE_LIST_URI:
                 sharerLogger.info(
-                    "用户IP: %s, 用户访问了文件列表, 文件链接: %s"
-                    % (
-                        client_ip,
-                        fileObj.targetPath,
-                    )
+                    f"用户IP: {client_ip}, 用户访问了文件列表, 文件链接: {fileObj.targetPath}"
                 )
                 self._output_q.put(param)
             elif uri == ptype.DOWNLOAD_URI:
-                # 是否为文件夹判断
-                if fileObj.isDir and fileObj.shareType is ptype.ShareType.http:
-                    sharerLogger.warning("用户使用非客户端无法直接下载分享的文件夹, 用户IP: %s" % client_ip)
-                    return JSONResponse(
-                        {"errno": 400, "errmsg": "无法直接下载文件夹, 请使用客户端进行下载！"}
-                    )
-                # 下载的若为FTP分享文件, 需进行是否为客户端判断
-                if await is_download_ftp_without_client(fileObj.shareType, _request):
-                    sharerLogger.warning(
-                        "用户使用非客户端无法下载FTP分享的文件/文件夹, 用户IP: %s" % client_ip
-                    )
-                    return JSONResponse(
-                        {"errno": 400, "errmsg": "ftp分享的文件/文件夹请使用客户端进行下载！"}
-                    )
+                params = request.query_params
+                hit_log = params.get(ptype.HIT_LOG, "false")
+                if fileObj.shareType is ptype.ShareType.http:
+                    # 下载的若为HTTP分享的文件夹, 需进行是否含hit_log标志校验
+                    if fileObj.isDir and hit_log != "true":
+                        sharerLogger.warning(f"用户使用非客户端无法直接下载分享的文件夹, 用户IP: {client_ip}")
+                        return JSONResponse(
+                            {"errno": 400, "errmsg": "无法直接下载文件夹, 请使用客户端进行下载！"}
+                        )
+                    elif fileObj.isDir and hit_log == "true":
+                        sharerLogger.info(
+                            f"用户IP: {client_ip}, 用户下载了文件夹, 文件夹路径: {fileObj.targetPath}"
+                        )
+                        return JSONResponse({"errno": 200, "errmsg": ""})
+                    elif hit_log == "true":
+                        sharerLogger.info(
+                            f"用户IP: {client_ip}, 用户下载了文件, 文件路径: {fileObj.targetPath}"
+                        )
                 else:
-                    sharerLogger.info(
-                        "用户IP: %s, 用户下载了文件, 文件链接: %s" % (client_ip, fileObj.targetPath)
-                    )
+                    file_type = "文件夹" if fileObj.isDir else "文件"
+                    # 下载的若为FTP分享文件, 需进行是否为客户端判断
+                    if await is_download_ftp_without_client(
+                        fileObj.shareType, _request
+                    ):
+                        sharerLogger.warning(
+                            f"用户使用非客户端无法下载FTP分享的文件/文件夹, 用户IP: {client_ip}"
+                        )
+                        return JSONResponse(
+                            {"errno": 400, "errmsg": "ftp分享的文件/文件夹请使用客户端进行下载！"}
+                        )
+                    if hit_log == "true":
+                        sharerLogger.info(
+                            f"用户IP: {client_ip}, 用户下载了{file_type}, {file_type}路径: {fileObj.targetPath}"
+                        )
             else:
                 return JSONResponse({"errno": 404, "errmsg": "访问的链接不存在！"})
 
@@ -272,14 +283,14 @@ class HttpService(BaseService):
                 sysLogger.error(
                     "发生了错误, 获取不到用户访问的文件/文件夹对象, "
                     "请用uuid对比`file_sharing_backups.json`文件, "
-                    "查看分享的文件/文件夹状态, uuid: %s" % uuid
+                    f"查看分享的文件/文件夹状态, uuid: {uuid}"
                 )
                 return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
 
             data = await fileObj.to_dict_client()
             return {"errno": 200, "errmsg": "", "data": data}
 
-        @self._app.get("%s/{uuid}" % ptype.DOWNLOAD_URI)
+        @self._app.get("%s/{uuid}" % ptype.DOWNLOAD_URI, response_model=None)
         async def download(
             uuid: str, request: Request
         ) -> Union[Dict[str, Any], StreamingResponse]:
@@ -289,7 +300,7 @@ class HttpService(BaseService):
                 sysLogger.error(
                     "发生了错误, 获取不到用户访问的文件/文件夹对象, "
                     "请用uuid对比`file_sharing_backups.json`文件, "
-                    "查看分享的文件/文件夹状态, uuid: %s" % uuid
+                    f"查看分享的文件/文件夹状态, uuid: {uuid}"
                 )
                 return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
 
@@ -299,5 +310,5 @@ class HttpService(BaseService):
                 ftp_data = await fileObj.to_ftp_data()
                 return {"errno": 200, "errmsg": "", "data": ftp_data}
             else:
-                sysLogger.error("未被预判的分享类型: %s, 系统发生错误" % fileObj.shareType.value)
+                sysLogger.error(f"未被预判的分享类型: {fileObj.shareType.value}, 系统发生错误")
                 return {"errno": 500, "errmsg": "下载文件/文件夹失败"}

@@ -23,6 +23,7 @@ from typing import Dict, Any, Callable
 
 import toml
 from PyQt5.Qt import QApplication
+from model import public_types as ptype
 
 
 def get_system() -> str:
@@ -233,3 +234,18 @@ def window_reservation_when_box_destroyed(show_box: Callable) -> Callable:
         return result
 
     return _inner
+
+
+def update_downloadUrl_with_hitLog(fileDict: Dict[str, Any]) -> None:
+    """
+    更新download_url, 以便告知服务端存储下载记录日志
+
+    Args:
+        fileDict: 需下载的文件/文件夹对象
+
+    Returns:
+        None
+    """
+    if ptype.HIT_LOG not in fileDict["downloadUrl"]:
+        new_download_url = f"{fileDict['downloadUrl']}?{ptype.HIT_LOG}=true"
+        fileDict.update({"downloadUrl": new_download_url})

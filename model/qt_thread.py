@@ -22,7 +22,7 @@ from ftplib import FTP
 
 from settings import settings
 from utils.logger import sysLogger
-from .public_types import DownloadStatus
+from .public_types import DownloadStatus, HIT_LOG
 
 
 class WatchResultThread(QThread):
@@ -112,6 +112,9 @@ class DownloadHttpFileThread(QThread):
         if self._is_pause(fileObj):
             return
         url = fileObj["downloadUrl"]
+        if HIT_LOG in url and fileObj.get("isDir"):
+            await session.get(url)
+            return
         relativePath = fileObj["relativePath"]
         file_path = os.path.abspath(os.path.join(settings.DOWNLOAD_DIR, relativePath))
         if os.path.exists(file_path):

@@ -28,7 +28,7 @@ from model.qt_thread import *
 from model.browse import BrowseFileDictModel
 from model.assert_env import AssertEnvWindow
 from model.tray_icon import TrayIcon
-from utils.public_func import generate_uuid
+from utils.public_func import generate_uuid, update_downloadUrl_with_hitLog
 
 
 class MainWindow(QMainWindow):
@@ -164,10 +164,11 @@ class MainWindow(QMainWindow):
                 return
             copy_fileDict = copy.copy(fileDict)
             copy_fileDict.update({"relativePath": copy_fileDict["fileName"]})
+            update_downloadUrl_with_hitLog(copy_fileDict)
             fileList = [copy_fileDict]
             fileCount = 1
         else:
-            fileList, fileCount = self._generare_fileList_recursive()
+            fileList, fileCount = self._generate_fileList_recursive()
         self._append_download_fileList(fileList)
 
         sysLogger.info(f"加入下载成功, 此次下载文件个数: {fileCount}")
@@ -594,18 +595,17 @@ class MainWindow(QMainWindow):
         self._UIClass.show_file_list(self, self._browse_data.currentDict)
         self.ui.backupButton.setEnabled(not self._browse_data.isRoot)
 
-    def _generare_fileList_recursive(self) -> Tuple[List[Dict[str, Any]], int]:
-        def _generare_fileList_recursive_inner(
-            fileList: List[Dict[str, Any]], fileDict: Union[None, dict] = None
+    def _generate_fileList_recursive(self) -> Tuple[List[Dict[str, Any]], int]:
+        def _generate_fileList_recursive_inner(
+            fileList: List[Dict[str, Any]], fileDict: Dict[str, Any]
         ) -> List[Dict[str, Any]]:
-            fileDict = fileDict or self._browse_data.currentDict
             copy_fileDict = copy.deepcopy(fileDict)
             dir_name = copy_fileDict["fileName"]
             for children in copy_fileDict["children"]:
                 relativePath = os.path.join(dir_name, children["fileName"])
                 if children["isDir"]:
                     children.update({"fileName": relativePath})
-                    _generare_fileList_recursive_inner(fileList, children)
+                    _generate_fileList_recursive_inner(fileList, children)
                 else:
                     children.update({"relativePath": relativePath})
                     fileList.append(children)
@@ -615,17 +615,12 @@ class MainWindow(QMainWindow):
             return fileList
 
         current_fileDict = self._browse_data.currentDict
-        if current_fileDict["stareType"] == "ftp":
-            parent_fileDict = copy.copy(current_fileDict)
-            del parent_fileDict["children"]
-            fileList = [parent_fileDict]
-            ignore_count = 1
-        else:
-            fileList = []
-            ignore_count = 0
+        parent_fileDict = copy.copy(current_fileDict)
+        update_downloadUrl_with_hitLog(parent_fileDict)
+        fileList = [parent_fileDict]
 
-        fileList = _generare_fileList_recursive_inner(fileList)
-        return fileList, len(fileList) - ignore_count
+        fileList = _generate_fileList_recursive_inner(fileList, parent_fileDict)
+        return fileList, len(fileList) - 1
 
     def _append_download_fileList(self, fileList: Sequence[Dict[str, Any]]) -> None:
         self._UIClass.add_download_table_item(self, fileList)
