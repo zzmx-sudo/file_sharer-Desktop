@@ -2,7 +2,7 @@ __all__ = ["SharingModel", "FuseSharingModel"]
 
 import os
 import json
-from typing import Union
+from typing import Union, Optional
 
 from .file import FileModel, DirModel
 from .public_types import ShareType as shareType
@@ -19,35 +19,96 @@ class SharingModel(dict):
 
     @property
     def length(self) -> int:
+        """
+        分享的文件/文件夹个数
+
+        Returns:
+            int: 分享的文件/文件夹个数
+        """
         return len(self)
 
     @property
     def isEmpty(self) -> bool:
+        """
+        分享是否为空
+
+        Returns:
+            bool: 分享是否为空
+        """
         return not self
 
 
 class FuseSharingModel(list):
     @property
     def length(self) -> int:
+        """
+        融合分享文件/文件夹个数
+
+        Returns:
+            int: 融合分享文件/文件夹个数
+        """
         return len(self)
 
     def append(self, fileObj: Union[FileModel, DirModel]) -> None:
+        """
+        追加分享文件/文件夹对象
+
+        Args:
+            fileObj: 待追加的文件/文件夹对象
+
+        Returns:
+            None
+        """
+        sysLogger.debug("追加分享文件对象")
         super(FuseSharingModel, self).append(fileObj)
         fileObj.rowIndex = self.length - 1
+        sysLogger.debug("追加分享文件对象完成")
 
     def remove(self, rowIndex: int) -> None:
+        """
+        移除分享文件/文件夹对象
+
+        Args:
+            rowIndex: 待移除文件/文件夹对象的行号
+
+        Returns:
+            None
+        """
+        sysLogger.debug("移除分享文件对象")
         super(FuseSharingModel, self).pop(rowIndex)
         for index in range(rowIndex, self.length):
             self[index].rowIndex -= 1
+        sysLogger.debug("移除分享文件对象完成")
 
-    def contains(self, target_path: str, share_type: shareType) -> Union[None, int]:
+    def contains(self, target_path: str, share_type: shareType) -> Optional[int]:
+        """
+        目标分享文件/文件夹对象的行号
+
+        Args:
+            target_path: 文件/文件夹对象的路径
+            share_type: 文件/文件夹对象的分享类型
+
+        Returns:
+            Optional[int]: 目标分享文件/文件夹对象的行号
+        """
+        sysLogger.debug("检验分享文件对象是否存在")
         for fileObj in self:
             if fileObj == target_path and fileObj.shareType is share_type:
                 return fileObj.rowIndex
 
         return None
 
-    def get_ftp_shared(self, target_path: str) -> Union[None, FileModel, DirModel]:
+    def get_ftp_shared(self, target_path: str) -> Union[FileModel, DirModel, None]:
+        """
+        获取可复用FTP的文件/文件夹对象
+
+        Args:
+            target_path: 待分析文件/文件夹对象的路径
+
+        Returns:
+            Union[FileModel, DirModel, None]: 可复用FTP的文件/文件夹对象
+        """
+        sysLogger.debug("获取可复用的FTP")
         basePath_file_params: dict = {}
         for fileObj in self:
             if fileObj.shareType is shareType.ftp:
@@ -61,6 +122,13 @@ class FuseSharingModel(list):
         return None
 
     def dump(self) -> None:
+        """
+        转存
+
+        Returns:
+            None
+        """
+        sysLogger.debug("开始写入历史分享记录")
         backup_result: list = [fileObj.to_dump_backup() for fileObj in self]
 
         backup_file_path: str = os.path.join(
@@ -71,10 +139,17 @@ class FuseSharingModel(list):
                 backup_result, f, indent=4, separators=(",", ": "), ensure_ascii=False
             )
 
-        sysLogger.info("保存历史分享记录成功")
+        sysLogger.debug("写入历史分享记录成功")
 
     @classmethod
     def load(cls) -> "FuseSharingModel":
+        """
+        加载
+
+        Returns:
+            FuseSharingModel: 加载成融合分享对象
+        """
+        sysLogger.debug("开始读取历史分享记录")
         model = cls()
         backup_file_path: str = os.path.join(
             settings.BASE_DIR, "file_sharing_backups.json"
@@ -117,5 +192,5 @@ class FuseSharingModel(list):
 
             model.append(fileObj)
 
-        sysLogger.info("加载历史分享记录成功")
+        sysLogger.debug("读取历史分享记录完成")
         return model

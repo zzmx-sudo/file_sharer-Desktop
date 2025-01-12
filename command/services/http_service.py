@@ -2,7 +2,7 @@ __all__ = ["HttpService"]
 
 import os
 import re
-from typing import Union, Any, AsyncGenerator
+from typing import Union, Any, AsyncGenerator, Dict
 from multiprocessing import Queue
 from urllib.parse import quote
 from email.utils import formatdate
@@ -20,7 +20,7 @@ from utils.logger import sharerLogger, sysLogger
 
 
 class MyRequest:
-    def __init__(self, scope: Scope) -> None:
+    def __init__(self, scope: Scope):
         self._setup(scope)
 
     def _setup(self, scope: Scope) -> None:
@@ -38,35 +38,90 @@ class MyRequest:
 
 
 class HttpService(BaseService):
-    def __init__(self, input_q: Queue, output_q: Queue) -> None:
+    def __init__(self, input_q: Queue, output_q: Queue):
+        """
+        HTTP共享服务类初始化函数
+
+        Args:
+            input_q: 输入的进程队列
+            output_q: 输出的进程队列
+        """
         super(HttpService, self).__init__(input_q, output_q)
+        self._service_name = "HTTP"
         self._app = None
 
     def _add_share(self, fileObj: Union[FileModel, DirModel]) -> None:
+        """
+        添加共享文件或文件夹
+
+        Args:
+            fileObj: 待添加共享的文件或文件夹对象
+
+        Returns:
+            None
+        """
+        self._sysLogger_debug(f"开始添加分享, 分享路径: {fileObj.targetPath}")
         self._sharing_dict.update({fileObj.uuid: fileObj})
+        self._sysLogger_debug(f"添加分享完成, 分享路径: {fileObj.targetPath}")
 
     def _remove_share(self, uuid: str) -> None:
+        """
+        移除共享文件或文件夹
+
+        Args:
+            uuid: 待移除共享文件或文件夹的uuid
+
+        Returns:
+            None
+        """
+        self._sysLogger_debug(f"开始移除分享, 分享的uuid: {uuid}")
         if uuid in self._sharing_dict:
             del self._sharing_dict[uuid]
+        self._sysLogger_debug(f"移除分享完成, 分享的uuid: {uuid}")
 
     def run(self) -> None:
+        """
+        HTTP服务进程运行入口函数
+
+        Returns:
+            None
+        """
         self.watch()
         super(HttpService, self).run()
 
         import uvicorn
 
+        self._sysLogger_debug("初始化FastAPI")
         self._app = FastAPI()
         self._setup()
-        uvicorn.run(app=self._app, host=settings.LOCAL_HOST, port=settings.WSGI_PORT)
+        self._sysLogger_debug("开启服务")
+        uvicorn.run(
+            app=self._app, host=settings.LOCAL_HOST, port=settings.init_wsgi_port()
+        )
+        self._sysLogger_debug("开启HTTP服务失败")
 
     def _setup(self) -> None:
+        """
+        初始化HTTP服务配置, 意在初始化中间件和路由
+
+        Returns:
+            None
+        """
+        self._sysLogger_debug("初始化路由")
         self._setup_middleware()
         self._setup_router()
 
     def _setup_middleware(self) -> None:
+        """
+        初始化中间件
+
+        Returns:
+            None
+        """
+
         async def generate_fileObj_recursive(
             uuid: str, parentObj: Union[None, DirModel] = None
-        ) -> Union[None, FileModel, DirModel]:
+        ) -> Union[FileModel, DirModel, None]:
             if parentObj is None:
                 try:
                     parent_uuid, other_uuid = uuid.split(">", 1)
@@ -106,9 +161,13 @@ class HttpService(BaseService):
             4. 是否下载文件夹
             5. 是否用非客户端下载FTP服务文件/文件夹
             6. 文件/文件夹对象往后传递给视图
-            :param request: fastapi request对象
-            :param cell_next: 后续中间件/视图回调函数
-            :return: Response: fastapi支持的 response对象
+
+            Args:
+                request: request对象
+                cell_next: 后续中间件/视图回调函数
+
+            Returns:
+                Response: response对象
             """
             _request = MyRequest(request.scope)
             client_ip = _request["client"][0] if _request["client"] else "未知IP"
@@ -118,39 +177,50 @@ class HttpService(BaseService):
             # 文件是否存在判断
             if fileObj is None or not fileObj.isExists:
                 sharerLogger.warning(
-                    "访问错误路径或文件/文件夹已不存在, 访问链接: %s, 用户IP: %s"
-                    % (_request["path"], client_ip)
+                    f"访问错误路径或文件/文件夹已不存在, 访问链接: {_request['path']}, 用户IP: {client_ip}"
                 )
                 return JSONResponse({"errno": 404, "errmsg": "错误的路径或文件已不存在！"})
             # 浏览/下载记录写入日志
             if uri == ptype.FILE_LIST_URI:
                 sharerLogger.info(
-                    "用户IP: %s, 用户访问了文件列表, 文件链接: %s"
-                    % (
-                        client_ip,
-                        fileObj.targetPath,
-                    )
+                    f"用户IP: {client_ip}, 用户访问了文件列表, 文件链接: {fileObj.targetPath}"
                 )
                 self._output_q.put(param)
             elif uri == ptype.DOWNLOAD_URI:
-                # 是否为文件夹判断
-                if fileObj.isDir and fileObj.shareType is ptype.ShareType.http:
-                    sharerLogger.warning("用户使用非客户端无法直接下载分享的文件夹, 用户IP: %s" % client_ip)
-                    return JSONResponse(
-                        {"errno": 400, "errmsg": "无法直接下载文件夹, 请使用客户端进行下载！"}
-                    )
-                # 下载的若为FTP分享文件, 需进行是否为客户端判断
-                if await is_download_ftp_without_client(fileObj.shareType, _request):
-                    sharerLogger.warning(
-                        "用户使用非客户端无法下载FTP分享的文件/文件夹, 用户IP: %s" % client_ip
-                    )
-                    return JSONResponse(
-                        {"errno": 400, "errmsg": "ftp分享的文件/文件夹请使用客户端进行下载！"}
-                    )
+                params = request.query_params
+                hit_log = params.get(ptype.HIT_LOG, "false")
+                if fileObj.shareType is ptype.ShareType.http:
+                    # 下载的若为HTTP分享的文件夹, 需进行是否含hit_log标志校验
+                    if fileObj.isDir and hit_log != "true":
+                        sharerLogger.warning(f"用户使用非客户端无法直接下载分享的文件夹, 用户IP: {client_ip}")
+                        return JSONResponse(
+                            {"errno": 400, "errmsg": "无法直接下载文件夹, 请使用客户端进行下载！"}
+                        )
+                    elif fileObj.isDir and hit_log == "true":
+                        sharerLogger.info(
+                            f"用户IP: {client_ip}, 用户下载了文件夹, 文件夹路径: {fileObj.targetPath}"
+                        )
+                        return JSONResponse({"errno": 200, "errmsg": ""})
+                    elif hit_log == "true":
+                        sharerLogger.info(
+                            f"用户IP: {client_ip}, 用户下载了文件, 文件路径: {fileObj.targetPath}"
+                        )
                 else:
-                    sharerLogger.info(
-                        "用户IP: %s, 用户下载了文件, 文件链接: %s" % (client_ip, fileObj.targetPath)
-                    )
+                    file_type = "文件夹" if fileObj.isDir else "文件"
+                    # 下载的若为FTP分享文件, 需进行是否为客户端判断
+                    if await is_download_ftp_without_client(
+                        fileObj.shareType, _request
+                    ):
+                        sharerLogger.warning(
+                            f"用户使用非客户端无法下载FTP分享的文件/文件夹, 用户IP: {client_ip}"
+                        )
+                        return JSONResponse(
+                            {"errno": 400, "errmsg": "ftp分享的文件/文件夹请使用客户端进行下载！"}
+                        )
+                    if hit_log == "true":
+                        sharerLogger.info(
+                            f"用户IP: {client_ip}, 用户下载了{file_type}, {file_type}路径: {fileObj.targetPath}"
+                        )
             else:
                 return JSONResponse({"errno": 404, "errmsg": "访问的链接不存在！"})
 
@@ -159,6 +229,13 @@ class HttpService(BaseService):
             return response
 
     def _setup_router(self) -> None:
+        """
+        初始化路由
+
+        Returns:
+            None
+        """
+
         async def file_generator(
             file_path: str, offset: int, chunk_size: int
         ) -> AsyncGenerator:
@@ -208,29 +285,31 @@ class HttpService(BaseService):
             )
 
         @self._app.get("%s/{uuid}" % ptype.FILE_LIST_URI)
-        async def file_list(uuid: str, request: Request) -> dict:
+        async def file_list(uuid: str, request: Request) -> Dict[str, Any]:
             fileObj = request.scope.get("fileObj")
             fileObj: Union[None, FileModel, DirModel]
             if not fileObj:
                 sysLogger.error(
                     "发生了错误, 获取不到用户访问的文件/文件夹对象, "
                     "请用uuid对比`file_sharing_backups.json`文件, "
-                    "查看分享的文件/文件夹状态, uuid: %s" % uuid
+                    f"查看分享的文件/文件夹状态, uuid: {uuid}"
                 )
                 return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
 
             data = await fileObj.to_dict_client()
             return {"errno": 200, "errmsg": "", "data": data}
 
-        @self._app.get("%s/{uuid}" % ptype.DOWNLOAD_URI)
-        async def download(uuid: str, request: Request) -> Any:
+        @self._app.get("%s/{uuid}" % ptype.DOWNLOAD_URI, response_model=None)
+        async def download(
+            uuid: str, request: Request
+        ) -> Union[Dict[str, Any], StreamingResponse]:
             fileObj = request.scope.get("fileObj")
             fileObj: Union[None, FileModel, DirModel]
             if not fileObj:
                 sysLogger.error(
                     "发生了错误, 获取不到用户访问的文件/文件夹对象, "
                     "请用uuid对比`file_sharing_backups.json`文件, "
-                    "查看分享的文件/文件夹状态, uuid: %s" % uuid
+                    f"查看分享的文件/文件夹状态, uuid: {uuid}"
                 )
                 return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
 
@@ -240,5 +319,5 @@ class HttpService(BaseService):
                 ftp_data = await fileObj.to_ftp_data()
                 return {"errno": 200, "errmsg": "", "data": ftp_data}
             else:
-                sysLogger.error("未被预判的分享类型: %s, 系统发生错误" % fileObj.shareType.value)
+                sysLogger.error(f"未被预判的分享类型: {fileObj.shareType.value}, 系统发生错误")
                 return {"errno": 500, "errmsg": "下载文件/文件夹失败"}

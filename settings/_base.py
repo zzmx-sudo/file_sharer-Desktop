@@ -29,8 +29,9 @@ IS_WINDOWS: bool = SYSTEM == "Windows"
 # 本机IP
 LOCAL_HOST: str = get_local_ip()
 
+# 废除从这配置, 改为开启HTTP前选择有效端口
 # 后端端口
-WSGI_PORT: int = 8080
+# WSGI_PORT: int = 8080
 
 # 是否Debug
 DEBUG: bool = False
@@ -332,7 +333,7 @@ QSlider::handle:horizontal:hover {
 QTooltip */
 QToolTip {
 	color: rgb(%(BaseColor)s);
-	background-color: rgba(%(BaseBgColor)s, %(ThemeOpacity).2f);
+	background-color: rgb(%(BaseBgColor)s);
 	border: 1px solid rgb(%(BaseColor)s);
 	background-image: none;
 	background-position: left center;

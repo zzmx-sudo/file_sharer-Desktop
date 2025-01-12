@@ -67,8 +67,8 @@ Section "MainSection" SEC01
   CreateDirectory "$SMPROGRAMS\FileSharer"
   CreateShortCut "$SMPROGRAMS\FileSharer\FileSharer.lnk" "$INSTDIR\file-sharer.exe" "" "$INSTDIR\icon.ico"
   CreateShortCut "$DESKTOP\FileSharer.lnk" "$INSTDIR\file-sharer.exe" "" "$INSTDIR\icon.ico"
-  SetOverwrite off
   File "${PROJECT_DIR}\build\file-sharer\pyproject.toml"
+  SetOverwrite off
   File "${PROJECT_DIR}\build\file-sharer\file_sharing_backups.json"
   SetOverwrite ifnewer
   File /r "${PROJECT_DIR}\build\file-sharer\*.*"

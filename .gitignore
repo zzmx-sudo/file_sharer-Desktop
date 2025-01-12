@@ -4,6 +4,7 @@ __pycache__
 
 # debug file
 demo*
+customize.toml
 
 # logs
 logs/

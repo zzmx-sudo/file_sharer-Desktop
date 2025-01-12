@@ -2,7 +2,7 @@ __all__ = ["FileModel", "DirModel"]
 
 import os
 import random
-from typing import Any, Union
+from typing import Any, Union, Dict
 
 from model import public_types as ptype
 from settings import settings
@@ -19,7 +19,19 @@ class FileModel:
         port: Union[None, int] = None,
         ftp_base_path: Union[None, str] = None,
         **kwargs,
-    ) -> None:
+    ):
+        """
+        文件模型类初始化函数
+
+        Args:
+            path: 文件所在路径
+            uuid: 文件uuid
+            parent_uuid: 父级文件夹的uuid, 若无父级则为None, 默认为None
+            pwd: FTP服务的密码, 若不是FTP共享则为None, 默认为None
+            port: FTP服务的端口, 若不是FTP共享则为None, 默认为None
+            ftp_base_path: FTP服务的根路径, 若不是FTP共享则为None, 默认为None
+            **kwargs: 其他关键字参数
+        """
         self._uuid = f"{parent_uuid}>{uuid}" if parent_uuid else uuid
         self._target_path = path.rstrip(os.sep) if path.endswith(os.sep) else path
         self._browse_number = 0
@@ -45,6 +57,12 @@ class FileModel:
             self._ftp_base_path = None
 
     def _generate_ftp_port(self) -> int:
+        """
+        生成FTP服务端口
+
+        Returns:
+            int: FTP服务器端口
+        """
         port = random.randint(10000, 65500)
         if not public_func.exists_port(port):
             return port
@@ -53,62 +71,161 @@ class FileModel:
 
     @property
     def uuid(self) -> str:
+        """
+        文件对象的uuid
+
+        Returns:
+            str: 文件对象的uuid
+        """
         return self._uuid
 
     @property
     def isSharing(self) -> bool:
+        """
+        文件对象是否被在分享中
+
+        Returns:
+            bool: 文件对象是否在分享中
+        """
         return self._is_sharing
 
     @isSharing.setter
     def isSharing(self, newValue: bool) -> None:
+        """
+        修改文件对象分享状态
+
+        Args:
+            newValue: 将要修改的分享状态
+
+        Returns:
+            None
+        """
         self._is_sharing = newValue
 
     @property
     def rowIndex(self) -> Union[None, int]:
+        """
+        文件对象在分享列表控件的行号
+
+        Returns:
+            Union[None, int]: 在分享列表控件的行号
+        """
         return self._row_index
 
     @rowIndex.setter
     def rowIndex(self, newValue: int) -> None:
+        """
+        修改文件对象在分享列表控件的行号
+
+        Args:
+            newValue: 将要修改的行号
+
+        Returns:
+            None
+        """
         self._row_index = newValue
 
     @property
     def isDir(self) -> bool:
+        """
+        文件对象是否为文件夹
+
+        Returns:
+            bool: 文件对象是否为文件夹
+        """
         return False
 
     @property
     def isExists(self) -> bool:
+        """
+        文件对象的路径是否存在
+
+        Returns:
+            bool: 文件对象的路径是否存在
+        """
         return os.path.exists(self._target_path)
 
     @property
     def browse_number(self) -> int:
+        """
+        文件对象被浏览次数
+
+        Returns:
+            int: 文件对象被浏览次数
+        """
         return self._browse_number
 
     @browse_number.setter
     def browse_number(self, newValue: int) -> None:
+        """
+        修改文件对象被浏览次数
+
+        Args:
+            newValue: 将要修改的浏览次数
+
+        Returns:
+            None
+        """
         self._browse_number = newValue
 
     @property
     def shareType(self) -> ptype.ShareType:
+        """
+        文件对象分享的类型
+
+        Returns:
+            ptype.ShareType: 文件对象分享的类型
+        """
         return self._share_type
 
     @property
     def targetPath(self) -> str:
+        """
+        文件对象的路径
+
+        Returns:
+            str: 文件对象的路径
+        """
         return self._target_path
 
     @property
     def ftp_pwd(self) -> Union[None, str]:
+        """
+        FTP服务的密码
+
+        Returns:
+            Union[None, str]: FTP服务的密码
+        """
         return self._ftp_pwd
 
     @property
     def ftp_port(self) -> Union[None, int]:
+        """
+        FTP服务的端口
+
+        Returns:
+            Union[None, int]: FTP服务的端口
+        """
         return self._ftp_port
 
     @property
     def ftp_basePath(self) -> Union[None, str]:
+        """
+        FTP服务的根路径
+
+        Returns:
+            Union[None, str]: FTP服务的根路径
+        """
         return self._ftp_base_path
 
     @property
     def ftp_cwd(self) -> str:
+        """
+        文件对象对于FTP服务根目录的相对路径
+
+        Returns:
+            str: 文件对象对于FTP服务根目录的相对路径
+        """
         result = os.path.dirname(self._target_path.replace(self._ftp_base_path, "", 1))
         if settings.IS_WINDOWS:
             result = result.replace("\\", "/")
@@ -116,17 +233,41 @@ class FileModel:
 
     @property
     def browse_url(self) -> str:
+        """
+        文件对象浏览的url
+
+        Returns:
+            str: 文件对象浏览的url
+        """
         return f"http://{settings.LOCAL_HOST}:{settings.WSGI_PORT}{ptype.FILE_LIST_URI}/{self._uuid}"
 
     @property
     def download_url(self) -> str:
+        """
+        文件对象下载的url
+
+        Returns:
+            str: 文件对象下载的url
+        """
         return f"http://{settings.LOCAL_HOST}:{settings.WSGI_PORT}{ptype.DOWNLOAD_URI}/{self._uuid}"
 
     @property
     def file_name(self) -> str:
+        """
+        文件对象的文件名
+
+        Returns:
+            str: 文件对象的文件名
+        """
         return os.path.basename(self._target_path)
 
-    async def to_dict_client(self) -> dict:
+    async def to_dict_client(self) -> Dict[str, Union[str, bool]]:
+        """
+        给客户端的格式化数据
+
+        Returns:
+            Dict[str, Union[str, bool]]: 给客户端的格式化数据
+        """
         return {
             "uuid": self._uuid,
             "downloadUrl": self.download_url,
@@ -135,7 +276,13 @@ class FileModel:
             "isDir": self.isDir,
         }
 
-    async def to_ftp_data(self) -> dict:
+    async def to_ftp_data(self) -> Dict[str, Union[str, int]]:
+        """
+        FTP各项数据
+
+        Returns:
+            Dict[str, Union[str, int]]: FTP的各项数据
+        """
         return {
             "uuid": self._uuid,
             "host": settings.LOCAL_HOST,
@@ -146,7 +293,13 @@ class FileModel:
             "filename": self.file_name,
         }
 
-    async def to_dict_server(self) -> dict:
+    async def to_dict_server(self) -> Dict[str, Union[str, int, bool]]:
+        """
+        给服务端的格式化数据
+
+        Returns:
+            Dict[str, Union[str, int, bool]]: 给服务端的格式化数据
+        """
         return {
             "uuid": self._uuid,
             "downloadUrl": self.download_url,
@@ -161,7 +314,13 @@ class FileModel:
             "browseNumber": self._browse_number,
         }
 
-    def to_dump_backup(self) -> dict:
+    def to_dump_backup(self) -> Dict[str, Union[str, bool, int, None]]:
+        """
+        转存的格式化数据
+
+        Returns:
+            Dict[str, Union[str, bool, int, None]]: 转存的格式化数据
+        """
         normal = {
             "path": self._target_path,
             "uuid": self._uuid,
@@ -198,7 +357,19 @@ class DirModel(FileModel):
         port: Union[None, int] = None,
         ftp_base_path: Union[None, str] = None,
         **kwargs,
-    ) -> None:
+    ):
+        """
+        文件夹模型类初始化函数
+
+        Args:
+            path: 文件夹所在路径
+            uuid: 文件夹uuid
+            parent_uuid: 父级文件夹的uuid, 若无父级则为None, 默认为None
+            pwd: FTP服务的密码, 若不是FTP共享则为None, 默认为None
+            port: FTP服务的端口, 若不是FTP共享则为None, 默认为None
+            ftp_base_path: FTP服务的根路径, 若不是FTP共享则为None, 默认为None
+            **kwargs: 其他关键字参数
+        """
         super(DirModel, self).__init__(
             path, uuid, parent_uuid, pwd, port, ftp_base_path, **kwargs
         )
@@ -212,6 +383,12 @@ class DirModel(FileModel):
         self._setup_child()
 
     def _setup_child(self) -> None:
+        """
+        初始化下级文件/文件夹
+
+        Returns:
+            None
+        """
         for file_name in os.listdir(self._target_path):
             file_path = os.path.join(self._target_path, file_name)
             child_uuid = public_func.generate_uuid()
@@ -227,14 +404,35 @@ class DirModel(FileModel):
 
             self._children[child_uuid] = child
 
-    def get(self, item: str) -> Any:
+    def get(self, item: str) -> Union[FileModel, "DirModel"]:
+        """
+        获取子级文件/文件夹对象
+
+        Args:
+            item: 子级文件/文件夹对象对应的key(uuid)
+
+        Returns:
+            Union[FileModel, "DirModel"]: 目标文件/文件夹对象
+        """
         return self._children.get(item)
 
     @property
     def isDir(self) -> bool:
+        """
+        文件对象是否为文件夹
+
+        Returns:
+            bool: 文件对象是否为文件夹
+        """
         return True
 
-    async def to_dict_client(self) -> dict:
+    async def to_dict_client(self) -> Dict[str, Any]:
+        """
+        给客户端的格式化数据
+
+        Returns:
+            Dict[str, Any]: 给客户端的格式化数据
+        """
         children = []
         for child_uuid, child in self._children.items():
             child_dict = {child_uuid: await child.to_dict_client()}
@@ -249,7 +447,13 @@ class DirModel(FileModel):
             "children": children,
         }
 
-    async def to_dict_server(self) -> dict:
+    async def to_dict_server(self) -> Dict[str, Any]:
+        """
+        给服务端的格式化数据
+
+        Returns:
+            Dict[str, Any]: 给服务端的格式化数据
+        """
         children = []
         for child_uuid, child in self._children.items():
             child_dict = {child_uuid: await child.to_dict_server()}

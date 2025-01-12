@@ -29,7 +29,13 @@ class configurable(object):
 class FuseSettings:
     _wrapper = empty
 
-    def __init__(self, mode: str) -> None:
+    def __init__(self, mode: str):
+        """
+        融合配置类初始化函数
+
+        Args:
+            mode: 配置模式
+        """
         self.__mode = mode
 
     def _setup(self) -> None:
@@ -62,7 +68,6 @@ class FuseSettings:
         if self._wrapper is empty:
             self._setup()
             self._load()
-            self._available_http_port()
         val = getattr(self._wrapper, item)
         self.__dict__[item] = val
 
@@ -95,6 +100,9 @@ class FuseSettings:
             raise OperationException(f"配置的日志文件夹路径不存在, LOGS_PATH: {logs_path}")
 
     def _load(self) -> None:
+        from utils.logger import sysLogger
+
+        sysLogger.debug("开始读取配置")
         tool_config = get_config_from_toml()
         if not tool_config:
             return
@@ -119,6 +127,7 @@ class FuseSettings:
         )
         color_card_map = generate_color_card_map()
         self._wrapper.COLOR_CARD = ColorCardStruct.dispatch(**color_card_map)
+        sysLogger.debug("读取配置完成")
 
     def _available_http_port(self) -> None:
         http_port = self._wrapper.__dict__.get("WSGI_PORT", 8080)
@@ -127,7 +136,16 @@ class FuseSettings:
         self._wrapper.WSGI_PORT = available_http_port
 
     def dump(self) -> None:
-        settings_file = os.path.join(self.BASE_DIR, "pyproject.toml")
+        """
+        转存
+
+        Returns:
+            None
+        """
+        from utils.logger import sysLogger
+
+        sysLogger.debug("开始写入配置")
+        settings_file = os.path.join(self.BASE_DIR, "customize.toml")
         try:
             tool_config = toml.load(settings_file)
         except Exception:
@@ -136,7 +154,6 @@ class FuseSettings:
         tool_config.update(
             {
                 "file-sharer": {
-                    "version": self.VERSION,
                     "saveSystemLog": self.SAVE_SYSTEM_LOG,
                     "saveShareLog": self.SAVE_SHARER_LOG,
                     "logsPath": self.LOGS_PATH,
@@ -148,12 +165,23 @@ class FuseSettings:
         )
         with open(settings_file, "w", encoding="utf-8") as f:
             toml.dump(tool_config, f)
+        sysLogger.debug("写入配置完成")
 
     def style_sheet(
         self,
         theme_color: Optional[themeColor] = None,
         theme_opacity: Optional[int] = None,
     ) -> str:
+        """
+        主程序窗口全局样式表
+
+        Args:
+            theme_color: 主题颜色
+            theme_opacity: 透明度
+
+        Returns:
+            str: 主程序窗口全局样式表
+        """
         theme_color = theme_color or self.THEME_COLOR
         theme_opacity = theme_opacity or self.THEME_OPACITY
         control_color = getattr(self.COLOR_CARD, theme_color.value)
@@ -164,12 +192,41 @@ class FuseSettings:
     def controlColor(
         self, theme_color: Optional[themeColor] = None
     ) -> ControlColorStruct:
+        """
+        主题样式对象
+
+        Args:
+            theme_color: 主题颜色
+
+        Returns:
+            ControlColorStruct: 主题样式对象
+        """
         theme_color = theme_color or self.THEME_COLOR
         return getattr(self.COLOR_CARD, theme_color.value)
 
     @property
     def initStyle(self) -> str:
+        """
+        初始化主程序窗口全局样式表
+
+        Returns:
+            str: 初始化主程序窗口全局样式表
+        """
         return self.style_sheet()
+
+    def init_wsgi_port(self) -> int:
+        """
+        获取有效WSGI端口
+
+        Returns:
+            int: 可用的WSGI端口
+        """
+        if self._wrapper is empty:
+            self._setup()
+            self._load()
+        self._available_http_port()
+
+        return self._wrapper.WSGI_PORT
 
 
 settings = FuseSettings("prod")

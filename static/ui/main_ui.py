@@ -12,11 +12,12 @@ from PyQt5 import QtGui, QtWidgets
 
 from .main_qrc import *
 from utils.public_func import generate_product_version
-from settings import settings
 
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
+        from settings import settings
+
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1066, 600)
         self.styleSheet = QtWidgets.QWidget(MainWindow)
