@@ -39,11 +39,13 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
 
         # load ui
+        sysLogger.debug("初始化UI")
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self._merge_theme_radioButton()
 
         # setup ui_function
+        sysLogger.debug("初始化UI响应")
         from utils.ui_function import UiFunction
 
         self._UIClass = UiFunction
@@ -73,6 +75,7 @@ class MainWindow(QMainWindow):
         Returns:
             None
         """
+        sysLogger.debug("正在打开主窗口和系统托盘图标")
         self.ti = TrayIcon(self)
         self.ti.show()
         self.show()
@@ -92,7 +95,7 @@ class MainWindow(QMainWindow):
         Returns:
             None
         """
-
+        sysLogger.debug("正在取消配置修改")
         self._cancel_settings()
 
     def open_all_share(self) -> None:
@@ -102,6 +105,7 @@ class MainWindow(QMainWindow):
         Returns:
             None
         """
+        sysLogger.debug("正在打开所有分享")
         open_count = 0
         for row in range(self.ui.shareListTable.rowCount()):
             status_item = self.ui.shareListTable.item(
@@ -114,6 +118,7 @@ class MainWindow(QMainWindow):
                 open_button = button_widget.findChild(QPushButton, "open_close")
                 open_button.click()
                 open_count += 1
+        sysLogger.debug("打开所有分享任务下发成功")
         self._ui_function.show_info_messageBox(f"操作成功, 本次成功打开分享个数: {open_count}")
 
     def close_all_share(self) -> None:
@@ -123,6 +128,7 @@ class MainWindow(QMainWindow):
         Returns:
             None
         """
+        sysLogger.debug("正在关闭所有分享")
         close_count = 0
         for row in range(self.ui.shareListTable.rowCount()):
             status_item = self.ui.shareListTable.item(
@@ -135,13 +141,14 @@ class MainWindow(QMainWindow):
                 close_button = button_widget.findChild(QPushButton, "open_close")
                 close_button.click()
                 close_count += 1
+        sysLogger.debug("关闭所有分享任务下发成功")
         self._ui_function.show_info_messageBox(f"操作成功, 本次成功关闭分享个数: {close_count}")
 
     def create_download_record_and_start(
         self, fileDict: Union[None, Dict[str, Any]] = None
     ) -> None:
         """
-        当发成下载意愿时的回调
+        当发生下载意愿时的回调
 
         Args:
             fileDict: 需下载的文件/文件夹对象
@@ -149,6 +156,7 @@ class MainWindow(QMainWindow):
         Returns:
             None
         """
+        sysLogger.debug("正在创建下载任务并开启")
         self.ui.downloadDirButton.setEnabled(False)
         if fileDict:
             if (
@@ -164,6 +172,7 @@ class MainWindow(QMainWindow):
                 return
             copy_fileDict = copy.copy(fileDict)
             copy_fileDict.update({"relativePath": copy_fileDict["fileName"]})
+            sysLogger.debug("给下载路径添加HIT_LOG标志")
             update_downloadUrl_with_hitLog(copy_fileDict)
             fileList = [copy_fileDict]
             fileCount = 1
@@ -187,9 +196,11 @@ class MainWindow(QMainWindow):
         Returns:
             None
         """
+        sysLogger.debug("浏览文件夹被点击, 正在进入该文件夹")
         self._browse_data.currentDict = fileDict
         self._UIClass.show_file_list(self, self._browse_data.currentDict)
         self.ui.backupButton.setEnabled(True)
+        sysLogger.debug("进入文件夹成功")
 
     def remove_share(self, fileObj: Union[FileModel, DirModel]) -> None:
         """
@@ -201,7 +212,9 @@ class MainWindow(QMainWindow):
         Returns:
             None
         """
+        sysLogger.debug("正在移除分享记录")
         if fileObj.isSharing:
+            sysLogger.debug("该分享未关闭, 移除失败")
             self._ui_function.show_info_messageBox(
                 "该分享未关闭,请先关闭分享后再移除哦~", msg_color="red"
             )
@@ -211,6 +224,7 @@ class MainWindow(QMainWindow):
         if not self._sharing_list or self._sharing_list.length == 0:
             self._service_process.close_all()
         del fileObj
+        sysLogger.debug("移除分享记录成功")
         self._ui_function.show_info_messageBox("移除成功~")
 
     def open_share(self, fileObj: Union[FileModel, DirModel]) -> None:
@@ -223,12 +237,14 @@ class MainWindow(QMainWindow):
         Returns:
             None
         """
+        sysLogger.debug("正在打开分享")
         if fileObj.isSharing:
             sysLogger.error(
                 f"操作异常,重复打开分享,分享路径: {fileObj.targetPath}, 分享类型:{fileObj.shareType.value}"
             )
             return
         self._service_process.add_share(fileObj)
+        sysLogger.debug("打开分享任务下发成功")
 
     def close_share(self, fileObj: Union[FileModel, DirModel]) -> None:
         """
@@ -240,6 +256,7 @@ class MainWindow(QMainWindow):
         Returns:
             None
         """
+        sysLogger.debug("正在关闭分享")
         if not fileObj.isSharing:
             sysLogger.error(
                 f"操作异常,重复取消分享,分享路径: {fileObj.targetPath}, 分享类型:{fileObj.shareType.value}"
@@ -250,6 +267,7 @@ class MainWindow(QMainWindow):
             self._service_process.remove_share(fileObj.uuid)
         except AttributeError:
             return
+        sysLogger.debug("关闭分享任务下发成功")
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         """
@@ -261,12 +279,17 @@ class MainWindow(QMainWindow):
         Returns:
             None
         """
+        sysLogger.debug("显示关闭程序对话框")
         result = self._ui_function.show_question_messageBox("您正在退出程序，请确认是否退出？", "是否退出？")
         if result != 0:
+            sysLogger.debug("确认退出, 正在关闭服务和写入历史分享记录")
             self._service_process.close_all()
             self._sharing_list.dump()
+            sysLogger.info("写入历史分享记录成功")
+            sysLogger.debug("关闭窗口")
             event.accept()
         else:
+            sysLogger.debug("取消退出, 忽略退出事件")
             event.ignore()
 
     def except_hook(self, type: Exception, value: str, tb: traceback) -> None:
@@ -294,6 +317,7 @@ class MainWindow(QMainWindow):
         self._ui_function.show_critical_messageBox(err_msg)
 
     def _merge_theme_radioButton(self) -> None:
+        sysLogger.debug("合并主题选择按钮至按钮组")
         self.ui.themeColorButtonGroup = QButtonGroup()
         self.ui.themeColorButtonGroup.addButton(self.ui.Default)
         self.ui.themeColorButtonGroup.addButton(self.ui.Red)
@@ -305,23 +329,31 @@ class MainWindow(QMainWindow):
         self.ui.themeColorButtonGroup.addButton(self.ui.Purple)
 
     def _load_settings(self) -> None:
+        sysLogger.debug("加载配置项")
         self._cancel_settings()
-        sysLogger.info("加载配置完成")
+        sysLogger.info("加载配置成功")
 
     def _load_sharing_backups(self) -> None:
+        sysLogger.debug("加载历史分享记录")
         self._sharing_list = FuseSharingModel.load()
         for fileObj in self._sharing_list:
             self._UIClass.add_share_table_item(self, fileObj)
+        sysLogger.info("加载历史分享记录成功")
 
     def _create_service_manager(self) -> None:
+        sysLogger.debug("创建分享服务管理员")
         self._browse_record_q = Queue()
+        sysLogger.debug("初始化被浏览监听任务并开启")
         self._watch_browse_thread = WatchResultThread(self._browse_record_q)
         self._watch_browse_thread.signal.connect(self._update_browse_number)
         self._watch_browse_thread.start()
+        sysLogger.info("被浏览监听任务开启成功")
 
         self._service_process = ServiceProcessManager(self._browse_record_q)
+        sysLogger.info("分享服务管理员创建成功")
 
     def _update_browse_number(self, file_uuid: str) -> None:
+        sysLogger.debug(f"分享被浏览, 对其浏览次数+1, 分享的uuid: {file_uuid}")
         for fileObj in self._sharing_list:
             if (
                 fileObj.uuid == file_uuid
@@ -331,78 +363,101 @@ class MainWindow(QMainWindow):
                 self.ui.shareListTable.item(fileObj.rowIndex, 3).setText(
                     str(fileObj.browse_number)
                 )
+                sysLogger.debug(f"浏览次数+1成功, 其分享记录行号为: {fileObj.rowIndex}")
                 break
 
     def _setup_attr(self) -> None:
+        sysLogger.debug("初始化必要属性")
         from model.download import DownloadFileDictModel
 
-        self._prev_browse_url: str = ""
-        self._browse_data: BrowseFileDictModel = BrowseFileDictModel.load({})
-        self._download_data: DownloadFileDictModel = DownloadFileDictModel(self)
+        self._prev_browse_url, self._is_browse_succ = "", False
+        self._browse_data = BrowseFileDictModel.load({})
+        self._download_data = DownloadFileDictModel(self)
 
-        self._browse_thread: Union[None, LoadBrowseUrlThread] = None
-        self._download_http_thread: Union[None, DownloadHttpFileThread] = None
-        self._download_ftp_thread: Union[None, DownloadFtpFileThread] = None
+        self._browse_thread = None
+        self._download_http_thread = None
+        self._download_ftp_thread = None
+        sysLogger.info("必要属性初始化成功")
 
     def _setup_event_connect(self) -> None:
+        sysLogger.debug("初始化事件绑定")
         # settings elements
+        sysLogger.debug("绑定日志路径选择按钮点击事件")
         self.ui.logPathButton.clicked.connect(
             lambda: self._open_folder(self.ui.logPathEdit)
         )
+        sysLogger.debug("绑定下载路径选择按钮点击事件")
         self.ui.downloadPathButton.clicked.connect(
             lambda: self._open_folder(self.ui.downloadPathEdit)
         )
+        sysLogger.debug("绑定保存配置按钮点击事件")
         self.ui.saveSettingButton.clicked.connect(lambda: self._save_settings())
+        sysLogger.debug("绑定取消配置按钮点击事件")
         self.ui.cancelSettingButton.clicked.connect(lambda: self._cancel_settings())
         # server elements
+        sysLogger.debug("绑定分享路径按钮点击事件")
         self.ui.sharePathButton.clicked.connect(
             lambda: self._open_folder(self.ui.sharePathEdit)
         )
         self.ui.sharePathButton.clicked.connect(lambda: self._update_file_combo())
+        sysLogger.debug("绑定新建分享按钮点击事件")
         self.ui.createShareButton.clicked.connect(lambda: self._create_share())
         # client elements
+        sysLogger.debug("绑定加载分享链接按钮点击事件")
         self.ui.shareLinkButton.clicked.connect(lambda: self._load_browse_url())
+        sysLogger.debug("绑定分享链接文本框回车事件")
         self.ui.shareLinkEdit.returnPressed.connect(lambda: self._load_browse_url())
+        sysLogger.debug("绑定返回上一级目录按钮点击事件")
         self.ui.backupButton.clicked.connect(lambda: self._backup_button_clicked())
+        sysLogger.debug("绑定下载当前整个文件夹按钮点击事件")
         self.ui.downloadDirButton.clicked.connect(
             lambda: self.create_download_record_and_start()
         )
+        sysLogger.debug("绑定清空下载记录按钮点击事件")
         self.ui.removeDownloadsButton.clicked.connect(
             lambda: self._remove_download_list()
         )
+        sysLogger.info("事件绑定初始化成功")
 
     def _save_settings(self) -> None:
-        logs_path: str = self.ui.logPathEdit.text()
-        download_path: str = self.ui.downloadPathEdit.text()
+        sysLogger.debug("正在保存配置")
+        logs_path = self.ui.logPathEdit.text()
+        download_path = self.ui.downloadPathEdit.text()
         if not logs_path or not download_path:
             errmsg = "保存设置错误,日志路径或下载路径不可为空！"
-            self._ui_function.show_info_messageBox(errmsg, msg_color="red")
             sysLogger.warning(errmsg + f"欲设置的日志路径: {logs_path}, 下载路径: {download_path}")
+            self._ui_function.show_info_messageBox(errmsg, msg_color="red")
             return
         if not os.path.isdir(logs_path):
             errmsg = "保存设置错误,日志路径不存在！\n建议用按钮打开资源管理器选择路径"
-            self._ui_function.show_info_messageBox(errmsg, msg_color="red")
             sysLogger.warning(errmsg.replace("\n", "") + f", 欲设置的日志路径: {logs_path}")
+            self._ui_function.show_info_messageBox(errmsg, msg_color="red")
             return
         if not os.path.isdir(download_path):
             errmsg = "保存设置错误,下载路径不存在！\n建议用按钮打开资源管理器选择路径"
-            self._ui_function.show_info_messageBox(errmsg, msg_color="red")
             sysLogger.warning(errmsg.replace("\n", "") + f", 欲设置的下载路径: {download_path}")
+            self._ui_function.show_info_messageBox(errmsg, msg_color="red")
             return
 
-        save_system_log: bool = self.ui.saveSystemCheck.isChecked()
+        save_system_log = self.ui.saveSystemCheck.isChecked()
         if save_system_log != settings.SAVE_SYSTEM_LOG:
+            sysLogger.debug("系统日志开关变更, 需同步配置")
             settings.SAVE_SYSTEM_LOG = save_system_log
             self._service_process.modify_settings("SAVE_SYSTEM_LOG", save_system_log)
-        save_share_log: bool = self.ui.saveShareCheck.isChecked()
+            sysLogger.debug("同步配置任务下发成功")
+        save_share_log = self.ui.saveShareCheck.isChecked()
         if save_share_log != settings.SAVE_SHARER_LOG:
+            sysLogger.debug("分享日志开关变更, 需同步配置")
             settings.SAVE_SHARER_LOG = save_share_log
             self._service_process.modify_settings("SAVE_SHARER_LOG", save_share_log)
+            sysLogger.debug("同步配置任务下发成功")
         if settings.LOGS_PATH != logs_path:
+            sysLogger.debug("日志路径变更, 需同步配置")
             settings.LOGS_PATH = logs_path
             self._service_process.modify_settings("LOGS_PATH", logs_path)
             sysLogger.reload()
             sharerLogger.reload()
+            sysLogger.debug("同步配置任务下发成功")
         settings.DOWNLOAD_DIR = download_path
         checkedRadio = self.ui.themeColorButtonGroup.checkedButton()
         theme_color = themeColor.dispatch(checkedRadio.objectName())
@@ -414,6 +469,7 @@ class MainWindow(QMainWindow):
         sysLogger.info("保存配置成功")
 
     def _cancel_settings(self) -> None:
+        sysLogger.debug("正在取消或加载配置")
         self.ui.saveSystemCheck.setChecked(settings.SAVE_SYSTEM_LOG)
         self.ui.saveShareCheck.setChecked(settings.SAVE_SHARER_LOG)
         self.ui.logPathEdit.setText(settings.LOGS_PATH)
@@ -422,29 +478,33 @@ class MainWindow(QMainWindow):
         rollback_radioButton.setChecked(True)
         self.ui.opacitySlider.setValue(settings.THEME_OPACITY)
         self._ui_function.reset_theme()
+        sysLogger.info("取消或加载配置完成")
 
     def _update_file_combo(self) -> None:
-        share_path: str = self.ui.sharePathEdit.text()
+        sysLogger.debug("正在更新分享路径文件夹的内容至下拉框")
+        share_path = self.ui.sharePathEdit.text()
         if not os.path.isdir(share_path):
+            sysLogger.warning("分享路径不是文件夹, 更新失败")
             return
         self.ui.shareFileCombo.clear()
-        fileList: list = os.listdir(share_path)
+        fileList = os.listdir(share_path)
         for item in fileList:
             self.ui.shareFileCombo.addItem(item)
+        sysLogger.debug("更新分享路径文件夹的内容至下拉框完成")
 
     def _create_share(self) -> None:
+        sysLogger.debug("正在创建分享")
+
         def _create_share_inner() -> None:
-            base_path: str = self.ui.sharePathEdit.text()
+            base_path = self.ui.sharePathEdit.text()
             if not os.path.isdir(base_path):
                 errmsg = "分享的路径不存在！\n建议用按钮打开资源管理器选择路径"
-                self._ui_function.show_info_messageBox(errmsg, msg_color="red")
                 sysLogger.warning(
                     errmsg.replace("\n", "") + f", 欲分享的文件夹路径: {base_path}"
                 )
+                self._ui_function.show_info_messageBox(errmsg, msg_color="red")
                 return
-            target_path: str = os.path.join(
-                base_path, self.ui.shareFileCombo.currentText()
-            )
+            target_path = os.path.join(base_path, self.ui.shareFileCombo.currentText())
             # 路径整好看一点
             if settings.IS_WINDOWS:
                 target_path = target_path.replace("/", "\\")
@@ -452,41 +512,39 @@ class MainWindow(QMainWindow):
                 target_path = target_path.replace("\\", "/")
             if not os.path.exists(target_path):
                 errmsg = "分享的路径不存在！\n请确认后再新建"
-                self._ui_function.show_info_messageBox(errmsg, msg_color="red")
                 sysLogger.warning(errmsg.replace("\n", "") + f", 欲分享的路径: {target_path}")
+                self._ui_function.show_info_messageBox(errmsg, msg_color="red")
                 return
-            share_type: Union[str, shareType] = self.ui.shareTypeCombo.currentText()
+            share_type = self.ui.shareTypeCombo.currentText()
             share_type = shareType.ftp if share_type == "FTP" else shareType.http
-            shared_row_number: Union[None, int] = self._sharing_list.contains(
-                target_path, share_type
-            )
+            shared_row_number = self._sharing_list.contains(target_path, share_type)
             if shared_row_number is not None:
+                sysLogger.warning(f"重复分享被取消, 分享的路径: {target_path}, 分享类型: {share_type}")
                 self._ui_function.show_info_messageBox(
                     f"该路径已被分享过, 他在分享记录的第 [{shared_row_number + 1}] 行", msg_color="red"
                 )
-                sysLogger.warning(f"重复分享被取消, 分享的路径: {target_path}, 分享类型: {share_type}")
                 return
             try:
                 file_count = self._calc_file_count(target_path)
             except FileNotFoundError as e:
+                sysLogger.warning(f"分享文件中含无法打开路径, 尝试打开发生的错误信息: {e}")
                 self._ui_function.show_info_messageBox(
                     f"文件路径解析错误, 原始错误信息: {e}", "分享异常", msg_color="red"
                 )
-                sysLogger.warning(f"分享文件中含无法打开路径, 尝试打开发生的错误信息: {e}")
                 return
             except Exception as e:
+                sysLogger.warning(f"分享异常, 尝试分享发生的错误信息: {e}")
                 self._ui_function.show_info_messageBox(
                     f"分享出现错误, 原始错误信息: {e}", "分享异常", msg_color="red"
                 )
-                sysLogger.warning(f"分享异常, 尝试分享发生的错误信息: {e}")
                 return
             if file_count > 10000:
+                sysLogger.warning("分享被取消, 因为分享的文件夹中文件个数超过10000, 建议打包后分享压缩文件")
                 self._ui_function.show_info_messageBox(
                     f"分享已被取消\n该文件夹内文件数量大于10000, 直接分享它不是一个好的选择, 请按需对文件夹进行打包后再分享",
                     "分享被取消",
                     msg_color="red",
                 )
-                sysLogger.warning("分享被取消, 因为分享的文件夹中文件个数超过10000, 建议打包后分享压缩文件")
                 return
             elif file_count > 100:
                 if (
@@ -500,7 +558,7 @@ class MainWindow(QMainWindow):
                 ):
                     sysLogger.info("成功取消文件个数大于100的文件夹的分享")
                     return
-            uuid: str = f"{share_type.value[0]}{generate_uuid()}"
+            uuid = f"{share_type.value[0]}{generate_uuid()}"
             fileModel = DirModel if os.path.isdir(target_path) else FileModel
             if share_type is shareType.ftp:
                 shared_fileObj = self._sharing_list.get_ftp_shared(target_path)
@@ -509,6 +567,7 @@ class MainWindow(QMainWindow):
             if shared_fileObj is None:
                 fileObj = fileModel(target_path, uuid)
             else:
+                sysLogger.debug(f"存在可复用的FTP, 其工作路径为: {shared_fileObj.ftp_basePath}")
                 fileObj = fileModel(
                     target_path,
                     uuid,
@@ -518,6 +577,7 @@ class MainWindow(QMainWindow):
                 )
             self._sharing_list.append(fileObj)
             fileObj.isSharing = True
+            sysLogger.debug("正在添加显示一条分享记录数据")
             self._UIClass.add_share_table_item(self, fileObj)
             self._service_process.add_share(fileObj)
             sysLogger.info(f"创建分享成功, 分享路径: {target_path}, 分享类型: {share_type}")
@@ -529,15 +589,16 @@ class MainWindow(QMainWindow):
         self.ui.createShareButton.setEnabled(True)
 
     def _load_browse_url(self) -> None:
+        sysLogger.debug("正在加载分享链接")
         self._reload_browse_buttons()
-        browse_url: str = self.ui.shareLinkEdit.text()
+        browse_url = self.ui.shareLinkEdit.text()
         if not browse_url or not browse_url.startswith("http://"):
             errmsg = "不支持的分享链接!\n请确认分享链接无误后再点击加载哦~"
-            self._ui_function.show_info_messageBox(errmsg, msg_color="rgb(154, 96, 2)")
             sysLogger.warning(errmsg.replace("\n", "") + f"输入的链接地址: {browse_url}")
+            self._ui_function.show_info_messageBox(errmsg, msg_color="rgb(154, 96, 2)")
             return
         # 简单提高下效率
-        if browse_url == self._prev_browse_url:
+        if browse_url == self._prev_browse_url and self._is_browse_succ:
             if self._browse_data:
                 self._load_browse_url_reload()
                 self._UIClass.show_file_list(self, self._browse_data)
@@ -549,40 +610,54 @@ class MainWindow(QMainWindow):
         if self._browse_thread is not None:
             self._browse_thread.run_flag = False
             self._browse_thread.quit()
+        sysLogger.debug("初始化加载分享链接任务并开启")
         self._browse_thread = LoadBrowseUrlThread(browse_url)
         self._browse_thread.signal.connect(self._show_file_list)
         self._browse_thread.start()
+        sysLogger.debug("加载分享链接任务开启成功")
 
     def _reload_browse_buttons(self) -> None:
+        sysLogger.debug("重制返回上一级和下载当前文件夹按钮可点击状态")
         self.ui.backupButton.setEnabled(False)
         self.ui.downloadDirButton.setEnabled(False)
 
     def _load_browse_url_reload(self) -> None:
+        sysLogger.debug("重制加载分享链接")
         self._browse_data.reload()
 
     def _show_file_list(self, browse_response: Dict[str, Any]) -> None:
+        sysLogger.debug("正在显示分享链接加载的数据")
+        self._is_browse_succ = False
         if (
             not browse_response
             or not isinstance(browse_response, dict)
             or not browse_response.get("errno")
         ):
+            sysLogger.warning("分享服务器异常, 未能连接服务器或服务器返回非法数据")
             self._browse_data = BrowseFileDictModel.load({})
             self._UIClass.show_error_browse(self)
         elif browse_response.get("errno", 0) == 404:
+            sysLogger.warning("来晚了, 分享的文件/文件夹已被删除")
             self._browse_data = BrowseFileDictModel.load({})
             self._UIClass.show_not_found_browse(self)
         elif browse_response.get("errno", 0) == 500:
+            sysLogger.warning("分享服务器存在异常")
             self._browse_data = BrowseFileDictModel.load({})
             self._UIClass.show_server_error_browse(self)
         elif browse_response.get("errno", 0) == 200:
-            browse_data: dict = browse_response.get("data", {})
+            browse_data = browse_response.get("data", {})
             if not self._verify_data(browse_data):
+                sysLogger.warning("分享服务器返回的数据格式存在非标")
                 self._browse_data = BrowseFileDictModel.load({})
                 self._UIClass.show_server_error_browse(self)
             else:
+                sysLogger.debug("分享链接数据正确返回, 正在显示")
                 self._browse_data = BrowseFileDictModel.load(browse_data)
                 self._UIClass.show_file_list(self, self._browse_data)
+                self._is_browse_succ = True
+                sysLogger.debug("分享链接数据加载并显示完成")
         else:
+            sysLogger.error(f"发生未知错误, 返回的response: {browse_response}")
             self._browse_data = BrowseFileDictModel.load({})
             self._UIClass.show_server_error_browse(self)
         self._browse_thread = None
@@ -591,11 +666,15 @@ class MainWindow(QMainWindow):
         sysLogger.info("加载文件列表完成")
 
     def _backup_button_clicked(self) -> None:
+        sysLogger.debug("正在返回上一级目录")
         self._browse_data.prev()
         self._UIClass.show_file_list(self, self._browse_data.currentDict)
         self.ui.backupButton.setEnabled(not self._browse_data.isRoot)
+        sysLogger.debug("返回上一级路径完成")
 
     def _generate_fileList_recursive(self) -> Tuple[List[Dict[str, Any]], int]:
+        sysLogger.debug("下载的是文件夹, 正在获取下载文件列表和文件个数")
+
         def _generate_fileList_recursive_inner(
             fileList: List[Dict[str, Any]], fileDict: Dict[str, Any]
         ) -> List[Dict[str, Any]]:
@@ -616,36 +695,52 @@ class MainWindow(QMainWindow):
 
         current_fileDict = self._browse_data.currentDict
         parent_fileDict = copy.copy(current_fileDict)
+        sysLogger.debug("给下载路径添加HIT_LOG标志")
         update_downloadUrl_with_hitLog(parent_fileDict)
         fileList = [parent_fileDict]
 
         fileList = _generate_fileList_recursive_inner(fileList, parent_fileDict)
+        sysLogger.debug("获取文件下载列表和文件个数完成")
         return fileList, len(fileList) - 1
 
     def _append_download_fileList(self, fileList: Sequence[Dict[str, Any]]) -> None:
+        sysLogger.debug("添加下载记录并开启下载")
         self._UIClass.add_download_table_item(self, fileList)
+        sysLogger.debug("添加下载记录完成")
 
         if fileList[0]["stareType"] == "ftp":
             if self._download_ftp_thread is None:
+                sysLogger.debug("正在初始化ftp分享文件下载")
                 self._download_ftp_thread = DownloadFtpFileThread(fileList)
                 self._download_ftp_thread.signal.connect(self._update_download_status)
                 self._download_ftp_thread.start()
+                sysLogger.debug("初始化ftp分享文件下载成功")
             else:
+                sysLogger.debug("正在追加ftp分享文件下载")
                 self._download_ftp_thread.append(fileList)
+                sysLogger.debug("追加ftp分享文件下载成功")
+            sysLogger.debug("添加ftp分享文件下载成功")
         else:
             if self._download_http_thread is None:
+                sysLogger.debug("正在初始化http分享文件下载")
                 self._download_http_thread = DownloadHttpFileThread(fileList)
                 self._download_http_thread.signal.connect(self._update_download_status)
                 self._download_http_thread.start()
+                sysLogger.debug("初始化http分享文件下载成功")
             else:
+                sysLogger.debug("正在追加http分享文件下载")
                 self._download_http_thread.append(fileList)
+                sysLogger.debug("追加ftp分享文件下载成功")
+            sysLogger.debug("添加http分享文件下载完成")
 
     def _open_folder(self, lineEdit: QLineEdit) -> None:
+        sysLogger.debug("正在打开系统选择文件夹窗口")
         folder_path = QFileDialog.getExistingDirectory(self, "选择文件夹", "./")
         if folder_path:
             lineEdit.setText(folder_path)
 
     def _verify_data(self, data: Dict[str, Any]) -> bool:
+        sysLogger.debug("正在校验分享链接对应服务器返回数据的格式")
         if not data or not isinstance(data, dict):
             return False
         status = True
@@ -677,6 +772,7 @@ class MainWindow(QMainWindow):
         return status
 
     def _calc_file_count(self, base_path: str, initial_count: int = 0) -> int:
+        sysLogger.debug("正在计算文件夹下文件个数")
         if not os.path.isdir(base_path):
             return 1
         else:
@@ -697,11 +793,13 @@ class MainWindow(QMainWindow):
     def _update_download_status(
         self, status_tuple: Tuple[Dict[str, Any], DownloadStatus, str]
     ) -> None:
+        sysLogger.debug("正在更新下载状态")
         self._download_data.update_download_status(
             status_tuple, self.ui.downloadListTable
         )
 
     def _remove_download_list(self) -> None:
+        sysLogger.debug("正在清空已完成下载记录")
         self._download_data.remove_download_list(self.ui.downloadListTable)
         self.ui.removeDownloadsButton.setEnabled(not self._download_data.is_empty())
 

@@ -11,6 +11,7 @@ from PyQt5.QtCore import QPropertyAnimation, QEasingCurve
 from settings import settings
 from .public_types import VerifyStatus
 from utils.public_func import get_config_from_toml
+from utils.logger import sysLogger
 
 
 class AssertThread(QThread):
@@ -34,12 +35,16 @@ class AssertThread(QThread):
         # verify local ip
         if not settings.LOCAL_HOST:
             self.single.emit((VerifyStatus.FATAL, "获取本机IP失败, 请确认本机网络正常后再打开"))
+            sysLogger.error("获取本机IP失败, 已发射对应FATAL信息")
             return
         elif settings.LOCAL_HOST == "127.0.0.1":
             self.single.emit((VerifyStatus.WARN, "未发现可与他人通信IP地址, 分享或下载对象仅限本机"))
+            sysLogger.debug("未发现可与他人通信IP地址, 已发射对应WARN信息")
 
         self.single.emit((VerifyStatus.INFO, f"本机IP: {settings.LOCAL_HOST}"))
+        sysLogger.debug("已发射追加本机IP INFO信息")
         self.single.emit((VerifyStatus.DONE, "校验完成, 点击按钮后进入"))
+        sysLogger.debug("已发射校验完成DONE信息")
 
     def _verify_pyproject_toml(self) -> None:
         """
@@ -48,22 +53,30 @@ class AssertThread(QThread):
         Returns:
             None
         """
+        sysLogger.debug("开始校验配置文件")
         if not get_config_from_toml():
             self.single.emit(
                 (VerifyStatus.WARN, "customize.toml和pyproject.toml文件不存在或损坏, 将使用默认配置")
             )
+            sysLogger.debug("配置文件不存在或损坏, 已发射对应WARN信息")
 
         self.single.emit(
             (VerifyStatus.INFO, f"日志路径: {settings.LOGS_PATH}, 如需修改请在设置中配置, 保存后生效")
         )
+        sysLogger.debug("已发射日志路径INFO信息")
         self.single.emit(
             (VerifyStatus.INFO, f"下载路径: {settings.DOWNLOAD_DIR}, 如需修改请在设置中配置, 保存后生效")
         )
+        sysLogger.debug("已发射下载路径INFO信息")
         self.single.emit(
             (VerifyStatus.INFO, f"预使用HTTP端口: {settings.init_wsgi_port()}, 请勿占用")
         )
+        sysLogger.debug("已发射预使用HTTP端口INFO信息")
         self.single.emit((VerifyStatus.INFO, f"当前使用主题: {settings.THEME_COLOR}"))
+        sysLogger.debug("已发射当前使用主题INFO信息")
         self.single.emit((VerifyStatus.INFO, f"当前使用透明度: {settings.THEME_OPACITY}%"))
+        sysLogger.debug("已发射当前使用透明度INFO信息")
+        sysLogger.debug("配置文件校验完成")
 
 
 class AssertEnvWindow(QDialog):
@@ -112,6 +125,7 @@ class AssertEnvWindow(QDialog):
         self.assert_thread = None
         self._all_safe = True
 
+        sysLogger.debug("开启Assert窗口")
         self.show()
         self._verify()
 
@@ -122,6 +136,7 @@ class AssertEnvWindow(QDialog):
         Returns:
             None
         """
+        sysLogger.debug("开始校验环境")
         self.assert_thread = AssertThread()
         self.assert_thread.single.connect(self._append_text_edit)
         self.assert_thread.start()
@@ -139,17 +154,23 @@ class AssertEnvWindow(QDialog):
         status, msg = verify_res
         if status is VerifyStatus.INFO:
             self.text_edit.append(self._info_message_format(msg))
+            sysLogger.debug(f"收到INFO信息[{msg}], 已追加至文本框")
         elif status is VerifyStatus.WARN:
             self.text_edit.append(self._warn_message_format(msg))
+            sysLogger.debug(f"收到WARN信息[{msg}], 已追加至文本框")
         elif status is VerifyStatus.FATAL:
             self._all_safe = False
             self.text_edit.append(self._fatal_message_format(msg))
+            sysLogger.debug(f"收到FATAL信息[{msg}], 已追加至文本框")
             self.button.setText("确认并退出")
+            sysLogger.debug("按钮改为[确认并退出], 并绑定点击事件")
             self._show_button()
             self.button.clicked.connect(lambda: self._quit_app())
         else:
             self.text_edit.append(self._info_message_format(msg))
+            sysLogger.debug(f"收到DONE信息[{msg}], 已追加至文本框")
             self.button.setText("点击进入")
+            sysLogger.debug("按钮改为[点击进入], 并绑定点击事件")
             self._show_button()
             self.button.clicked.connect(lambda: self._enter_mainWindow())
 
@@ -160,6 +181,7 @@ class AssertEnvWindow(QDialog):
         Returns:
             None
         """
+        sysLogger.debug("用户点击进入, 正在发射打开主窗口事件")
         self.assert_thread.quit()
         self.all_safe.emit()
         self.close()
@@ -171,6 +193,7 @@ class AssertEnvWindow(QDialog):
         Returns:
             None
         """
+        sysLogger.debug("用户点击确认并退出, 正在退出程序")
         self.assert_thread.quit()
         self.close()
 

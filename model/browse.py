@@ -2,6 +2,8 @@ __all__ = ["BrowseFileDictModel"]
 
 from typing import Dict, Any
 
+from utils.logger import sysLogger
+
 
 class BrowseFileDictModel(dict):
     def __init__(self):
@@ -83,6 +85,7 @@ class BrowseFileDictModel(dict):
         Returns:
             BrowseFileDictModel: 浏览目录文件集对象
         """
+        sysLogger.debug("开始读取分享链接的数据")
         model = cls()
         if not data:
             return model
@@ -93,6 +96,7 @@ class BrowseFileDictModel(dict):
         for key, value in data.items():
             model[key] = value
 
+        sysLogger.debug("读取分享链接的数据完成")
         return model
 
     @classmethod

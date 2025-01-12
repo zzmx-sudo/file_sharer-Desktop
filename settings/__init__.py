@@ -100,6 +100,9 @@ class FuseSettings:
             raise OperationException(f"配置的日志文件夹路径不存在, LOGS_PATH: {logs_path}")
 
     def _load(self) -> None:
+        from utils.logger import sysLogger
+
+        sysLogger.debug("开始读取配置")
         tool_config = get_config_from_toml()
         if not tool_config:
             return
@@ -124,6 +127,7 @@ class FuseSettings:
         )
         color_card_map = generate_color_card_map()
         self._wrapper.COLOR_CARD = ColorCardStruct.dispatch(**color_card_map)
+        sysLogger.debug("读取配置完成")
 
     def _available_http_port(self) -> None:
         http_port = self._wrapper.__dict__.get("WSGI_PORT", 8080)
@@ -138,6 +142,9 @@ class FuseSettings:
         Returns:
             None
         """
+        from utils.logger import sysLogger
+
+        sysLogger.debug("开始写入配置")
         settings_file = os.path.join(self.BASE_DIR, "customize.toml")
         try:
             tool_config = toml.load(settings_file)
@@ -158,6 +165,7 @@ class FuseSettings:
         )
         with open(settings_file, "w", encoding="utf-8") as f:
             toml.dump(tool_config, f)
+        sysLogger.debug("写入配置完成")
 
     def style_sheet(
         self,

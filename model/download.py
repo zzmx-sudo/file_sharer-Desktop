@@ -38,6 +38,7 @@ class DownloadFileDictModel(list):
         Returns:
             None
         """
+        sysLogger.debug(f"更新下载状态, {status_tuple}")
         if not isinstance(status_tuple, tuple) or len(status_tuple) != 3:
             sysLogger.error(f"获取的下载状态数据有误, 原始信息: {status_tuple}")
             return
@@ -93,6 +94,7 @@ class DownloadFileDictModel(list):
         Returns:
             None
         """
+        sysLogger.debug("清空已完成下载记录")
         row_index = 0
         ignore_urls = []
         for url in self:
@@ -137,6 +139,7 @@ class DownloadFileDictModel(list):
     def _remove_download_item(
         self, fileObj: Dict[str, Any], tableWidget: QTableWidget
     ) -> None:
+        sysLogger.debug(f"移除下载记录, {fileObj}")
         try:
             index = self.index(fileObj)
         except ValueError:
@@ -155,9 +158,11 @@ class DownloadFileDictModel(list):
         reset_str: str,
         tableWidget: QTableWidget,
     ) -> None:
+        sysLogger.debug("初始化操作按钮控件")
         widget = self._window._ui_function.pushButton_change_to_widget(reset_str)
 
         reset_button = widget.findChild(QPushButton, "restartButton")
+        sysLogger.debug("给下载路径添加HIT_LOG标志")
         update_downloadUrl_with_hitLog(fileObj)
         reset_button.clicked.connect(
             lambda: self._window._append_download_fileList([fileObj])

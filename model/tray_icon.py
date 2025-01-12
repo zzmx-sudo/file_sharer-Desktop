@@ -8,6 +8,7 @@ from PyQt5.QtCore import Qt
 
 from model.public_types import ThemeColor as themeColor
 from settings import settings
+from utils.logger import sysLogger
 
 
 class TrayIcon(QSystemTrayIcon):
@@ -40,16 +41,21 @@ class TrayIcon(QSystemTrayIcon):
         self._setup_event_connect()
 
     def _setup_event_connect(self) -> None:
+        sysLogger.debug("初始化系统托盘图标各菜单事件绑定")
+        sysLogger.debug("绑定打开所有分享按钮点击事件")
         self.rich_share_action.triggered.connect(
             lambda: self._main_window.open_all_share()
         )
+        sysLogger.debug("绑定关闭所有分享按钮点击事件")
         self.poor_share_action.triggered.connect(
             lambda: self._main_window.close_all_share()
         )
+        sysLogger.debug("绑定显示/隐藏主界面按钮点击事件")
         self.show_hide_action.triggered.connect(lambda: self.show_hide_window())
+        sysLogger.debug("绑定退出按钮点击事件")
         self.quit_action.triggered.connect(lambda: self.quit())
+        sysLogger.debug("绑定托盘图标点击事件")
         self.activated.connect(self.iconClicked)
-        self.messageClicked.connect(lambda: self.parent().show())
 
     def show_hide_window(self) -> None:
         """
@@ -58,6 +64,7 @@ class TrayIcon(QSystemTrayIcon):
         Returns:
             None
         """
+        sysLogger.debug("显示/隐藏主界面按钮被点击")
         if self.is_show_window:
             self.parent().hide()
             self.show_hide_action.setText("显示主界面")
@@ -66,6 +73,7 @@ class TrayIcon(QSystemTrayIcon):
             self.show_hide_action.setText("隐藏主界面")
 
         self.is_show_window = not self.is_show_window
+        sysLogger.debug("处理显示/隐藏主界面按钮点击事件完成")
 
     def iconClicked(self, reason) -> None:
         """
@@ -77,6 +85,7 @@ class TrayIcon(QSystemTrayIcon):
         Returns:
             None
         """
+        sysLogger.debug("系统托盘图标被点击")
         if reason in [2, 3]:
             self.parent().show()
             self.is_show_window = True
@@ -85,6 +94,7 @@ class TrayIcon(QSystemTrayIcon):
                 self._main_window.showMaximized()
             else:
                 self._main_window.showNormal()
+        sysLogger.debug("处理托盘图标点击事件完成")
 
     def quit(self) -> None:
         """
@@ -93,8 +103,10 @@ class TrayIcon(QSystemTrayIcon):
         Returns:
             None
         """
+        sysLogger.debug("退出按钮被点击")
         if self._main_window.close():
             self.setVisible(False)
+        sysLogger.debug("处理退出按钮点击事件完成")
 
     def resetStyleSheet(self, theme_color: themeColor = settings.THEME_COLOR) -> None:
         """
@@ -106,7 +118,9 @@ class TrayIcon(QSystemTrayIcon):
         Returns:
             None
         """
+        sysLogger.debug("重制托盘图标菜单主题")
         self.menu.setStyleSheet(self.styleSheet(theme_color))
+        sysLogger.debug("重制托盘图标菜单主题完成")
 
     def styleSheet(self, theme_color: themeColor = settings.THEME_COLOR) -> str:
         """

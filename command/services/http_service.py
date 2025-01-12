@@ -47,6 +47,7 @@ class HttpService(BaseService):
             output_q: 输出的进程队列
         """
         super(HttpService, self).__init__(input_q, output_q)
+        self._service_name = "HTTP"
         self._app = None
 
     def _add_share(self, fileObj: Union[FileModel, DirModel]) -> None:
@@ -59,7 +60,9 @@ class HttpService(BaseService):
         Returns:
             None
         """
+        self._sysLogger_debug(f"开始添加分享, 分享路径: {fileObj.targetPath}")
         self._sharing_dict.update({fileObj.uuid: fileObj})
+        self._sysLogger_debug(f"添加分享完成, 分享路径: {fileObj.targetPath}")
 
     def _remove_share(self, uuid: str) -> None:
         """
@@ -71,8 +74,10 @@ class HttpService(BaseService):
         Returns:
             None
         """
+        self._sysLogger_debug(f"开始移除分享, 分享的uuid: {uuid}")
         if uuid in self._sharing_dict:
             del self._sharing_dict[uuid]
+        self._sysLogger_debug(f"移除分享完成, 分享的uuid: {uuid}")
 
     def run(self) -> None:
         """
@@ -86,11 +91,14 @@ class HttpService(BaseService):
 
         import uvicorn
 
+        self._sysLogger_debug("初始化FastAPI")
         self._app = FastAPI()
         self._setup()
+        self._sysLogger_debug("开启服务")
         uvicorn.run(
             app=self._app, host=settings.LOCAL_HOST, port=settings.init_wsgi_port()
         )
+        self._sysLogger_debug("开启HTTP服务失败")
 
     def _setup(self) -> None:
         """
@@ -99,6 +107,7 @@ class HttpService(BaseService):
         Returns:
             None
         """
+        self._sysLogger_debug("初始化路由")
         self._setup_middleware()
         self._setup_router()
 

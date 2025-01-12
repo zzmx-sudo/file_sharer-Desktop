@@ -30,6 +30,7 @@ from settings import settings
 from utils.public_func import (
     window_reservation_when_box_destroyed as window_reservation,
 )
+from utils.logger import sysLogger
 
 
 class UiFunction:
@@ -108,6 +109,7 @@ class UiFunction:
         Returns:
             None
         """
+        sysLogger.debug(f"显示INFO对话框, 标题: {title}, 内容: {msg}")
         info = QMessageBox(
             QMessageBox.Information, title, msg, parent=self._main_window
         )
@@ -156,6 +158,7 @@ class UiFunction:
         Returns:
             int: 按钮点击事件的返回值
         """
+        sysLogger.debug(f"显示Question对话框, 标题: {title}, 内容: {msg}")
         question = QMessageBox(
             QMessageBox.Question, title, msg, parent=self._main_window
         )
@@ -225,6 +228,7 @@ class UiFunction:
         Returns:
             None
         """
+        sysLogger.debug(f"显示Critical对话框, 内容: {msg}")
         full_msg = f"程序出现BUG, 你可以将复现方式和该弹框截图至项目GitHub提交Lssues, 原始错误信息:\n{msg}"
         critical = QMessageBox(
             QMessageBox.Critical, "程序出错", full_msg, parent=self._main_window
@@ -261,6 +265,9 @@ class UiFunction:
         Returns:
             None
         """
+        sysLogger.debug(
+            f"追加分享记录到分享列表表格控件, 行号: {fileObj.rowIndex}, 分享类型: {fileObj.shareType}, 分享路径: {fileObj.targetPath}"
+        )
         if self.ui.shareListTable.rowCount() <= self._sharing_list.length:
             self.ui.shareListTable.setRowCount(self.ui.shareListTable.rowCount() + 1)
 
@@ -370,6 +377,7 @@ class UiFunction:
         self.ui.shareListTable.setCellWidget(
             fileObj.rowIndex, self._ui_function._share_options_col, widget
         )
+        sysLogger.debug(f"追加分享记录到分享列表表格控件, 行号: {fileObj.rowIndex}")
 
     def save_theme(self, theme_color: themeColor) -> None:
         """
@@ -486,6 +494,7 @@ class UiFunction:
         Returns:
             None
         """
+        sysLogger.debug(f"从分享列表表格控件删除指定行记录, 行号: {rowIndex}")
         self.ui.shareListTable.removeRow(rowIndex)
         share_row_count = self.ui.shareListTable.rowCount()
         for row in range(rowIndex, share_row_count):
@@ -545,6 +554,7 @@ class UiFunction:
         Returns:
             None
         """
+        sysLogger.debug("正在显示分享链接加载后文件列表")
         if not fileDict["isDir"]:
             self.ui.fileListTable.setRowCount(0)
             self.ui.fileListTable.setRowCount(1)
