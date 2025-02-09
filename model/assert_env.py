@@ -30,6 +30,7 @@ class AssertThread(QThread):
         Returns:
             None
         """
+        self.single.emit((VerifyStatus.WARN, "本软件永久免费, 如果您进行了付费, 请直接给差评!"))
         # verify pyproject.toml
         self._verify_pyproject_toml()
         # verify local ip
