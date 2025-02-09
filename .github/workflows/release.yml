@@ -50,7 +50,7 @@ jobs:
           .\build_windows_x64.bat
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Build-Win-x64
           path: |
@@ -91,7 +91,7 @@ jobs:
           .\build_windows_x86.bat
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Build-Win-x86
           path: |
@@ -125,7 +125,7 @@ jobs:
           sh build_mac.sh x64
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Build-MacOs-x64
           path: build/installer/*.dmg
@@ -157,7 +157,7 @@ jobs:
           sh build_mac.sh arm64
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Build-MacOs-arm64
           path: build/installer/*.dmg
@@ -169,24 +169,24 @@ jobs:
 
     steps:
       - name: Download Win-x64 artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: Build-Win-x64
 
       - name: Download Win-x86 artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: Build-Win-x86
           path: ./x86
 
       - name: Download Macos-x64 artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: Build-MacOs-x64
           path: ./macos
 
       - name: Download Macos-arm64 artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: Build-MacOs-arm64
           path: ./macos
