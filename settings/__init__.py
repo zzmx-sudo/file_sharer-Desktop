@@ -5,6 +5,7 @@ import importlib
 from typing import Any, Optional
 
 import toml
+from PyQt5.Qt import QWidget
 
 from exceptions import OperationException
 from settings import _base
@@ -12,6 +13,7 @@ from utils.public_func import (
     generate_http_port,
     get_config_from_toml,
     generate_color_card_map,
+    get_screen_resolution,
 )
 from model.public_types import (
     ThemeColor as themeColor,
@@ -53,7 +55,13 @@ class FuseSettings:
         self._wrapper = _wrapper
 
         mod = importlib.import_module(self.SETTINGS_MODE)
-        lock_settings = ["BASE_DIR", "SYSTEM", "IS_WINDOWS", "LOCAL_HOST"]
+        lock_settings = [
+            "BASE_DIR",
+            "SYSTEM",
+            "IS_WINDOWS",
+            "LOCAL_HOST",
+            "CURR_RESOLUTION",
+        ]
 
         for setting in dir(mod):
             if setting.isupper():
@@ -188,6 +196,20 @@ class FuseSettings:
         control_color_map = control_color._asdict()
         control_color_map.update({"ThemeOpacity": theme_opacity / 100})
         return self.BASIC_QSS % (control_color_map)
+
+    def resize_window(self, *windows: QWidget) -> None:
+        """
+
+        Args:
+            *windows: 各Qt界面对象
+
+        Returns:
+            None
+        """
+        self.CURR_RESOLUTION = get_screen_resolution(windows[0])
+
+        for window in windows:
+            window.resize()
 
     def controlColor(
         self, theme_color: Optional[themeColor] = None

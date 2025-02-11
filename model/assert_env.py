@@ -10,7 +10,7 @@ from PyQt5.QtCore import QPropertyAnimation, QEasingCurve
 
 from settings import settings
 from .public_types import VerifyStatus
-from utils.public_func import get_config_from_toml
+from utils.public_func import get_config_from_toml, resize_window
 from utils.logger import sysLogger
 
 
@@ -125,6 +125,22 @@ class AssertEnvWindow(QDialog):
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         self.assert_thread = None
         self._all_safe = True
+
+    def resize(self, *args: int) -> None:
+        """
+        重置窗口大小
+
+        Args:
+            *args: 需重置大小的宽高, 为空时根据屏幕分辨率自适应
+
+        Returns:
+            None
+        """
+        if args:
+            super(AssertEnvWindow, self).resize(*args)
+            return
+
+        resize_window(self, (400, 300), settings.CURR_RESOLUTION)
 
         sysLogger.debug("开启Assert窗口")
         self.show()

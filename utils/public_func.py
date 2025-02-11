@@ -19,10 +19,11 @@ import sys
 import platform
 import uuid
 import json
-from typing import Dict, Any, Callable
+from typing import Dict, Any, Callable, Tuple
 
 import toml
-from PyQt5.Qt import QApplication
+from PyQt5.Qt import QApplication, QWidget
+from PyQt5.QtGui import QGuiApplication
 from model import public_types as ptype
 
 
@@ -249,3 +250,48 @@ def update_downloadUrl_with_hitLog(fileDict: Dict[str, Any]) -> None:
     if ptype.HIT_LOG not in fileDict["downloadUrl"]:
         new_download_url = f"{fileDict['downloadUrl']}?{ptype.HIT_LOG}=true"
         fileDict.update({"downloadUrl": new_download_url})
+
+
+def get_screen_resolution(window: QWidget) -> Tuple[int, int]:
+    """
+    获取当前屏幕分辨率
+
+    Args:
+        window: Qt界面对象
+
+    Returns:
+        Tuple[int, int]: 当前屏幕的分辨率 [宽, 高]
+    """
+    screen = QGuiApplication.screenAt(window.pos()).geometry()
+
+    return screen.width(), screen.height()
+
+
+def resize_window(
+    window: QWidget, min_size: Tuple[int, int], screen_resolution: Tuple[int, int]
+) -> None:
+    """
+    根据Qt界面要求最小大小和当前屏幕分辨率, 重置Qt界面大小
+
+    Args:
+        window: Qt界面对象
+        min_size: Qt界面要求的最小大小
+        screen_resolution: 当前屏幕分辨率
+
+    Returns:
+        None
+    """
+    min_width, min_height = min_size
+    screen_width, screen_height = screen_resolution
+    width_scale, height_scale = int(1920 / min_width) + 1, int(1080 / min_height) + 1
+    if screen_width <= 1920:
+        width = min_width
+    else:
+        width = screen_width // width_scale
+
+    if screen_height <= 1080:
+        height = min_height
+    else:
+        height = screen_height // height_scale
+
+    window.resize(width, height)
