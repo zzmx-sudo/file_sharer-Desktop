@@ -29,6 +29,9 @@ IS_WINDOWS: bool = SYSTEM == "Windows"
 # 本机IP
 LOCAL_HOST: str = get_local_ip()
 
+# 当前屏幕分辨率
+CURR_RESOLUTION: (int, int) = (0, 0)
+
 # 废除从这配置, 改为开启HTTP前选择有效端口
 # 后端端口
 # WSGI_PORT: int = 8080

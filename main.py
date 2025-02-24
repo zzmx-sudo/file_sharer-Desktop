@@ -28,7 +28,11 @@ from model.qt_thread import *
 from model.browse import BrowseFileDictModel
 from model.assert_env import AssertEnvWindow
 from model.tray_icon import TrayIcon
-from utils.public_func import generate_uuid, update_downloadUrl_with_hitLog
+from utils.public_func import (
+    generate_uuid,
+    update_downloadUrl_with_hitLog,
+    resize_window,
+)
 
 
 class MainWindow(QMainWindow):
@@ -67,6 +71,22 @@ class MainWindow(QMainWindow):
 
         # show window after assert env successful.
         # self.show()
+
+    def resize(self, *args: int) -> None:
+        """
+        重置窗口大小
+
+        Args:
+            *args: 需重置大小的宽高, 为空时根据屏幕分辨率自适应
+
+        Returns:
+            None
+        """
+        if args:
+            super(MainWindow, self).resize(*args)
+            return
+
+        resize_window(self, (1066, 600), settings.CURR_RESOLUTION)
 
     def show_normal(self) -> None:
         """
@@ -737,6 +757,8 @@ class MainWindow(QMainWindow):
         sysLogger.debug("正在打开系统选择文件夹窗口")
         folder_path = QFileDialog.getExistingDirectory(self, "选择文件夹", "./")
         if folder_path:
+            if settings.IS_WINDOWS:
+                folder_path = folder_path.replace("/", "\\")
             lineEdit.setText(folder_path)
 
     def _verify_data(self, data: Dict[str, Any]) -> bool:
@@ -810,8 +832,9 @@ if __name__ == "__main__":
     multiprocessing.freeze_support()
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(":/icons/icon.ico"))
-    window = MainWindow()
     assert_window = AssertEnvWindow()
+    window = MainWindow()
+    settings.resize_window(assert_window, window)
     assert_window.all_safe.connect(lambda: window.show_normal())
     sys.excepthook = window.except_hook
     sys.exit(app.exec_())
