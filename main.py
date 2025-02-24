@@ -757,6 +757,8 @@ class MainWindow(QMainWindow):
         sysLogger.debug("正在打开系统选择文件夹窗口")
         folder_path = QFileDialog.getExistingDirectory(self, "选择文件夹", "./")
         if folder_path:
+            if settings.IS_WINDOWS:
+                folder_path = folder_path.replace("/", "\\")
             lineEdit.setText(folder_path)
 
     def _verify_data(self, data: Dict[str, Any]) -> bool:
