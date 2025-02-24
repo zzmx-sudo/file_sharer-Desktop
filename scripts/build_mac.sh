@@ -44,8 +44,8 @@ if [ "$1" == "arm64" ]; then
 else
   ARCH_NAME="x64"
 fi
-# macos-13 runner Maybe due to `Resource busy` failure, try up to 3 times
-for i in {1..3}; do
+# macos-13 runner Maybe due to `Resource busy` failure, try up to 5 times
+for i in {1..5}; do
   create-dmg --volname "${PROJECT_NAME}" \
     --volicon "${PROJECT_PATH}/static/ui/icon.ico" \
     --window-pos 200 120 \
@@ -57,6 +57,12 @@ for i in {1..3}; do
     "installer/file_sharer-desktop_${PRODUCT_VERSION}-macos-${ARCH_NAME}.dmg" \
     "./dmg/" && break || sleep 5
 done
+
+# return code 1 where create-img is failed
+if [ ! -f "installer/file_sharer-desktop_${PRODUCT_VERSION}-macos-${ARCH_NAME}.dmg" ]; then
+  echo "Failed to create-img! Exit Build."
+  exit 1
+fi
 
 # 打包结束
 echo ******************* Build complete! *******************
