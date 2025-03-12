@@ -34,6 +34,7 @@ class TrayIcon(QSystemTrayIcon):
         self.menu.addAction(self.quit_action)
         self.setContextMenu(self.menu)
         self.setIcon(QIcon(":/icons/icon.ico"))
+        self.setToolTip("File-Sharer")
 
         self.menu.setStyleSheet(self.styleSheet())
         self.menu.setWindowFlag(Qt.FramelessWindowHint)

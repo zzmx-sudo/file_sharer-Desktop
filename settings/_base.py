@@ -542,7 +542,7 @@ Content server Box */
 #createShareButton:pressed {
 	border: 2px solid rgb(%(SpecialHovColor)s);
 }
-#sharePathFrame .QLineEdit {
+#createShareParamFrame .QLineEdit {
 	border: 1px solid rgb(%(BaseColor)s);
 	border-radius: 5%%;
 	margin-right: 10px;

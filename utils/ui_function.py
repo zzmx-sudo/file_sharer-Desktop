@@ -1153,6 +1153,9 @@ class UiFunction:
             self._contentTopDpubleClicked
         )
         self._elements.contentTopBox.mouseMoveEvent = self._moveWindow
+        self._elements.shareTypeCombo.currentIndexChanged.connect(
+            lambda x: self._show_hide_sharePwd(x)
+        )
         self._setup_table_widget()
         self._elements.backupButton.setEnabled(False)
         self._elements.downloadDirButton.setEnabled(False)
@@ -1237,6 +1240,22 @@ class UiFunction:
 
         self._main_window.reset_settings()
         self.animation = QPropertyAnimation(self._elements.extraBox, b"minimumWidth")
+        self.animation.setDuration(500)
+        self.animation.setStartValue(width)
+        self.animation.setEndValue(widthExtended)
+        self.animation.setEasingCurve(QEasingCurve.InOutQuart)
+        self.animation.start()
+
+    def _show_hide_sharePwd(self, index) -> None:
+        if index == 0:
+            width = self._elements.sharePwdFrame.width()
+            widthExtended = 205
+        else:
+            width = self._elements.sharePwdFrame.width()
+            widthExtended = 0
+        self.animation = QPropertyAnimation(
+            self._elements.sharePwdFrame, b"maximumWidth"
+        )
         self.animation.setDuration(500)
         self.animation.setStartValue(width)
         self.animation.setEndValue(widthExtended)
