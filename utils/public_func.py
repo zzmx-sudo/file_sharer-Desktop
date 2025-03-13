@@ -91,6 +91,18 @@ def generate_ftp_passwd() -> str:
     return "".join(random.sample(base_str, 5))
 
 
+def generate_secret_key() -> str:
+    """
+    获取随机盐值
+
+    Returns:
+        str: 生成的盐值
+    """
+    base_str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+
+    return "".join(random.sample(base_str, 12))
+
+
 def exists_port(port: int) -> bool:
     """
     判断端口是否被占用

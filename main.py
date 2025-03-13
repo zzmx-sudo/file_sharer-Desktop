@@ -28,6 +28,7 @@ from model.qt_thread import *
 from model.browse import BrowseFileDictModel
 from model.assert_env import AssertEnvWindow
 from model.tray_icon import TrayIcon
+from utils.credentials import Credentials
 from utils.public_func import (
     generate_uuid,
     update_downloadUrl_with_hitLog,
@@ -537,6 +538,14 @@ class MainWindow(QMainWindow):
                 return
             share_type = self.ui.shareTypeCombo.currentText()
             share_type = shareType.ftp if share_type == "FTP" else shareType.http
+            share_pwd = (
+                self.ui.sharePwdEdit.text() if share_type is shareType.http else ""
+            )
+            if share_pwd != "":
+                secret_key = settings.SECRET_KEY
+                credentials = Credentials.encode(secret_key, share_pwd)
+            else:
+                secret_key = credentials = ""
             shared_row_number = self._sharing_list.contains(target_path, share_type)
             if shared_row_number is not None:
                 sysLogger.warning(f"重复分享被取消, 分享的路径: {target_path}, 分享类型: {share_type}")
@@ -585,7 +594,9 @@ class MainWindow(QMainWindow):
             else:
                 shared_fileObj = None
             if shared_fileObj is None:
-                fileObj = fileModel(target_path, uuid)
+                fileObj = fileModel(
+                    target_path, uuid, secret_key=secret_key, credentials=credentials
+                )
             else:
                 sysLogger.debug(f"存在可复用的FTP, 其工作路径为: {shared_fileObj.ftp_basePath}")
                 fileObj = fileModel(
@@ -594,6 +605,8 @@ class MainWindow(QMainWindow):
                     pwd=shared_fileObj.ftp_pwd,
                     port=shared_fileObj.ftp_port,
                     ftp_base_path=shared_fileObj.ftp_basePath,
+                    secret_key=secret_key,
+                    credentials=credentials,
                 )
             self._sharing_list.append(fileObj)
             fileObj.isSharing = True

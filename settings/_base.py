@@ -6,6 +6,7 @@ from utils.public_func import (
     get_local_ip,
     generate_project_path,
     generate_product_version,
+    generate_secret_key,
 )
 from model.public_types import ThemeColor, ColorCardStruct
 
@@ -59,6 +60,9 @@ THEME_OPACITY: int = 100
 
 # 全局色卡
 COLOR_CARD: ColorCardStruct = ColorCardStruct.dispatch()
+
+# 随机的盐值
+SECRET_KEY = generate_secret_key()
 
 # 基本样式
 BASIC_QSS = """

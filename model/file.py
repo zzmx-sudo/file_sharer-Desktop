@@ -2,7 +2,7 @@ __all__ = ["FileModel", "DirModel"]
 
 import os
 import random
-from typing import Any, Union, Dict
+from typing import Any, Union, Dict, Optional
 
 from model import public_types as ptype
 from settings import settings
@@ -14,10 +14,12 @@ class FileModel:
         self,
         path: str,
         uuid: str,
-        parent_uuid: Union[None, str] = None,
-        pwd: Union[None, str] = None,
-        port: Union[None, int] = None,
-        ftp_base_path: Union[None, str] = None,
+        parent_uuid: Optional[str] = None,
+        pwd: Optional[str] = None,
+        port: Optional[int] = None,
+        ftp_base_path: Optional[str] = None,
+        secret_key: Optional[str] = None,
+        credentials: Optional[str] = None,
         **kwargs,
     ):
         """
@@ -30,6 +32,8 @@ class FileModel:
             pwd: FTP服务的密码, 若不是FTP共享则为None, 默认为None
             port: FTP服务的端口, 若不是FTP共享则为None, 默认为None
             ftp_base_path: FTP服务的根路径, 若不是FTP共享则为None, 默认为None
+            secret_key: 文件分享的盐值, 用于密码校验, 默认无校验
+            credentials: 文件分享的凭据, 用于密码校验, 默认无校验
             **kwargs: 其他关键字参数
         """
         self._uuid = f"{parent_uuid}>{uuid}" if parent_uuid else uuid
@@ -39,6 +43,8 @@ class FileModel:
         self._row_index = None
         self._ftp_pwd = pwd
         self._ftp_port = port
+        self._secret_key = secret_key
+        self._credentials = credentials
 
         if self._uuid[0] == "h":
             self._share_type = ptype.ShareType.http
@@ -261,6 +267,26 @@ class FileModel:
         """
         return os.path.basename(self._target_path)
 
+    @property
+    def secret_key(self) -> str:
+        """
+        盐值
+
+        Returns:
+            str: 盐值
+        """
+        return self._secret_key or ""
+
+    @property
+    def credentials(self) -> str:
+        """
+        凭据
+
+        Returns:
+            str: 凭据
+        """
+        return self._credentials or ""
+
     async def to_dict_client(self) -> Dict[str, Union[str, bool]]:
         """
         给客户端的格式化数据
@@ -327,6 +353,8 @@ class FileModel:
             "parent_uuid": None,
             "share_type": self._share_type.value,
             "isDir": self.isDir,
+            "secret_key": self.secret_key,
+            "credentials": self.credentials,
         }
         if self._share_type is ptype.ShareType.ftp:
             normal.update(
@@ -352,10 +380,12 @@ class DirModel(FileModel):
         self,
         path: str,
         uuid: str,
-        parent_uuid: Union[None, str] = None,
-        pwd: Union[None, str] = None,
-        port: Union[None, int] = None,
-        ftp_base_path: Union[None, str] = None,
+        parent_uuid: Optional[str] = None,
+        pwd: Optional[str] = None,
+        port: Optional[int] = None,
+        ftp_base_path: Optional[str] = None,
+        secret_key: Optional[str] = None,
+        credentials: Optional[str] = None,
         **kwargs,
     ):
         """
@@ -368,10 +398,20 @@ class DirModel(FileModel):
             pwd: FTP服务的密码, 若不是FTP共享则为None, 默认为None
             port: FTP服务的端口, 若不是FTP共享则为None, 默认为None
             ftp_base_path: FTP服务的根路径, 若不是FTP共享则为None, 默认为None
+            secret_key: 文件分享的盐值, 用于密码校验, 默认无校验
+            credentials: 文件分享的凭据, 用于密码校验, 默认无校验
             **kwargs: 其他关键字参数
         """
         super(DirModel, self).__init__(
-            path, uuid, parent_uuid, pwd, port, ftp_base_path, **kwargs
+            path,
+            uuid,
+            parent_uuid,
+            pwd,
+            port,
+            ftp_base_path,
+            secret_key,
+            credentials,
+            **kwargs,
         )
 
         if self._share_type is ptype.ShareType.ftp:
