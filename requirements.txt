@@ -11,14 +11,18 @@ backports.tarfile==1.2.0
 black==23.9.1
 cchardet==2.1.7
 certifi==2023.7.22
+cfgv==3.4.0
 chardet==5.2.0
 charset-normalizer==3.2.0
 click==8.1.7
 colorama==0.4.6
+distlib==0.3.8
 exceptiongroup==1.1.3
 fastapi==0.101.1
+filelock==3.16.1
 frozenlist==1.4.0
 h11==0.14.0
+identify==2.6.1
 idna==3.4
 importlib_resources==6.4.4
 jaraco.context==6.0.1
@@ -30,9 +34,11 @@ more-itertools==10.4.0
 multidict==6.0.4
 mypy-extensions==1.0.0
 netifaces==0.11.0
+nodeenv==1.9.1
 packaging==23.1
 pathspec==0.11.2
 pefile==2023.2.7
+pillow==10.4.0
 platformdirs==3.10.0
 pre-commit==3.5.0
 psutil==5.9.5
@@ -43,12 +49,16 @@ pyftpdlib==1.5.7
 pyinstaller==5.13.2
 pyinstaller-hooks-contrib==2023.8
 pyperclip==1.8.2
+pypng==0.20220715.0
 PyQt5==5.15.11
 PyQt5-Qt5==5.15.14; platform_system == "Darwin"
 PyQt5-Qt5==5.15.2; platform_system == "Windows"
 PyQt5_sip==12.15.0
 python-dotenv==1.0.0
 pywin32-ctypes==0.2.2
+PyYAML==6.0.2
+qrcode==7.4.2
+qt5-applications==5.15.2.2.3
 requests==2.31.0
 sniffio==1.3.0
 starlette==0.27.0

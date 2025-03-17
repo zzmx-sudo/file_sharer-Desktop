@@ -28,6 +28,7 @@ from model.qt_thread import *
 from model.browse import BrowseFileDictModel
 from model.assert_env import AssertEnvWindow
 from model.tray_icon import TrayIcon
+from model.QRCode import QRCodeWindow
 from utils.credentials import Credentials
 from utils.public_func import (
     generate_uuid,
@@ -99,7 +100,9 @@ class MainWindow(QMainWindow):
         sysLogger.debug("正在打开主窗口和系统托盘图标")
         self.ti = TrayIcon(self)
         self.ti.show()
-        self.show()
+        self.qrcode = QRCodeWindow()
+        self.qrcode.freeSecretButton.clicked.connect(lambda: self.show())
+        # self.show()
 
     def save_settings(self) -> None:
         """
