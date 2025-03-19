@@ -1,6 +1,7 @@
 <RCC>
   <qresource prefix="icons">
     <file>../images/icon/Purple/folder.png</file>
+    <file>../images/icon/Purple/qrcode.png</file>
     <file>../images/icon/Purple/back.png</file>
     <file>../images/icon/Purple/browse.png</file>
     <file>../images/icon/Purple/check.png</file>
@@ -17,6 +18,7 @@
     <file>../images/icon/Purple/share.png</file>
     <file>../images/icon/Blue/folder.png</file>
     <file>../images/icon/Blue/back.png</file>
+    <file>../images/icon/Blue/qrcode.png</file>
     <file>../images/icon/Blue/browse.png</file>
     <file>../images/icon/Blue/check.png</file>
     <file>../images/icon/Blue/client.png</file>
@@ -32,6 +34,7 @@
     <file>../images/icon/Blue/share.png</file>
     <file>../images/icon/Cyan/folder.png</file>
     <file>../images/icon/Cyan/back.png</file>
+    <file>../images/icon/Cyan/qrcode.png</file>
     <file>../images/icon/Cyan/browse.png</file>
     <file>../images/icon/Cyan/check.png</file>
     <file>../images/icon/Cyan/client.png</file>
@@ -47,6 +50,7 @@
     <file>../images/icon/Cyan/share.png</file>
     <file>../images/icon/Green/folder.png</file>
     <file>../images/icon/Green/back.png</file>
+    <file>../images/icon/Green/qrcode.png</file>
     <file>../images/icon/Green/browse.png</file>
     <file>../images/icon/Green/check.png</file>
     <file>../images/icon/Green/client.png</file>
@@ -62,6 +66,7 @@
     <file>../images/icon/Green/share.png</file>
     <file>../images/icon/Yellow/folder.png</file>
     <file>../images/icon/Yellow/back.png</file>
+    <file>../images/icon/Yellow/qrcode.png</file>
     <file>../images/icon/Yellow/browse.png</file>
     <file>../images/icon/Yellow/check.png</file>
     <file>../images/icon/Yellow/client.png</file>
@@ -77,6 +82,7 @@
     <file>../images/icon/Yellow/share.png</file>
     <file>../images/icon/Orange/folder.png</file>
     <file>../images/icon/Orange/back.png</file>
+    <file>../images/icon/Orange/qrcode.png</file>
     <file>../images/icon/Orange/browse.png</file>
     <file>../images/icon/Orange/check.png</file>
     <file>../images/icon/Orange/client.png</file>
@@ -92,6 +98,7 @@
     <file>../images/icon/Orange/share.png</file>
     <file>../images/icon/Red/folder.png</file>
     <file>../images/icon/Red/back.png</file>
+    <file>../images/icon/Red/qrcode.png</file>
     <file>../images/icon/Red/browse.png</file>
     <file>../images/icon/Red/check.png</file>
     <file>../images/icon/Red/client.png</file>
@@ -107,6 +114,7 @@
     <file>../images/icon/Red/share.png</file>
     <file>../images/icon/Default/folder.png</file>
     <file>../images/icon/Default/back.png</file>
+    <file>../images/icon/Default/qrcode.png</file>
     <file>../images/icon/Default/browse.png</file>
     <file>../images/icon/Default/check.png</file>
     <file>../images/icon/Default/client.png</file>

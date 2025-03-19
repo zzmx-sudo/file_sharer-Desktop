@@ -16,6 +16,8 @@ from collections import namedtuple
 FILE_LIST_URI: str = "/file_list"
 DOWNLOAD_URI: str = "/download"
 HIT_LOG: str = "hit_log"
+MOBILE_PREFIX: str = "/mobile"
+STATIC_PREFIX: str = "/static"
 
 
 # share type

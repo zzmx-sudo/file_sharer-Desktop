@@ -10,6 +10,7 @@ from email.utils import formatdate
 import aiofiles
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, StreamingResponse, Response
+from fastapi.staticfiles import StaticFiles
 from starlette.types import Scope
 
 from ._base_service import BaseService
@@ -78,6 +79,25 @@ class HttpService(BaseService):
         if uuid in self._sharing_dict:
             del self._sharing_dict[uuid]
         self._sysLogger_debug(f"移除分享完成, 分享的uuid: {uuid}")
+
+    def _change_free_secret(self, uuid: str, value: bool) -> None:
+        """
+        修改文件/文件夹对象的免密状态
+
+        Args:
+            uuid: 待修改文件/文件夹对象的uuid
+            value: 待修改的免密状态
+
+        Returns:
+            None
+        """
+        self._sysLogger_debug(f"开始修改免密状态, 分享的uuid: {uuid}, 新的免密状态: {value}")
+        if uuid not in self._sharing_dict:
+            sysLogger.error(f"系统错误, 接收到修改免密状态任务, 但该文件/文件夹并未分享, 文件uuid: {uuid}")
+            return
+
+        self._sharing_dict[uuid].free_secret = value
+        self._sysLogger_debug(f"修改免密状态完成, 分享的uuid: {uuid}")
 
     def run(self) -> None:
         """
@@ -221,8 +241,8 @@ class HttpService(BaseService):
                         sharerLogger.info(
                             f"用户IP: {client_ip}, 用户下载了{file_type}, {file_type}路径: {fileObj.targetPath}"
                         )
-            else:
-                return JSONResponse({"errno": 404, "errmsg": "访问的链接不存在！"})
+            # else:
+            #     return JSONResponse({"errno": 404, "errmsg": "访问的链接不存在！"})
 
             request.scope["fileObj"] = fileObj
             response = await cell_next(request)
@@ -236,54 +256,7 @@ class HttpService(BaseService):
             None
         """
 
-        async def file_generator(
-            file_path: str, offset: int, chunk_size: int
-        ) -> AsyncGenerator:
-            async with aiofiles.open(file_path, "rb") as f:
-                await f.seek(offset, os.SEEK_SET)
-                while True:
-                    chunk = await f.read(chunk_size)
-                    if chunk:
-                        yield chunk
-                    else:
-                        break
-
-        async def generate_file_stream_response(
-            request: Request, fileObj: FileModel
-        ) -> StreamingResponse:
-            stat_result = os.stat(fileObj.targetPath)
-            st_size = stat_result.st_size
-            range_str = request.headers.get("range", "")
-            range_match = re.match(r"bytes=(\d+)-", range_str) or re.match(
-                r"bytes=(\d+)-(\d+)", range_str
-            )
-            if range_match:
-                start = int(range_match.group(1))
-                end = (
-                    int(range_match.group(2))
-                    if range_match.lastindex == 2
-                    else st_size - 1
-                )
-            else:
-                start = 0
-                end = st_size - 1
-            file_name = quote(fileObj.file_name)
-            content_length = st_size - start
-            content_type = "application/octet-stream"
-            return StreamingResponse(
-                file_generator(fileObj.targetPath, start, 1048576),
-                media_type=content_type,
-                headers={
-                    "content-disposition": f"attachment; filename={file_name}",
-                    "accept-ranges": "bytes",
-                    "connection": "keep-alive",
-                    "content-length": str(content_length),
-                    "content-range": f"{start}-{end}/{st_size}",
-                    "last-modified": formatdate(stat_result.st_mtime, usegmt=True),
-                },
-                status_code=206 if start > 0 else 200,
-            )
-
+        ### root app
         @self._app.get("%s/{uuid}" % ptype.FILE_LIST_URI)
         async def file_list(uuid: str, request: Request) -> Dict[str, Any]:
             fileObj = request.scope.get("fileObj")
@@ -314,10 +287,88 @@ class HttpService(BaseService):
                 return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
 
             if fileObj.shareType is ptype.ShareType.http:
-                return await generate_file_stream_response(request, fileObj)
+                return await self.generate_file_stream_response(request, fileObj)
             elif fileObj.shareType is ptype.ShareType.ftp:
                 ftp_data = await fileObj.to_ftp_data()
                 return {"errno": 200, "errmsg": "", "data": ftp_data}
             else:
                 sysLogger.error(f"未被预判的分享类型: {fileObj.shareType.value}, 系统发生错误")
                 return {"errno": 500, "errmsg": "下载文件/文件夹失败"}
+
+        ### mobile app
+        mobile = FastAPI()
+
+        @mobile.get("%s/{uuid}" % ptype.FILE_LIST_URI)
+        async def file_list_mobile(uuid: str, request: Request) -> Dict[str, Any]:
+            fileObj = request.scope.get("fileObj")
+            fileObj: Union[None, FileModel, DirModel]
+            if not fileObj:
+                sysLogger.error(
+                    "发生了错误, 获取不到用户访问的文件/文件夹对象, "
+                    "请用uuid对比`file_sharing_backups.json`文件, "
+                    f"查看分享的文件/文件夹状态, uuid: {uuid}"
+                )
+                return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
+
+            data = await fileObj.to_dict_mobile()
+            return {"errno": 200, "errmsg": "", "data": data}
+
+        # mount app
+        self._app.mount(ptype.MOBILE_PREFIX, mobile)
+        static_path = os.path.join(
+            os.path.dirname(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            ),
+            "static",
+            "mobile_frontend",
+        )
+        self._app.mount(
+            ptype.STATIC_PREFIX, StaticFiles(directory=static_path), name="static"
+        )
+
+    @staticmethod
+    async def generate_file_stream_response(
+        request: Request, fileObj: FileModel
+    ) -> StreamingResponse:
+        async def file_generator(
+            file_path: str, offset: int, chunk_size: int
+        ) -> AsyncGenerator:
+            async with aiofiles.open(file_path, "rb") as f:
+                await f.seek(offset, os.SEEK_SET)
+                while True:
+                    chunk = await f.read(chunk_size)
+                    if chunk:
+                        yield chunk
+                    else:
+                        break
+
+        stat_result = os.stat(fileObj.targetPath)
+        st_size = stat_result.st_size
+        range_str = request.headers.get("range", "")
+        range_match = re.match(r"bytes=(\d+)-", range_str) or re.match(
+            r"bytes=(\d+)-(\d+)", range_str
+        )
+        if range_match:
+            start = int(range_match.group(1))
+            end = (
+                int(range_match.group(2)) if range_match.lastindex == 2 else st_size - 1
+            )
+        else:
+            start = 0
+            end = st_size - 1
+        file_name = quote(fileObj.file_name)
+        content_length = st_size - start
+        content_type = "application/octet-stream"
+        return StreamingResponse(
+            file_generator(fileObj.targetPath, start, 1048576),
+            media_type=content_type,
+            headers={
+                "content-disposition": f"attachment; filename={file_name}",
+                "accept-ranges": "bytes",
+                "connection": "keep-alive",
+                "content-length": str(content_length),
+                "content-range": f"{start}-{end}/{st_size}",
+                "last-modified": formatdate(stat_result.st_mtime, usegmt=True),
+            },
+            status_code=206 if start > 0 else 200,
+        )

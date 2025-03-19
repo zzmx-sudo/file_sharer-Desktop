@@ -45,6 +45,7 @@ class FileModel:
         self._ftp_port = port
         self._secret_key = secret_key
         self._credentials = credentials
+        self._free_secret = False
 
         if self._uuid[0] == "h":
             self._share_type = ptype.ShareType.http
@@ -248,6 +249,16 @@ class FileModel:
         return f"http://{settings.LOCAL_HOST}:{settings.WSGI_PORT}{ptype.FILE_LIST_URI}/{self._uuid}"
 
     @property
+    def mobile_browse_url(self) -> str:
+        """
+        移动设备(浏览器)浏览时文件对象的浏览url
+
+        Returns:
+            str: 手机浏览时文件对象的浏览url
+        """
+        return f"http://{settings.LOCAL_HOST}:{settings.WSGI_PORT}{ptype.MOBILE_PREFIX}{ptype.FILE_LIST_URI}/{self._uuid}"
+
+    @property
     def download_url(self) -> str:
         """
         文件对象下载的url
@@ -256,6 +267,16 @@ class FileModel:
             str: 文件对象下载的url
         """
         return f"http://{settings.LOCAL_HOST}:{settings.WSGI_PORT}{ptype.DOWNLOAD_URI}/{self._uuid}"
+
+    @property
+    def browse_download_url(self) -> str:
+        """
+        移动设备(浏览器)浏览时文件对象的下载url
+
+        Returns:
+            str: 手机浏览时文件对象的下载url
+        """
+        return f"http://{settings.LOCAL_HOST}:{settings.WSGI_PORT}{ptype.MOBILE_PREFIX}{ptype.DOWNLOAD_URI}/{self._uuid}"
 
     @property
     def file_name(self) -> str:
@@ -287,6 +308,29 @@ class FileModel:
         """
         return self._credentials or ""
 
+    @property
+    def free_secret(self) -> bool:
+        """
+        临时免密属性
+
+        Returns:
+            bool: 是否临时免密
+        """
+        return self._free_secret
+
+    @free_secret.setter
+    def free_secret(self, newValue: bool) -> None:
+        """
+        修改临时免密属性
+
+        Args:
+            newValue: 需修改临时免密属性的新值
+
+        Returns:
+            None
+        """
+        self._free_secret = bool(newValue)
+
     async def to_dict_client(self) -> Dict[str, Union[str, bool]]:
         """
         给客户端的格式化数据
@@ -297,6 +341,21 @@ class FileModel:
         return {
             "uuid": self._uuid,
             "downloadUrl": self.download_url,
+            "fileName": self.file_name,
+            "stareType": self._share_type.value,
+            "isDir": self.isDir,
+        }
+
+    async def to_dict_mobile(self) -> Dict[str, Union[str, bool]]:
+        """
+        移动设备(浏览器)浏览的格式化数据
+
+        Returns:
+            Dict[str, Union[str, bool]]: 给移动设备(浏览器)浏览的格式化数据
+        """
+        return {
+            "uuid": self._uuid,
+            "downloadUrl": self.browse_download_url,
             "fileName": self.file_name,
             "stareType": self._share_type.value,
             "isDir": self.isDir,
@@ -419,7 +478,7 @@ class DirModel(FileModel):
         else:
             self._ftp_base_path = None
 
-        self._children = DirChildrenModel()
+        self._children: Dict[str, Union[FileModel, DirModel]] = DirChildrenModel()
         self._setup_child()
 
     def _setup_child(self) -> None:
@@ -466,6 +525,31 @@ class DirModel(FileModel):
         """
         return True
 
+    @property
+    def free_secret(self) -> bool:
+        """
+        临时免密属性
+
+        Returns:
+            bool: 是否临时免密
+        """
+        return self._free_secret
+
+    @free_secret.setter
+    def free_secret(self, newValue: bool) -> None:
+        """
+        修改临时免密属性
+
+        Args:
+            newValue: 需修改临时免密属性的新值
+
+        Returns:
+            None
+        """
+        self._free_secret = bool(newValue)
+        for child in self._children.values():
+            child.free_secret = newValue
+
     async def to_dict_client(self) -> Dict[str, Any]:
         """
         给客户端的格式化数据
@@ -481,6 +565,27 @@ class DirModel(FileModel):
         return {
             "uuid": self._uuid,
             "downloadUrl": self.download_url,
+            "fileName": self.file_name,
+            "stareType": self._share_type.value,
+            "isDir": self.isDir,
+            "children": children,
+        }
+
+    async def to_dict_mobile(self) -> Dict[str, Any]:
+        """
+        移动设备(浏览器)浏览的格式化数据
+
+        Returns:
+            Dict[str, Any]: 给移动设备(浏览器)浏览的格式化数据
+        """
+        children = []
+        for child_uuid, child in self._children.items():
+            child_dict = {child_uuid: await child.to_dict_mobile()}
+            children.append(child_dict)
+
+        return {
+            "uuid": self._uuid,
+            "downloadUrl": self.browse_download_url,
             "fileName": self.file_name,
             "stareType": self._share_type.value,
             "isDir": self.isDir,

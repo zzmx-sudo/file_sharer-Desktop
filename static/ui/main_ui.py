@@ -1058,7 +1058,7 @@ class Ui_MainWindow(object):
         self.shareTypeCombo.setItemText(1, _translate("MainWindow", "FTP"))
         self.sharePathLabel.setText(_translate("MainWindow", "分享路径："))
         self.shareFileLbael.setText(_translate("MainWindow", "选取文件/文件夹："))
-        self.sharePwdLabel.setText(_translate("MainWindow", "浏览密码："))
+        self.sharePwdLabel.setText(_translate("MainWindow", "扫码浏览密码："))
         self.sharePwdEdit.setPlaceholderText(_translate("MainWindow", "为空则免密"))
         self.createShareButton.setText(_translate("MainWindow", "新建分享"))
         item = self.shareListTable.verticalHeaderItem(0)

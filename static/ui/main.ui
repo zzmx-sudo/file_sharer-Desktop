@@ -2474,7 +2474,7 @@ Content Bottom Bar */
                              </size>
                             </property>
                             <property name="text">
-                             <string>浏览密码：</string>
+                             <string>扫码浏览密码：</string>
                             </property>
                            </widget>
                           </item>

@@ -88,6 +88,23 @@ class ServiceProcessManager:
 
         return True
 
+    def change_free_secret(self, key: str, value: bool) -> bool:
+        """
+        修改文件/文件夹对象的免密状态
+
+        Args:
+            key: 待修改文件/文件夹对象的uuid
+            value: 待修改的免密状态
+
+        Returns:
+            bool: 是否成功修改免密状态
+        """
+        sysLogger.debug(f"正在修改免密状态, 文件的uuid: {key}, 新的免密状态: {value}")
+        if self._http_input_q is not None:
+            self._http_input_q.put(("free-secret", (key, value)))
+
+        return True
+
     def close_ftp(self) -> bool:
         """
         关闭FTP共享服务
