@@ -6,6 +6,7 @@ from typing import Union, Any, AsyncGenerator, Dict
 from multiprocessing import Queue
 from urllib.parse import quote
 from email.utils import formatdate
+from pydantic import BaseModel
 
 import aiofiles
 from fastapi import FastAPI, Request
@@ -18,6 +19,7 @@ from model import public_types as ptype
 from model.file import FileModel, DirModel
 from settings import settings
 from utils.logger import sharerLogger, sysLogger
+from utils.credentials import Credentials
 
 
 class MyRequest:
@@ -36,6 +38,11 @@ class MyRequest:
 
     def __getitem__(self, item: str) -> Union[str, tuple]:
         return self.__dict__.get(item, "")
+
+
+class AuthParam(BaseModel):
+    secret_key: str
+    ciphertext: str
 
 
 class HttpService(BaseService):
@@ -297,9 +304,46 @@ class HttpService(BaseService):
 
         ### mobile app
         mobile = FastAPI()
+        FOR_BIDDEN_RESPONSE = {"errno": 400, "errmsg": "For Bidden!"}
+
+        def REQUIRE_PWD_RESPONSE(secret_key):
+            return {
+                "errno": 400,
+                "errmsg": "Password verification is required",
+                "secret_key": secret_key,
+            }
+
+        async def no_need_credentials(fileObj: Union[FileModel, DirModel]) -> bool:
+            """
+            是否需要校验凭据
+
+            Args:
+                fileObj: 待确认的文件/文件夹对象
+
+            Returns:
+                bool: 是否需要校验凭据
+            """
+            return (
+                not fileObj.secret_key or not fileObj.credentials or fileObj.free_secret
+            )
+
+        async def verify_credentials(
+            fileObj: Union[FileModel, DirModel], pwd: str
+        ) -> bool:
+            """
+            凭据校验
+
+            Args:
+                fileObj: 待校验的文件/文件夹对象
+                pwd: 待校验的密码
+
+            Returns:
+                bool: 校验的结果
+            """
+            return Credentials.verification(fileObj, pwd)
 
         @mobile.get("%s/{uuid}" % ptype.FILE_LIST_URI)
-        async def file_list_mobile(uuid: str, request: Request) -> Dict[str, Any]:
+        async def get_list_mobile(uuid: str, request: Request) -> Dict[str, Any]:
             fileObj = request.scope.get("fileObj")
             fileObj: Union[None, FileModel, DirModel]
             if not fileObj:
@@ -309,9 +353,87 @@ class HttpService(BaseService):
                     f"查看分享的文件/文件夹状态, uuid: {uuid}"
                 )
                 return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
+            if fileObj.shareType is ptype.ShareType.ftp:
+                return FOR_BIDDEN_RESPONSE
+            if await no_need_credentials(fileObj):
+                data = await fileObj.to_dict_mobile()
+                return {"errno": 200, "errmsg": "", "data": data}
 
-            data = await fileObj.to_dict_mobile()
-            return {"errno": 200, "errmsg": "", "data": data}
+            return REQUIRE_PWD_RESPONSE(fileObj.secret_key)
+
+        @mobile.post("%s/{uuid}" % ptype.FILE_LIST_URI)
+        async def post_list_mobile(
+            uuid: str, request: Request, auth_param: AuthParam
+        ) -> Dict[str, Any]:
+            fileObj = request.scope.get("fileObj")
+            fileObj: Union[None, FileModel, DirModel]
+            if not fileObj:
+                sysLogger.error(
+                    "发生了错误, 获取不到用户访问的文件/文件夹对象, "
+                    "请用uuid对比`file_sharing_backups.json`文件, "
+                    f"查看分享的文件/文件夹状态, uuid: {uuid}"
+                )
+                return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
+            if fileObj.shareType is ptype.ShareType.ftp:
+                return FOR_BIDDEN_RESPONSE
+            if await no_need_credentials(fileObj):
+                data = await fileObj.to_dict_mobile()
+                return {"errno": 200, "errmsg": "", "data": data}
+            if auth_param.secret_key != fileObj.secret_key:
+                return FOR_BIDDEN_RESPONSE
+            if await verify_credentials(fileObj, auth_param.ciphertext):
+                data = await fileObj.to_dict_mobile()
+                return {"errno": 200, "errmsg": "", "data": data}
+
+            return REQUIRE_PWD_RESPONSE(fileObj.secret_key)
+
+        @mobile.post("%s/{uuid}" % ptype.DOWNLOAD_URI, response_model=None)
+        async def download_mobile(
+            uuid: str, request: Request, auth_param: AuthParam
+        ) -> Union[Dict[str, Any], StreamingResponse]:
+            fileObj = request.scope.get("fileObj")
+            fileObj: Union[None, FileModel, DirModel]
+            if not fileObj:
+                sysLogger.error(
+                    "发生了错误, 获取不到用户访问的文件/文件夹对象, "
+                    "请用uuid对比`file_sharing_backups.json`文件, "
+                    f"查看分享的文件/文件夹状态, uuid: {uuid}"
+                )
+                return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
+            if fileObj.shareType is ptype.ShareType.ftp:
+                return FOR_BIDDEN_RESPONSE
+            if await no_need_credentials(fileObj):
+                return await self.generate_file_stream_response(request, fileObj)
+            if auth_param.secret_key != fileObj.secret_key:
+                return FOR_BIDDEN_RESPONSE
+            if await verify_credentials(fileObj, auth_param.ciphertext):
+                return await self.generate_file_stream_response(request, fileObj)
+
+            return REQUIRE_PWD_RESPONSE(fileObj.secret_key)
+
+        @mobile.post("%s/{uuid}" % ptype.UPLOAD_URI)
+        async def upload_mobile(
+            uuid: str, request: Request, auth_param: AuthParam
+        ) -> Dict[str, Any]:
+            fileObj = request.scope.get("fileObj")
+            fileObj: Union[None, FileModel, DirModel]
+            if not fileObj:
+                sysLogger.error(
+                    "发生了错误, 获取不到用户访问的文件/文件夹对象, "
+                    "请用uuid对比`file_sharing_backups.json`文件, "
+                    f"查看分享的文件/文件夹状态, uuid: {uuid}"
+                )
+                return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
+            if fileObj.shareType is ptype.ShareType.ftp:
+                return FOR_BIDDEN_RESPONSE
+            if await no_need_credentials(fileObj):
+                pass
+            if auth_param.secret_key != fileObj.secret_key:
+                return FOR_BIDDEN_RESPONSE
+            if await verify_credentials(fileObj, auth_param.ciphertext):
+                pass
+
+            return REQUIRE_PWD_RESPONSE(fileObj.secret_key)
 
         # mount app
         self._app.mount(ptype.MOBILE_PREFIX, mobile)

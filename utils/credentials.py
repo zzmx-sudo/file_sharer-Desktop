@@ -4,6 +4,12 @@ import hashlib
 import base64
 from typing import Union
 
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import padding
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import hashes
+
 from model.file import FileModel, DirModel
 from utils.logger import sysLogger
 
@@ -42,9 +48,47 @@ class Credentials:
         Returns:
             bool: 是否通过校验
         """
-        if fileObj.secret_key == "" or fileObj.credentials == "":
-            sysLogger.debug("该分享无需验证密码")
-            return True
-
+        pwd = cls.__decrypt(fileObj.secret_key, pwd)
         new_hash = cls.encode(fileObj.secret_key, pwd)
         return new_hash == fileObj.credentials
+
+    @staticmethod
+    def __decrypt(salt: str, ciphertext: str) -> str:
+        """
+        对密码解密
+
+        Args:
+            salt: 密钥的盐值
+            ciphertext: 密文
+
+        Returns:
+            str: 解密后的结果
+        """
+        iv_b64, encrypted_data_b64 = ciphertext.split("|")
+        salt = salt.encode("utf-8")
+        iv = base64.b64decode(iv_b64)
+        encrypted_data = base64.b64decode(encrypted_data_b64)
+
+        # 使用盐值和密钥生成解密密钥
+        backend = default_backend()
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,  # 密钥长度
+            salt=salt,
+            iterations=100000,  # 迭代次数
+            backend=backend,
+        )
+        derived_key = kdf.derive("secret_key".encode())
+
+        # 创建解密器
+        cipher = Cipher(algorithms.AES(derived_key), modes.CBC(iv), backend=backend)
+        decryptor = cipher.decryptor()
+
+        # 解密数据
+        padded_plaintext = decryptor.update(encrypted_data) + decryptor.finalize()
+
+        # 去除填充
+        unpadder = padding.PKCS7(algorithms.AES.block_size).unpadder()
+        plaintext = unpadder.update(padded_plaintext) + unpadder.finalize()
+
+        return plaintext.decode()
