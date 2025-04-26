@@ -1,0 +1,2 @@
+webpackJsonp([4],{"0sAW":function(t,e){},EXBt:function(t,e,n){"use strict";Object.defineProperty(e,"__esModule",{value:!0});var s={render:function(){var t=this.$createElement;return(this._self._c||t)("div",{attrs:{id:"settings"}},[this._v("\n  "+this._s(this.msg)+"\n")])},staticRenderFns:[]};var i=n("VU/8")({name:"Settings",data:function(){return{msg:"暂未定具体配置项, 待版本更新"}}},s,!1,function(t){n("0sAW")},"data-v-77756b7b",null);e.default=i.exports}});
+//# sourceMappingURL=4.8e1faa82b27fe4b10803.js.map

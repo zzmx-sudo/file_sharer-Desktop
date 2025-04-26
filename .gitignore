@@ -18,4 +18,17 @@ logs/
 Download/
 
 # compilation product & output
-build/
+/build
+
+### frontend
+node_modules/
+/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+package-lock.json

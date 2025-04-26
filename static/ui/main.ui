@@ -499,7 +499,7 @@ Content server Box */
 #createShareButton:pressed {
 	border: 2px solid #ffffff;
 }
-#sharePathFrame .QLineEdit {
+#createShareParamFrame .QLineEdit {
 	border: 1px solid #409eff;
 	border-radius: 5%;
 	margin-right: 10px;
@@ -1830,6 +1830,12 @@ Content Bottom Bar */
        </item>
        <item>
         <widget class="QFrame" name="contentBox">
+         <property name="minimumSize">
+          <size>
+           <width>540</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
          </property>
@@ -2156,7 +2162,7 @@ Content Bottom Bar */
                       <property name="frameShadow">
                        <enum>QFrame::Raised</enum>
                       </property>
-                      <layout class="QHBoxLayout" name="horizontalLayout_14">
+                      <layout class="QHBoxLayout" name="horizontalLayout_14" stretch="2,4,4,3">
                        <property name="spacing">
                         <number>20</number>
                        </property>
@@ -2210,9 +2216,15 @@ Content Bottom Bar */
                           </property>
                           <item>
                            <widget class="QLabel" name="shareTypeLabel">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
                             <property name="minimumSize">
                              <size>
-                              <width>70</width>
+                              <width>0</width>
                               <height>0</height>
                              </size>
                             </property>
@@ -2229,6 +2241,12 @@ Content Bottom Bar */
                           </item>
                           <item>
                            <widget class="QComboBox" name="shareTypeCombo">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
                             <property name="cursor">
                              <cursorShape>PointingHandCursor</cursorShape>
                             </property>
@@ -2300,7 +2318,7 @@ Content Bottom Bar */
                            <widget class="QLineEdit" name="sharePathEdit">
                             <property name="minimumSize">
                              <size>
-                              <width>152</width>
+                              <width>0</width>
                               <height>30</height>
                              </size>
                             </property>
@@ -2372,9 +2390,15 @@ Content Bottom Bar */
                           </property>
                           <item>
                            <widget class="QLabel" name="shareFileLbael">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
                             <property name="minimumSize">
                              <size>
-                              <width>120</width>
+                              <width>0</width>
                               <height>0</height>
                              </size>
                             </property>
@@ -2391,14 +2415,82 @@ Content Bottom Bar */
                           </item>
                           <item>
                            <widget class="QComboBox" name="shareFileCombo">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
                             <property name="minimumSize">
                              <size>
-                              <width>180</width>
+                              <width>0</width>
                               <height>0</height>
                              </size>
                             </property>
                             <property name="cursor">
                              <cursorShape>PointingHandCursor</cursorShape>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QFrame" name="sharePwdFrame">
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>0</height>
+                          </size>
+                         </property>
+                         <property name="frameShape">
+                          <enum>QFrame::StyledPanel</enum>
+                         </property>
+                         <property name="frameShadow">
+                          <enum>QFrame::Raised</enum>
+                         </property>
+                         <layout class="QHBoxLayout" name="horizontalLayout_22">
+						  <property name="spacing">
+                           <number>0</number>
+                          </property>
+                          <property name="leftMargin">
+                           <number>0</number>
+                          </property>
+                          <property name="topMargin">
+                           <number>0</number>
+                          </property>
+                          <property name="rightMargin">
+                           <number>0</number>
+                          </property>
+                          <property name="bottomMargin">
+                           <number>0</number>
+                          </property>
+						  <item>
+                           <widget class="QLabel" name="sharePwdLabel">
+                            <property name="minimumSize">
+                             <size>
+                              <width>0</width>
+                              <height>0</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>扫码浏览密码：</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QLineEdit" name="sharePwdEdit">
+                            <property name="minimumSize">
+                             <size>
+                              <width>0</width>
+                              <height>30</height>
+                             </size>
+                            </property>
+                            <property name="echoMode">
+                             <enum>QLineEdit::Password</enum>
+                            </property>
+                            <property name="placeholderText">
+                             <string>为空则免密</string>
                             </property>
                            </widget>
                           </item>

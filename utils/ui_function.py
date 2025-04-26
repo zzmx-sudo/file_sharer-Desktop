@@ -3,7 +3,7 @@ __all__ = ["UiFunction"]
 import webbrowser
 from typing import Union, Optional, Dict, Any, Sequence, Tuple
 
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QListView, QComboBox
 from PyQt5.QtCore import QPropertyAnimation, QEasingCurve, Qt, QEvent, QPoint
 from PyQt5.Qt import (
@@ -371,6 +371,23 @@ class UiFunction:
         hLayout.addWidget(open_close_button)
         hLayout.addWidget(copy_browse_button)
         hLayout.addWidget(remove_share_button)
+
+        def _mobile_browse_button_clicked(fileObj: Union[FileModel, DirModel]) -> None:
+            self.show_mobile_browse_qrcode(fileObj)
+
+        if fileObj.shareType is shareType.http:
+            mobile_browse_button = QPushButton()
+            mobile_browse_button.setObjectName("mobile_browse")
+            mobile_browse_button.setMinimumSize(QtCore.QSize(60, 26))
+            mobile_browse_button.setMaximumSize(QtCore.QSize(60, 26))
+            mobile_browse_button.setStyleSheet(
+                self._ui_function.mobile_browse_button_style()
+            )
+            mobile_browse_button.clicked.connect(
+                lambda: _mobile_browse_button_clicked(fileObj)
+            )
+            hLayout.addWidget(mobile_browse_button)
+
         hLayout.setContentsMargins(0, 1, 0, 1)
         hLayout.setSpacing(2)
         widget.setLayout(hLayout)
@@ -391,6 +408,8 @@ class UiFunction:
         """
         # The TrayIcon reset styleSheet
         self._main_window.ti.resetStyleSheet(theme_color)
+        # The QRCode reset styleSheet
+        self._main_window.qrcode.resetStyleSheet(theme_color)
         # The selected menu button changes color
         ori_menu_style = self.select_menu_style()
         new_menu_style = self.select_menu_style(theme_color)
@@ -429,8 +448,10 @@ class UiFunction:
                     )
                 elif button.objectName() == "copy_browse":
                     button.setStyleSheet(self.copy_browse_button_style(theme_color))
-                else:
+                elif button.objectName() == "remove_share":
                     button.setStyleSheet(self.remove_share_button_style(theme_color))
+                else:
+                    button.setStyleSheet(self.mobile_browse_button_style(theme_color))
             QApplication.processEvents()
         # The fileListTable Item changes color
         for row in range(self._elements.fileListTable.rowCount()):
@@ -934,6 +955,28 @@ class UiFunction:
         theme_color = theme_color or settings.THEME_COLOR
         return self._negative_button_style(theme_color)
 
+    def mobile_browse_button_style(
+        self, theme_color: Optional[themeColor] = None
+    ) -> str:
+        """
+        扫码浏览按钮的样式
+
+        Args:
+            theme_color: 主题颜色
+
+        Returns:
+            str: 扫码浏览按钮的样式
+        """
+        theme_color = theme_color or settings.THEME_COLOR
+        control_color = self._control_color(theme_color)
+        return f"""
+            QPushButton {{
+                background-color: rgb({control_color.LightBgColor});
+                background-image: url(:/icons/images/icon/{control_color.DirName}/qrcode.png)
+            }}
+            QPushButton:hover {{border: 2px solid rgb({control_color.BaseColor});}}
+        """
+
     def file_dir_button_style(self, theme_color: Optional[themeColor] = None) -> str:
         """
         客户端页加载的文件/文件夹按钮的样式
@@ -1153,6 +1196,9 @@ class UiFunction:
             self._contentTopDpubleClicked
         )
         self._elements.contentTopBox.mouseMoveEvent = self._moveWindow
+        self._elements.shareTypeCombo.currentIndexChanged.connect(
+            lambda x: self._show_hide_sharePwd(x)
+        )
         self._setup_table_widget()
         self._elements.backupButton.setEnabled(False)
         self._elements.downloadDirButton.setEnabled(False)
@@ -1237,6 +1283,22 @@ class UiFunction:
 
         self._main_window.reset_settings()
         self.animation = QPropertyAnimation(self._elements.extraBox, b"minimumWidth")
+        self.animation.setDuration(500)
+        self.animation.setStartValue(width)
+        self.animation.setEndValue(widthExtended)
+        self.animation.setEasingCurve(QEasingCurve.InOutQuart)
+        self.animation.start()
+
+    def _show_hide_sharePwd(self, index) -> None:
+        if index == 0:
+            width = self._elements.sharePwdFrame.width()
+            widthExtended = 205
+        else:
+            width = self._elements.sharePwdFrame.width()
+            widthExtended = 0
+        self.animation = QPropertyAnimation(
+            self._elements.sharePwdFrame, b"maximumWidth"
+        )
         self.animation.setDuration(500)
         self.animation.setStartValue(width)
         self.animation.setEndValue(widthExtended)

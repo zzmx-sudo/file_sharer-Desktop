@@ -1,6 +1,6 @@
 __all__ = ["BaseService"]
 
-from typing import Union
+from typing import Union, Dict
 from threading import Thread
 from multiprocessing import Queue
 
@@ -20,7 +20,7 @@ class BaseService:
             input_q: 输入的进程队列
             output_q: 输出的进程队列
         """
-        self._sharing_dict = SharingModel()
+        self._sharing_dict: Dict[str, Union[FileModel, DirModel]] = SharingModel()
         self._input_q = input_q
         self._output_q = output_q
         self._watch_thread = None
@@ -51,6 +51,9 @@ class BaseService:
             elif command_type == "settings":
                 self._sysLogger_debug(f"接到同步配置任务, 配置参数: {command_msg}")
                 self._modify_settings(*command_msg)
+            elif command_type == "free-secret":
+                self._sysLogger_debug(f"接到修改免密状态任务, 配置参数: {command_msg}")
+                self._change_free_secret(*command_msg)
 
     def _add_share(self, fileObj: Union[FileModel, DirModel]) -> None:
         """
@@ -97,6 +100,19 @@ class BaseService:
             sysLogger.reload()
             sharerLogger.reload()
         self._sysLogger_debug("同步配置完成")
+
+    def _change_free_secret(self, uuid: str, value: bool) -> None:
+        """
+        修改文件/文件夹对象的免密状态
+
+        Args:
+            uuid: 待修改文件/文件夹对象的uuid
+            value: 待修改的免密状态
+
+        Returns:
+            None
+        """
+        raise NotImplException("实现service对象的类必须有定义`_change_free_secret`方法")
 
     def _sysLogger_debug(self, msg) -> None:
         """

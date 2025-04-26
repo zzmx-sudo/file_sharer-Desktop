@@ -37,7 +37,8 @@ a = Analysis(
         (PROJECT_PATH+"static\\ui\\icon.ico", "."),
         (PROJECT_PATH+"static\\themes\\color_card.json", "."),
         (PROJECT_PATH+"pyproject.toml", "."),
-        (PROJECT_PATH+"file_sharing_backups.json", ".")
+        (PROJECT_PATH+"file_sharing_backups.json", "."),
+        (PROJECT_PATH+"static\\mobile_frontend", ".\\static\\mobile_frontend"),
     ],
     hiddenimports=["settings.development", "settings.production"],
     hookspath=[],

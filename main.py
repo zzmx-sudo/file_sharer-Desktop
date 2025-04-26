@@ -28,6 +28,8 @@ from model.qt_thread import *
 from model.browse import BrowseFileDictModel
 from model.assert_env import AssertEnvWindow
 from model.tray_icon import TrayIcon
+from model.QRCode import QRCodeWindow
+from utils.credentials import Credentials
 from utils.public_func import (
     generate_uuid,
     update_downloadUrl_with_hitLog,
@@ -98,6 +100,7 @@ class MainWindow(QMainWindow):
         sysLogger.debug("正在打开主窗口和系统托盘图标")
         self.ti = TrayIcon(self)
         self.ti.show()
+        self.qrcode = QRCodeWindow(self)
         self.show()
 
     def save_settings(self) -> None:
@@ -247,6 +250,37 @@ class MainWindow(QMainWindow):
         sysLogger.debug("移除分享记录成功")
         self._ui_function.show_info_messageBox("移除成功~")
 
+    def show_mobile_browse_qrcode(self, fileObj: Union[FileModel, DirModel]) -> None:
+        """
+        扫码浏览按钮点击时的回调
+
+        Args:
+            fileObj: 待显示浏览二维码的文件/文件夹对象
+
+        Returns:
+            None
+        """
+        sysLogger.debug("正在显示浏览二维码")
+        if self.qrcode.isVisible():
+            self.qrcode.close()
+        if not fileObj.isSharing:
+            sysLogger.debug("该分享未打开, 显示浏览二维码失败")
+            self._ui_function.show_info_messageBox(
+                "该分享已被取消, 请打开分享后再点击扫码浏览哦~", msg_color="red"
+            )
+            return
+
+        self.qrcode.show_qrcode(fileObj)
+        if (
+            self.qrcode.freeSecretButton.receivers(self.qrcode.freeSecretButton.clicked)
+            > 0
+        ):
+            self.qrcode.freeSecretButton.disconnect()
+        self.qrcode.freeSecretButton.clicked.connect(
+            lambda: self._change_free_secret(fileObj)
+        )
+        self.qrcode.show()
+
     def open_share(self, fileObj: Union[FileModel, DirModel]) -> None:
         """
         打开分享时的回调
@@ -288,6 +322,20 @@ class MainWindow(QMainWindow):
         except AttributeError:
             return
         sysLogger.debug("关闭分享任务下发成功")
+
+    def change_free_secret(self, fileObj: Union[FileModel, DirModel]) -> None:
+        """
+        向后端下发修改文件/文件夹对象的免密状态任务
+
+        Args:
+            fileObj: 待修改免密状态的文件/文件夹对象
+
+        Returns:
+            None
+        """
+        sysLogger.debug("正在下发打开/关闭临时免密任务")
+        self._service_process.change_free_secret(fileObj.uuid, fileObj.free_secret)
+        sysLogger.debug("打开/关闭临时免密任务下发成功")
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         """
@@ -537,6 +585,14 @@ class MainWindow(QMainWindow):
                 return
             share_type = self.ui.shareTypeCombo.currentText()
             share_type = shareType.ftp if share_type == "FTP" else shareType.http
+            share_pwd = (
+                self.ui.sharePwdEdit.text() if share_type is shareType.http else ""
+            )
+            if share_pwd != "":
+                secret_key = settings.SECRET_KEY
+                credentials = Credentials.encode(secret_key, share_pwd)
+            else:
+                secret_key = credentials = ""
             shared_row_number = self._sharing_list.contains(target_path, share_type)
             if shared_row_number is not None:
                 sysLogger.warning(f"重复分享被取消, 分享的路径: {target_path}, 分享类型: {share_type}")
@@ -585,7 +641,9 @@ class MainWindow(QMainWindow):
             else:
                 shared_fileObj = None
             if shared_fileObj is None:
-                fileObj = fileModel(target_path, uuid)
+                fileObj = fileModel(
+                    target_path, uuid, secret_key=secret_key, credentials=credentials
+                )
             else:
                 sysLogger.debug(f"存在可复用的FTP, 其工作路径为: {shared_fileObj.ftp_basePath}")
                 fileObj = fileModel(
@@ -594,6 +652,8 @@ class MainWindow(QMainWindow):
                     pwd=shared_fileObj.ftp_pwd,
                     port=shared_fileObj.ftp_port,
                     ftp_base_path=shared_fileObj.ftp_basePath,
+                    secret_key=secret_key,
+                    credentials=credentials,
                 )
             self._sharing_list.append(fileObj)
             fileObj.isSharing = True
@@ -605,6 +665,7 @@ class MainWindow(QMainWindow):
         self.ui.createShareButton.setEnabled(False)
         self.ui.createShareButton.setText("创建中。。。")
         _create_share_inner()
+        self.ui.sharePwdEdit.clear()
         self.ui.createShareButton.setText("新建分享")
         self.ui.createShareButton.setEnabled(True)
 
@@ -752,6 +813,12 @@ class MainWindow(QMainWindow):
                 self._download_http_thread.append(fileList)
                 sysLogger.debug("追加ftp分享文件下载成功")
             sysLogger.debug("添加http分享文件下载完成")
+
+    def _change_free_secret(self, fileObj: Union[FileModel, DirModel]) -> None:
+        sysLogger.debug("正在打开/关闭临时免密")
+        self.qrcode.free_secret_button_clicked(fileObj)
+        self.change_free_secret(fileObj)
+        sysLogger.debug("打开/关闭临时免密完成")
 
     def _open_folder(self, lineEdit: QLineEdit) -> None:
         sysLogger.debug("正在打开系统选择文件夹窗口")

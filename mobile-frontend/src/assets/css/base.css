@@ -1,0 +1,162 @@
+@import "./normalize.css";
+
+:root {
+  --color-text: #666;
+  --color-high-text: #ff5777;
+  --color-tint: #ff8198;
+  --color-background: #fff;
+  --font-size: 14px;
+  --line-height: 1.5;
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+  user-select: none;
+  /* 禁止用户鼠标在页面上选中文字/图片等 */
+  -webkit-tap-highlight-color: transparent;
+  /* webkit是苹果浏览器引擎，tap点击，highlight背景高亮，color颜色，颜色用数值调节 */
+  background: var(--color-background);
+  color: var(--color-text);
+  width: 100vw;
+}
+
+.el-button--default {
+  &:focus {
+    color: #606266;
+    border-color: #dcdfe6;
+    background-color: #fff;
+  }
+  &:hover {
+    color: #409eff;
+    border-color: #c6e2ff;
+    background-color: #ecf5ff;
+  }
+  &.is-active,
+  &:active {
+    color: #3a8ee6;
+    border-color: #3a8ee6;
+    outline: 0;
+  }
+}
+
+.el-button--text {
+  &:focus {
+    color: #409eff;
+    background-color: initial;
+    border-color: transparent;
+  }
+  &:hover {
+    color: #66b1ff;
+    border-color: transparent;
+    background-color: transparent;
+  }
+  &.is-active,
+  &:active {
+    color: #3a8ee6;
+    border-color: transparent;
+    background-color: transparent;
+  }
+}
+
+.el-button--primary {
+  &:focus {
+    color: #fff;
+    background-color: #409eff;
+    border-color: #409eff;
+  }
+  &:hover {
+    background: #66b1ff;
+    border-color: #66b1ff;
+    color: #fff;
+  }
+  &.is-active,
+  &:active {
+    background: #3a8ee6;
+    border-color: #3a8ee6;
+    color: #fff;
+  }
+}
+
+.el-button--info {
+  &:focus {
+    color: #fff;
+    background-color: #909399;
+    border-color: #909399;
+  }
+  &:hover {
+    background: #a6a9ad;
+    border-color: #a6a9ad;
+    color: #fff;
+  }
+  &.is-active,
+  &:active {
+    background: #82848a;
+    border-color: #82848a;
+    color: #fff;
+  }
+}
+
+.el-button--warning {
+  &:focus {
+    color: #fff;
+    background-color: #e6a23c;
+    border-color: #e6a23c;
+  }
+  &:hover {
+    background: #ebb563;
+    border-color: #ebb563;
+    color: #fff;
+  }
+  &.is-active,
+  &:active {
+    background: #cf9236;
+    border-color: #cf9236;
+    color: #fff;
+  }
+}
+
+.el-button--danger {
+  &:focus {
+    color: #fff;
+    background-color: #f56c6c;
+    border-color: #f56c6c;
+  }
+  &:hover {
+    background: #f78989;
+    border-color: #f78989;
+    color: #fff;
+  }
+  &.is-active,
+  &:active {
+    background: #dd6161;
+    border-color: #dd6161;
+    color: #fff;
+  }
+}
+
+.el-button--success {
+  &:focus {
+    color: #fff;
+    background-color: #67c23a;
+    border-color: #67c23a;
+  }
+  &:hover {
+    background: #85ce61;
+    border-color: #85ce61;
+    color: #fff;
+  }
+  &.is-active,
+  &:active {
+    background: #5daf34;
+    border-color: #5daf34;
+    color: #fff;
+  }
+}
