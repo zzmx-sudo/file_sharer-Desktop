@@ -533,6 +533,7 @@ class HttpService(BaseService):
 
         @mobile.post("%s/{uuid}" % ptype.UPLOAD_MERGE_URI)
         async def upload_merge_mobile(
+            request: Request,
             file_name: str = Form(...),
             chunk_count: int = Form(...),
             curr_path: str = Form(...),
@@ -559,6 +560,22 @@ class HttpService(BaseService):
                     with open(chunk_file_name, "rb") as chunk_f:
                         merge_f.write(chunk_f.read())
                     os.remove(chunk_file_name)
+
+            fileObj: Union[FileModel, DirModel] = request.scope.get("fileObj")
+            self._sharing_dict.update(
+                {
+                    fileObj.uuid: DirModel(
+                        fileObj.targetPath,
+                        fileObj.uuid,
+                        None,
+                        fileObj.ftp_pwd,
+                        fileObj.ftp_port,
+                        fileObj.ftp_basePath,
+                        fileObj.secret_key,
+                        fileObj.credentials,
+                    )
+                }
+            )
 
             return {
                 "errno": 200,

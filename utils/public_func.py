@@ -159,7 +159,12 @@ def generate_project_path() -> str:
         else:
             return os.path.dirname(sys.executable)
     else:
-        return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        # MacOS下子进程为Resources/lib/python3.*/..., 需剔除到Resources
+        curr_path = os.path.abspath(__file__)
+        if "Resources" in curr_path:
+            return f"{curr_path.split('Resources')[0]}Resources"
+        else:
+            return os.path.dirname(os.path.dirname(curr_path))
 
 
 def get_config_from_toml(is_customize: bool = True) -> Dict[str, Any]:
