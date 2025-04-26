@@ -256,7 +256,7 @@ class FileModel:
         Returns:
             str: 手机浏览时文件对象的浏览url
         """
-        return f"http://{settings.LOCAL_HOST}:{settings.WSGI_PORT}{ptype.MOBILE_PREFIX}{ptype.FILE_LIST_URI}/{self._uuid}"
+        return f"http://{settings.LOCAL_HOST}:{settings.WSGI_PORT}{ptype.MOBILE_PREFIX}{ptype.QRCODE_URL}/{self._uuid}"
 
     @property
     def download_url(self) -> str:
@@ -287,6 +287,16 @@ class FileModel:
             str: 文件对象的文件名
         """
         return os.path.basename(self._target_path)
+
+    @property
+    def file_size(self) -> int:
+        """
+        文件对象的文件大小
+
+        Returns:
+            int: 文件对象的文件大小
+        """
+        return os.path.getsize(self._target_path)
 
     @property
     def secret_key(self) -> str:
@@ -357,8 +367,8 @@ class FileModel:
             "uuid": self._uuid,
             "downloadUrl": self.browse_download_url,
             "fileName": self.file_name,
-            "stareType": self._share_type.value,
             "isDir": self.isDir,
+            "targetPath": self.targetPath,
         }
 
     async def to_ftp_data(self) -> Dict[str, Union[str, int]]:
@@ -580,15 +590,14 @@ class DirModel(FileModel):
         """
         children = []
         for child_uuid, child in self._children.items():
-            child_dict = {child_uuid: await child.to_dict_mobile()}
-            children.append(child_dict)
+            children.append(await child.to_dict_mobile())
 
         return {
             "uuid": self._uuid,
             "downloadUrl": self.browse_download_url,
             "fileName": self.file_name,
-            "stareType": self._share_type.value,
             "isDir": self.isDir,
+            "targetPath": self.targetPath,
             "children": children,
         }
 

@@ -1,0 +1,27 @@
+import request from "./request";
+
+export function GetFileSize(uuid) {
+  return request.get('/file_size/' + uuid)
+}
+
+export async function DownloadChunk(uuid, secret_key, pwd, start, end, hit_log=false) {
+  const url = !hit_log ? '/download/' + uuid : '/download/' + uuid + "?hit_log=true";
+  const response = await request.post(
+    url,
+    {
+      'secret_key': secret_key,
+      'ciphertext': pwd
+    },
+    {
+      headers: { Range: `bytes=${start}-${end}` },
+      responseType: 'blob',
+    }
+  );
+  if ( response.errno != undefined ) {
+    return {succed: false, data: null}
+  }
+  if ( !response instanceof Blob) {
+    return {succed: false, data: null}
+  }
+  return {succed: true, data: response}
+}

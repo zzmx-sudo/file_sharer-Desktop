@@ -9,8 +9,14 @@ from email.utils import formatdate
 from pydantic import BaseModel
 
 import aiofiles
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse, StreamingResponse, Response
+from fastapi import FastAPI, Request, Depends, UploadFile, File, Form
+from fastapi.responses import (
+    JSONResponse,
+    StreamingResponse,
+    Response,
+    HTMLResponse,
+    FileResponse,
+)
 from fastapi.staticfiles import StaticFiles
 from starlette.types import Scope
 
@@ -46,6 +52,8 @@ class AuthParam(BaseModel):
 
 
 class HttpService(BaseService):
+    STATIC_PATH = os.path.join(settings.BASE_DIR, "static", "mobile_frontend")
+
     def __init__(self, input_q: Queue, output_q: Queue):
         """
         HTTP共享服务类初始化函数
@@ -199,6 +207,10 @@ class HttpService(BaseService):
             _request = MyRequest(request.scope)
             client_ip = _request["client"][0] if _request["client"] else "未知IP"
             uri, param = _request["path"].rsplit("/", 1)
+            if param == "favicon.ico":
+                return FileResponse(os.path.join(self.STATIC_PATH, "favicon.ico"))
+            if uri.startswith("/static"):
+                return await cell_next(request)
             # client_platform = _request["client_platform"]
             fileObj = await generate_fileObj_recursive(param)
             # 文件是否存在判断
@@ -208,12 +220,12 @@ class HttpService(BaseService):
                 )
                 return JSONResponse({"errno": 404, "errmsg": "错误的路径或文件已不存在！"})
             # 浏览/下载记录写入日志
-            if uri == ptype.FILE_LIST_URI:
+            if ptype.FILE_LIST_URI in uri:
                 sharerLogger.info(
                     f"用户IP: {client_ip}, 用户访问了文件列表, 文件链接: {fileObj.targetPath}"
                 )
                 self._output_q.put(param)
-            elif uri == ptype.DOWNLOAD_URI:
+            elif ptype.DOWNLOAD_URI in uri:
                 params = request.query_params
                 hit_log = params.get(ptype.HIT_LOG, "false")
                 if fileObj.shareType is ptype.ShareType.http:
@@ -308,7 +320,7 @@ class HttpService(BaseService):
 
         def REQUIRE_PWD_RESPONSE(secret_key):
             return {
-                "errno": 400,
+                "errno": 401,
                 "errmsg": "Password verification is required",
                 "secret_key": secret_key,
             }
@@ -342,6 +354,83 @@ class HttpService(BaseService):
             """
             return Credentials.verification(fileObj, pwd)
 
+        async def with_credentials(
+            uuid: str, request: Request, auth_param: AuthParam
+        ) -> Dict[str, Union[int, str, FileModel, DirModel]]:
+            fileObj = request.scope.get("fileObj")
+            fileObj: Union[None, FileModel, DirModel]
+            if not fileObj:
+                sysLogger.error(
+                    "发生了错误, 获取不到用户访问的文件/文件夹对象, "
+                    "请用uuid对比`file_sharing_backups.json`文件, "
+                    f"查看分享的文件/文件夹状态, uuid: {uuid}"
+                )
+                return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
+            if fileObj.shareType is ptype.ShareType.ftp:
+                return FOR_BIDDEN_RESPONSE
+            if await no_need_credentials(fileObj):
+                return {
+                    "errno": 200,
+                    "errmsg": "no need credentials",
+                    "fileObj": fileObj,
+                }
+            if auth_param.secret_key != fileObj.secret_key:
+                return FOR_BIDDEN_RESPONSE
+            if await verify_credentials(fileObj, auth_param.ciphertext):
+                return {
+                    "errno": 200,
+                    "errmsg": "credentials verification passed",
+                    "fileObj": fileObj,
+                }
+
+            return REQUIRE_PWD_RESPONSE(fileObj.secret_key)
+
+        async def with_credentials_form(
+            uuid: str,
+            request: Request,
+            secret_key: str = Form(...),
+            ciphertext: str = Form(...),
+        ) -> Dict[str, Union[int, str, FileModel, DirModel]]:
+            fileObj = request.scope.get("fileObj")
+            fileObj: Union[None, FileModel, DirModel]
+            if not fileObj:
+                sysLogger.error(
+                    "发生了错误, 获取不到用户访问的文件/文件夹对象, "
+                    "请用uuid对比`file_sharing_backups.json`文件, "
+                    f"查看分享的文件/文件夹状态, uuid: {uuid}"
+                )
+                return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
+            if fileObj.shareType is ptype.ShareType.ftp:
+                return FOR_BIDDEN_RESPONSE
+            if await no_need_credentials(fileObj):
+                return {
+                    "errno": 200,
+                    "errmsg": "no need credentials",
+                    "fileObj": fileObj,
+                }
+            if secret_key != fileObj.secret_key:
+                return FOR_BIDDEN_RESPONSE
+            if await verify_credentials(fileObj, ciphertext):
+                return {
+                    "errno": 200,
+                    "errmsg": "credentials verification passed",
+                    "fileObj": fileObj,
+                }
+
+            return REQUIRE_PWD_RESPONSE(fileObj.secret_key)
+
+        @mobile.get("%s/{uuid}" % ptype.QRCODE_URL)
+        async def get_mobile_start(uuid: str) -> HTMLResponse:
+            index_html = os.path.join(self.STATIC_PATH, "index.html")
+            with open(index_html) as f:
+                contend = f.read()
+            replace_content = contend.replace(
+                "{{ BASE_URL }}",
+                f"http://{settings.LOCAL_HOST}:{settings.WSGI_PORT}{ptype.MOBILE_PREFIX}",
+            )
+            replace_content = replace_content.replace("{{ UUID }}", uuid)
+            return HTMLResponse(replace_content)
+
         @mobile.get("%s/{uuid}" % ptype.FILE_LIST_URI)
         async def get_list_mobile(uuid: str, request: Request) -> Dict[str, Any]:
             fileObj = request.scope.get("fileObj")
@@ -363,8 +452,17 @@ class HttpService(BaseService):
 
         @mobile.post("%s/{uuid}" % ptype.FILE_LIST_URI)
         async def post_list_mobile(
-            uuid: str, request: Request, auth_param: AuthParam
+            verify_result: Dict[str, Any] = Depends(with_credentials),
         ) -> Dict[str, Any]:
+            if verify_result.get("errno", 400) != 200:
+                return verify_result
+
+            fileObj = verify_result.get("fileObj")
+            data = await fileObj.to_dict_mobile()
+            return {"errno": 200, "errmsg": "", "data": data}
+
+        @mobile.get("%s/{uuid}" % ptype.FILE_SIZE_URI)
+        async def get_file_size(uuid: str, request: Request) -> Dict[str, Any]:
             fileObj = request.scope.get("fileObj")
             fileObj: Union[None, FileModel, DirModel]
             if not fileObj:
@@ -376,76 +474,130 @@ class HttpService(BaseService):
                 return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
             if fileObj.shareType is ptype.ShareType.ftp:
                 return FOR_BIDDEN_RESPONSE
-            if await no_need_credentials(fileObj):
-                data = await fileObj.to_dict_mobile()
-                return {"errno": 200, "errmsg": "", "data": data}
-            if auth_param.secret_key != fileObj.secret_key:
-                return FOR_BIDDEN_RESPONSE
-            if await verify_credentials(fileObj, auth_param.ciphertext):
-                data = await fileObj.to_dict_mobile()
-                return {"errno": 200, "errmsg": "", "data": data}
 
-            return REQUIRE_PWD_RESPONSE(fileObj.secret_key)
+            if fileObj.isDir:
+                return {"errno": 300, "errmsg": "Can not get size for folder"}
+            if not fileObj.isExists:
+                return {"errno": 404, "errmsg": "The File is not exists"}
+
+            return {"errno": 200, "errmsg": "", "fileSize": fileObj.file_size}
 
         @mobile.post("%s/{uuid}" % ptype.DOWNLOAD_URI, response_model=None)
         async def download_mobile(
-            uuid: str, request: Request, auth_param: AuthParam
+            request: Request, verify_result: Dict[str, Any] = Depends(with_credentials)
         ) -> Union[Dict[str, Any], StreamingResponse]:
-            fileObj = request.scope.get("fileObj")
-            fileObj: Union[None, FileModel, DirModel]
-            if not fileObj:
-                sysLogger.error(
-                    "发生了错误, 获取不到用户访问的文件/文件夹对象, "
-                    "请用uuid对比`file_sharing_backups.json`文件, "
-                    f"查看分享的文件/文件夹状态, uuid: {uuid}"
-                )
-                return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
-            if fileObj.shareType is ptype.ShareType.ftp:
-                return FOR_BIDDEN_RESPONSE
-            if await no_need_credentials(fileObj):
-                return await self.generate_file_stream_response(request, fileObj)
-            if auth_param.secret_key != fileObj.secret_key:
-                return FOR_BIDDEN_RESPONSE
-            if await verify_credentials(fileObj, auth_param.ciphertext):
-                return await self.generate_file_stream_response(request, fileObj)
+            if verify_result.get("errno", 400) != 200:
+                return verify_result
+            fileObj = verify_result.get("fileObj")
 
-            return REQUIRE_PWD_RESPONSE(fileObj.secret_key)
+            return await self.generate_file_stream_response(request, fileObj)
 
         @mobile.post("%s/{uuid}" % ptype.UPLOAD_URI)
         async def upload_mobile(
-            uuid: str, request: Request, auth_param: AuthParam
+            request: Request,
+            file: UploadFile = File(...),
+            file_name: str = Form(...),
+            chunk_id: int = Form(...),
+            curr_path: str = Form(...),
+            verify_result: Dict[str, Any] = Depends(with_credentials_form),
         ) -> Dict[str, Any]:
-            fileObj = request.scope.get("fileObj")
-            fileObj: Union[None, FileModel, DirModel]
-            if not fileObj:
-                sysLogger.error(
-                    "发生了错误, 获取不到用户访问的文件/文件夹对象, "
-                    "请用uuid对比`file_sharing_backups.json`文件, "
-                    f"查看分享的文件/文件夹状态, uuid: {uuid}"
-                )
-                return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
-            if fileObj.shareType is ptype.ShareType.ftp:
-                return FOR_BIDDEN_RESPONSE
-            if await no_need_credentials(fileObj):
-                pass
-            if auth_param.secret_key != fileObj.secret_key:
-                return FOR_BIDDEN_RESPONSE
-            if await verify_credentials(fileObj, auth_param.ciphertext):
-                pass
+            if verify_result.get("errno", 400) != 200:
+                return verify_result
+            if not os.path.isdir(curr_path):
+                return {
+                    "errno": 400,
+                    "errmsg": "Cannot upload files to non folder locations",
+                }
+            merge_file_name = os.path.join(curr_path, file_name)
+            chunk_file_name = os.path.join(curr_path, f"{file_name}_{chunk_id}.part")
+            if os.path.exists(merge_file_name) or os.path.exists(chunk_file_name):
+                return {
+                    "errno": 400,
+                    "errmsg": "The file with the same name already exists!",
+                }
 
-            return REQUIRE_PWD_RESPONSE(fileObj.secret_key)
+            with open(chunk_file_name, "wb") as f:
+                f.write(await file.read())
+
+            if request.query_params.get(ptype.HIT_LOG, "false"):
+                client_ip = request.get("client", ["未知IP"])[0]
+                sysLogger.info(
+                    f"用户IP： {client_ip}, 用户正在上传文件: {file_name}, 上传路径: {curr_path}"
+                )
+
+            return {
+                "errno": 200,
+                "errmsg": "Upload chunk succed",
+                "data": {"fileName": file_name, "chunkId": chunk_id},
+            }
+
+        @mobile.post("%s/{uuid}" % ptype.UPLOAD_MERGE_URI)
+        async def upload_merge_mobile(
+            file_name: str = Form(...),
+            chunk_count: int = Form(...),
+            curr_path: str = Form(...),
+            verify_result: Dict[str, Any] = Depends(with_credentials_form),
+        ) -> Dict[str, Any]:
+            if verify_result.get("errno", 400) != 200:
+                return verify_result
+
+            if not os.path.isdir(curr_path):
+                return {
+                    "errno": 400,
+                    "errmsg": "Cannot upload files to non folder locations",
+                }
+
+            for i in range(chunk_count):
+                chunk_file_name = os.path.join(curr_path, f"{file_name}_{i}.part")
+                if not os.path.exists(chunk_file_name):
+                    return {"errno": 400, "errmsg": f"There is chunk loss: {i}"}
+
+            merge_file_name = os.path.join(curr_path, file_name)
+            with open(merge_file_name, "wb") as merge_f:
+                for i in range(chunk_count):
+                    chunk_file_name = os.path.join(curr_path, f"{file_name}_{i}.part")
+                    with open(chunk_file_name, "rb") as chunk_f:
+                        merge_f.write(chunk_f.read())
+                    os.remove(chunk_file_name)
+
+            return {
+                "errno": 200,
+                "errmsg": "Merge chunks succed",
+                "data": {"fileName": file_name, "chunkCount": chunk_count},
+            }
+
+        @mobile.post("%s/{uuid}" % ptype.UPLOAD_REMOVE_URI)
+        async def upload_remove_mobile(
+            file_name: str = Form(...),
+            curr_path: str = Form(...),
+            verify_result: Dict[str, Any] = Depends(with_credentials_form),
+        ) -> Dict[str, Any]:
+            if verify_result.get("errno", 400) != 200:
+                return verify_result
+            if not os.path.isdir(curr_path):
+                return {
+                    "errno": 400,
+                    "errmsg": "The curr_path is not a folder.",
+                }
+            rm_count = 0
+            for curr_file in os.listdir(curr_path):
+                curr_file_path = os.path.join(curr_path, curr_file)
+                if os.path.isdir(curr_file_path):
+                    continue
+                if re.match(f"{file_name}_\d+\.part", curr_file):
+                    os.remove(os.path.join(curr_path, curr_file))
+                    rm_count += 1
+
+            return {
+                "errno": 200,
+                "errmsg": "Remove all chunk file succ",
+                "data": {"fileName": file_name, "removeCount": rm_count},
+            }
 
         # mount app
         self._app.mount(ptype.MOBILE_PREFIX, mobile)
-        static_path = os.path.join(
-            os.path.dirname(
-                os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            ),
-            "static",
-            "mobile_frontend",
-        )
         self._app.mount(
-            ptype.STATIC_PREFIX, StaticFiles(directory=static_path), name="static"
+            ptype.STATIC_PREFIX, StaticFiles(directory=self.STATIC_PATH), name="static"
         )
 
     @staticmethod
@@ -453,36 +605,36 @@ class HttpService(BaseService):
         request: Request, fileObj: FileModel
     ) -> StreamingResponse:
         async def file_generator(
-            file_path: str, offset: int, chunk_size: int
+            file_path: str, offset: int, end: int, chunk_size: int
         ) -> AsyncGenerator:
             async with aiofiles.open(file_path, "rb") as f:
                 await f.seek(offset, os.SEEK_SET)
-                while True:
-                    chunk = await f.read(chunk_size)
-                    if chunk:
-                        yield chunk
-                    else:
+                remaining_bytes = end - offset
+                while remaining_bytes > 0:
+                    chunk_size_ = min(chunk_size, remaining_bytes)
+                    chunk = await f.read(chunk_size_)
+                    if not chunk:
                         break
+                    yield chunk
+                    remaining_bytes -= chunk_size_
 
         stat_result = os.stat(fileObj.targetPath)
         st_size = stat_result.st_size
         range_str = request.headers.get("range", "")
-        range_match = re.match(r"bytes=(\d+)-", range_str) or re.match(
-            r"bytes=(\d+)-(\d+)", range_str
+        range_match = re.match(r"bytes=(\d+)-(\d+)", range_str) or re.match(
+            r"bytes=(\d+)-", range_str
         )
         if range_match:
             start = int(range_match.group(1))
-            end = (
-                int(range_match.group(2)) if range_match.lastindex == 2 else st_size - 1
-            )
+            end = int(range_match.group(2)) if range_match.lastindex == 2 else st_size
         else:
             start = 0
-            end = st_size - 1
+            end = st_size
         file_name = quote(fileObj.file_name)
-        content_length = st_size - start
+        content_length = end - start
         content_type = "application/octet-stream"
         return StreamingResponse(
-            file_generator(fileObj.targetPath, start, 1048576),
+            file_generator(fileObj.targetPath, start, end, 1048576),
             media_type=content_type,
             headers={
                 "content-disposition": f"attachment; filename={file_name}",

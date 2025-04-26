@@ -48,24 +48,23 @@ class Credentials:
         Returns:
             bool: 是否通过校验
         """
-        pwd = cls.__decrypt(fileObj.secret_key, pwd)
+        pwd = cls.__decrypt(pwd)
         new_hash = cls.encode(fileObj.secret_key, pwd)
         return new_hash == fileObj.credentials
 
     @staticmethod
-    def __decrypt(salt: str, ciphertext: str) -> str:
+    def __decrypt(ciphertext: str) -> str:
         """
         对密码解密
 
         Args:
-            salt: 密钥的盐值
             ciphertext: 密文
 
         Returns:
             str: 解密后的结果
         """
-        iv_b64, encrypted_data_b64 = ciphertext.split("|")
-        salt = salt.encode("utf-8")
+        salt_b64, iv_b64, encrypted_data_b64 = ciphertext.split("|")
+        salt = base64.b64decode(salt_b64)
         iv = base64.b64decode(iv_b64)
         encrypted_data = base64.b64decode(encrypted_data_b64)
 

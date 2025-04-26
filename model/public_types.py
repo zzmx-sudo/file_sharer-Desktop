@@ -16,8 +16,12 @@ from collections import namedtuple
 FILE_LIST_URI: str = "/file_list"
 DOWNLOAD_URI: str = "/download"
 UPLOAD_URI: str = "/upload"
+UPLOAD_MERGE_URI: str = "/upload/merge"
+UPLOAD_REMOVE_URI: str = "/upload/remove"
+FILE_SIZE_URI: str = "/file_size"
 HIT_LOG: str = "hit_log"
 MOBILE_PREFIX: str = "/mobile"
+QRCODE_URL: str = "/start"
 STATIC_PREFIX: str = "/static"
 
 
