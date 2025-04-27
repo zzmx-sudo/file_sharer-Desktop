@@ -32,6 +32,10 @@ export default {
     }
   },
   created() {
+    // 将所有未完成下载置为暂停
+    this.PAUSE_ALL_DOWNLOAD_HISTORY();
+    // 将所有未完成上传置为暂停
+    this.PAUSE_ALL_UPLOAD_HISTORY();
     document.title = "File-Sharer";
     this.$alert('请勿在任何情况下刷新页面,否则上传/下载会暂停(下载进度也会消失),且需重新扫码!!!', '温馨提示', {
       showClose: false,
@@ -44,13 +48,7 @@ export default {
     });
   },
   methods: {
-    ...mapMutations(["PAUSE_ALL_UPLOAD_HISTORY"]),
-  },
-  destroyed() {
-    // 销毁时将所有未完成下载置为暂停
-    // this.PAUSE_ALL_DOWNLOAD_HISTORY();
-    // 销毁时将所有未完成上传置为暂停
-    // this.PAUSE_ALL_UPLOAD_HISTORY();
+    ...mapMutations(["PAUSE_ALL_DOWNLOAD_HISTORY", "PAUSE_ALL_UPLOAD_HISTORY"]),
   }
 }
 </script>
