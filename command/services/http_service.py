@@ -508,6 +508,11 @@ class HttpService(BaseService):
                     "errno": 400,
                     "errmsg": "Cannot upload files to non folder locations",
                 }
+            # verification the curr_path
+            fileObj: Union[FileModel, DirModel] = request.scope.get("fileObj")
+            if fileObj.targetPath not in curr_path:
+                return FOR_BIDDEN_RESPONSE
+
             merge_file_name = os.path.join(curr_path, file_name)
             chunk_file_name = os.path.join(curr_path, f"{file_name}_{chunk_id}.part")
             if os.path.exists(merge_file_name) or os.path.exists(chunk_file_name):
