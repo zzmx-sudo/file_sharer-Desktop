@@ -222,6 +222,8 @@ export default new Vuex.Store({
       var download_item = download_history[idx];
       context.commit("UPDATE_DOWNLOAD_ITEM", {uuid: uuid, data: {succed_chunks: []}});
       for (let i = 0; i < download_item.chunk_count; i++) {
+        // fix for #41
+        idx = download_history.findIndex(obj => obj.uuid == uuid);
         if ( context.state.download_history[idx].is_pause ) {
           return;
         }
@@ -235,6 +237,7 @@ export default new Vuex.Store({
           context.commit("UPDATE_DOWNLOAD_ITEM", {uuid: uuid, data: {failed: true}});
           return;
         }
+        idx = download_history.findIndex(obj => obj.uuid == uuid);
         context.commit("UPDATE_DOWNLOAD_ITEM", {
           uuid: uuid,
           data: {
@@ -242,6 +245,7 @@ export default new Vuex.Store({
           }
         });
       };
+      idx = download_history.findIndex(obj => obj.uuid == uuid);
       mergeChunks(context.state.download_history[idx].succed_chunks, download_item.file_name);
       context.commit("UPDATE_DOWNLOAD_ITEM", {
         uuid: uuid, data: {merged: true, succed_chunks: new Array(download_item.chunk_count).fill(0)}
@@ -262,6 +266,7 @@ export default new Vuex.Store({
       }
       context.commit("UPDATE_DOWNLOAD_ITEM", {uuid: uuid, data: {is_pause: false}});
       for (let i = download_item.succed_chunks.length; i < download_item.chunk_count; i++) {
+        idx = download_history.findIndex(obj => obj.uuid == uuid);
         if ( context.state.download_history[idx].is_pause ) {
           return;
         }
@@ -275,6 +280,7 @@ export default new Vuex.Store({
           context.commit("UPDATE_DOWNLOAD_ITEM", {uuid: uuid, data: {failed: true}});
           return;
         }
+        idx = download_history.findIndex(obj => obj.uuid == uuid);
         context.commit("UPDATE_DOWNLOAD_ITEM", {
           uuid: uuid,
           data: {
@@ -282,6 +288,7 @@ export default new Vuex.Store({
           }
         });
       }
+      idx = download_history.findIndex(obj => obj.uuid == uuid);
       mergeChunks(context.state.download_history[idx].succed_chunks, download_item.file_name);
       context.commit("UPDATE_DOWNLOAD_ITEM", {
         uuid: uuid, data: {merged: true, succed_chunks: new Array(download_item.chunk_count).fill(0)}
@@ -303,6 +310,7 @@ export default new Vuex.Store({
       }
       context.commit("UPDATE_UPLOAD_ITEM", {file_id: file_id, data: {succed_chunks: []}});
       for (let i = 0; i < upload_item.chunk_count; i++) {
+        idx = upload_history.findIndex(obj => obj.file_id == file_id);
         if ( context.state.upload_history[idx].is_pause ) {
           return;
         }
@@ -317,6 +325,7 @@ export default new Vuex.Store({
           context.commit("UPDATE_UPLOAD_ITEM", {file_id: file_id, data: {failed: true}});
           return;
         }
+        idx = upload_history.findIndex(obj => obj.file_id == file_id);
         context.commit("UPDATE_UPLOAD_ITEM", {
           file_id: file_id,
           data: {
@@ -349,6 +358,7 @@ export default new Vuex.Store({
         return;
       }
       for (let i = upload_item.succed_chunks.length; i < upload_item.chunk_count; i++) {
+        idx = upload_history.findIndex(obj => obj.file_id == file_id);
         if ( context.state.upload_history[idx].is_pause ) {
           return;
         }
@@ -363,6 +373,7 @@ export default new Vuex.Store({
           context.commit("UPDATE_UPLOAD_ITEM", {file_id: file_id, data: {failed: true}});
           return;
         }
+        idx = upload_history.findIndex(obj => obj.file_id == file_id);
         context.commit("UPDATE_UPLOAD_ITEM", {
           file_id: file_id,
           data: {
