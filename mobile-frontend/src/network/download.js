@@ -18,10 +18,10 @@ export async function DownloadChunk(uuid, secret_key, pwd, start, end, hit_log=f
     }
   );
   if ( response.errno != undefined ) {
-    return {succed: false, data: null}
+    return {succed: false, data: response.errmsg}
   }
   if ( !response instanceof Blob) {
-    return {succed: false, data: null}
+    return {succed: false, data: "后端异常, 返回非预期数据类型"}
   }
   return {succed: true, data: response}
 }

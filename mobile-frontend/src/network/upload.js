@@ -19,7 +19,7 @@ export async function UploadChunk(
       headers: { 'Content-Type': 'multipart/form-data' }
     }
   );
-  if ( response.errno != 200 ) {
+  if ( response.errno != 200 && response.errno != 4006 ) {
     return {succed: false, data: response.errmsg}
   }
   return {succed: true, data: response.errmsg}

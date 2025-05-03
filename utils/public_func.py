@@ -19,12 +19,13 @@ import sys
 import platform
 import uuid
 import json
-from typing import Dict, Any, Callable, Tuple
+from typing import Dict, Any, Callable, Tuple, Optional
 
 import toml
 from PyQt5.Qt import QApplication, QWidget
 from PyQt5.QtGui import QGuiApplication
 from model import public_types as ptype
+from .response_code import RET, MSG_MAP
 
 
 def get_system() -> str:
@@ -312,3 +313,48 @@ def resize_window(
         height = screen_height // height_scale
 
     window.resize(width, height)
+
+
+def json_response(
+    ret: RET.__class__, special_msg: Optional[str] = None, **datas
+) -> Dict[str, Any]:
+    """
+    生成JsonResponse
+
+    Args:
+        ret: 返回的errno, 类型为RET类属性
+        special_msg: 返回的特殊消息, 为None时根据ret从MSG_MAP获取
+        **datas: 其他返回数据
+
+    Returns:
+        Dict[str, Any]: 生成的JsonResponse
+    """
+    special_msg = special_msg or MSG_MAP[ret]
+
+    return {"errno": ret, "errmsg": special_msg, **datas}
+
+
+def response_ret_code(data: Dict[str, Any]) -> int:
+    """
+    从后端返回数据中提取errno
+
+    Args:
+        data: 后端返回的数据
+
+    Returns:
+        int: 后端返回数据中的errno
+    """
+    return data.get("errno", 10086)
+
+
+def response_err_msg(data: Dict[str, Any]) -> str:
+    """
+    从后端返回数据中提取errmsg
+
+    Args:
+        data: 后端返回的数据
+
+    Returns:
+        str: 后端返回数据中的errno
+    """
+    return data.get("errmsg", "未知消息")

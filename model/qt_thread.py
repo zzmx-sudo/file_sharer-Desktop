@@ -22,6 +22,8 @@ from ftplib import FTP
 
 from settings import settings
 from utils.logger import sysLogger
+from utils.public_func import response_ret_code
+from utils.response_code import RET
 from .public_types import DownloadStatus, HIT_LOG
 
 
@@ -88,7 +90,6 @@ class LoadBrowseUrlThread(QThread):
             result = json.loads(response.text)
         except json.JSONDecodeError:
             sysLogger.debug(f"服务器返回非法数据[{self._browse_url}]")
-            pass
 
         if not self.run_flag:
             sysLogger.debug(f"加载分享链接任务停止成功[{self._browse_url}]")
@@ -145,12 +146,12 @@ class DownloadHttpFileThread(QThread):
                 full_size = local_size + response.content_length
                 if response.content_type == "application/json":
                     data = await response.json()
-                    if data.get("errno", 200) == 404:
+                    if response_ret_code(data) == RET.FILENOTFOUND:
                         sysLogger.warning(f"文件分享后被删除, 文件路径: {relativePath}")
                         self.signal.emit((fileObj, DownloadStatus.FAILED, "文件分享后被删除"))
                         return
                     else:
-                        sysLogger.warnint(
+                        sysLogger.warning(
                             f"对方系统异常, 服务端返回的信息: {data.get('errmsg', '未知异常')}"
                         )
                         self.signal.emit((fileObj, DownloadStatus.FAILED, "对方系统异常"))
@@ -461,8 +462,8 @@ class DownloadFtpFileThread(QThread):
             return {}
 
         if isinstance(result, dict):
-            errno = result.get("errno", None)
-            if errno == 200:
+            errno = response_ret_code(result)
+            if errno == RET.OK:
                 sysLogger.debug("获取FTP必要参数完成")
                 return result.get("data", {})
             else:
