@@ -41,7 +41,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     // proxy: config.dev.proxyTable,
     proxy: {
       '/api': {
-        target: 'http://localhost:8080/mobile/', // 后端 API 地址
+        target: 'http://192.168.0.14:8080/mobile/', // 后端 API 地址
         changeOrigin: true, // 允许跨域
         pathRewrite: { '^/api': '' } // 重写路径
       }

@@ -26,17 +26,17 @@ export function copyHistoryRMChunks(download_history) {
   if ( download_history == null ) {
     return download_history;
   }
-  let download_history_ = [];
-  for ( let i = 0; i < download_history.length; i++ ) {
-    let download_item = deepClone(download_history[i]);
+  let download_history_ = {};
+  Object.values(download_history).forEach(obj => {
+    let download_item = deepClone(obj);
     // 下载完成的保留下载进度, 未完成的将下载进度置空
     if ( download_item.merged ) {
       download_item.succed_chunks = new Array(download_item.chunk_count).fill(0);
     } else {
       download_item.succed_chunks = [];
     }
-    download_history_.push(download_item);
-  }
+    download_history_[download_item.uuid] = download_item;
+  })
   return download_history_;
 }
 
@@ -56,11 +56,11 @@ export function copyHistoryRMFile(upload_history) {
   if ( upload_history == null ) {
     return upload_history;
   }
-  let upload_history_ = [];
-  for ( let i = 0; i < upload_history.length; i++ ) {
-    let upload_item = deepClone(upload_history[i]);
+  let upload_history_ = {};
+  Object.values(upload_history).forEach(obj => {
+    let upload_item = deepClone(obj);
     upload_item.file = null;
-    upload_history_.push(upload_item);
-  }
+    upload_history_[upload_item.file_id] = upload_item;
+  });
   return upload_history_;
 }

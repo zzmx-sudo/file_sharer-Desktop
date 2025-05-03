@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import { mapMutations } from "vuex";
+import { mapMutations, mapGetters } from "vuex";
 import TransOptions from '../../components/common/transitem/TransOptions.vue';
 import TransProgess from '../../components/common/transitem/TransProgess.vue';
 
@@ -42,9 +42,7 @@ export default {
   name: 'Download',
   data() {
     return {
-      DownloadList: this.$store.state.download_history,
       statusList: [
-        "下载失败, 请删除后重新下载",
         "已暂停",
         "下载中...",
         "合并分片中...",
@@ -70,6 +68,9 @@ export default {
       this.REMOVE_DOWNLOAD_ITEM(download_item.uuid);
       this.$message({"message": "删除下载成功", type: "success"});
     }
+  },
+  computed: {
+    ...mapGetters({DownloadList: "download_list"})
   }
 };
 </script>

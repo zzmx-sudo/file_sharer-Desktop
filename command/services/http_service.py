@@ -2,7 +2,7 @@ __all__ = ["HttpService"]
 
 import os
 import re
-from typing import Union, Any, AsyncGenerator, Dict
+from typing import Union, Any, AsyncGenerator, Dict, Optional
 from multiprocessing import Queue
 from urllib.parse import quote
 from email.utils import formatdate
@@ -26,6 +26,8 @@ from model.file import FileModel, DirModel
 from settings import settings
 from utils.logger import sharerLogger, sysLogger
 from utils.credentials import Credentials
+from utils.response_code import RET
+from utils.public_func import json_response
 
 
 class MyRequest:
@@ -218,7 +220,7 @@ class HttpService(BaseService):
                 sharerLogger.warning(
                     f"访问错误路径或文件/文件夹已不存在, 访问链接: {_request['path']}, 用户IP: {client_ip}"
                 )
-                return JSONResponse({"errno": 404, "errmsg": "错误的路径或文件已不存在！"})
+                return JSONResponse(self.json_response(RET.FILENOTFOUND))
             # 浏览/下载记录写入日志
             if ptype.FILE_LIST_URI in uri:
                 sharerLogger.info(
@@ -233,13 +235,13 @@ class HttpService(BaseService):
                     if fileObj.isDir and hit_log != "true":
                         sharerLogger.warning(f"用户使用非客户端无法直接下载分享的文件夹, 用户IP: {client_ip}")
                         return JSONResponse(
-                            {"errno": 400, "errmsg": "无法直接下载文件夹, 请使用客户端进行下载！"}
+                            self.json_response(RET.CANNOTDOWNLOADFOLDER)
                         )
                     elif fileObj.isDir and hit_log == "true":
                         sharerLogger.info(
                             f"用户IP: {client_ip}, 用户下载了文件夹, 文件夹路径: {fileObj.targetPath}"
                         )
-                        return JSONResponse({"errno": 200, "errmsg": ""})
+                        return JSONResponse(self.json_response(RET.OK))
                     elif hit_log == "true":
                         sharerLogger.info(
                             f"用户IP: {client_ip}, 用户下载了文件, 文件路径: {fileObj.targetPath}"
@@ -254,7 +256,7 @@ class HttpService(BaseService):
                             f"用户使用非客户端无法下载FTP分享的文件/文件夹, 用户IP: {client_ip}"
                         )
                         return JSONResponse(
-                            {"errno": 400, "errmsg": "ftp分享的文件/文件夹请使用客户端进行下载！"}
+                            self.json_response(RET.FTPDOWNLOADWITHOUTCLIENT)
                         )
                     if hit_log == "true":
                         sharerLogger.info(
@@ -286,10 +288,10 @@ class HttpService(BaseService):
                     "请用uuid对比`file_sharing_backups.json`文件, "
                     f"查看分享的文件/文件夹状态, uuid: {uuid}"
                 )
-                return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
+                return self.json_response(RET.FILETRANSFERERR)
 
             data = await fileObj.to_dict_client()
-            return {"errno": 200, "errmsg": "", "data": data}
+            return self.json_response(RET.OK, None, data=data)
 
         @self._app.get("%s/{uuid}" % ptype.DOWNLOAD_URI, response_model=None)
         async def download(
@@ -303,27 +305,23 @@ class HttpService(BaseService):
                     "请用uuid对比`file_sharing_backups.json`文件, "
                     f"查看分享的文件/文件夹状态, uuid: {uuid}"
                 )
-                return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
+                return self.json_response(RET.FILETRANSFERERR)
 
             if fileObj.shareType is ptype.ShareType.http:
                 return await self.generate_file_stream_response(request, fileObj)
             elif fileObj.shareType is ptype.ShareType.ftp:
                 ftp_data = await fileObj.to_ftp_data()
-                return {"errno": 200, "errmsg": "", "data": ftp_data}
+                return self.json_response(RET.OK, None, data=ftp_data)
             else:
                 sysLogger.error(f"未被预判的分享类型: {fileObj.shareType.value}, 系统发生错误")
-                return {"errno": 500, "errmsg": "下载文件/文件夹失败"}
+                return self.json_response(RET.FTPTYPEERR)
 
         ### mobile app
         mobile = FastAPI()
-        FOR_BIDDEN_RESPONSE = {"errno": 400, "errmsg": "For Bidden!"}
+        FOR_BIDDEN_RESPONSE = self.json_response(RET.FORBIDDEN)
 
         def REQUIRE_PWD_RESPONSE(secret_key):
-            return {
-                "errno": 401,
-                "errmsg": "Password verification is required",
-                "secret_key": secret_key,
-            }
+            return self.json_response(RET.REQUIREPWD, secret_key=secret_key)
 
         async def no_need_credentials(fileObj: Union[FileModel, DirModel]) -> bool:
             """
@@ -365,23 +363,15 @@ class HttpService(BaseService):
                     "请用uuid对比`file_sharing_backups.json`文件, "
                     f"查看分享的文件/文件夹状态, uuid: {uuid}"
                 )
-                return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
+                return self.json_response(RET.FILETRANSFERERR)
             if fileObj.shareType is ptype.ShareType.ftp:
                 return FOR_BIDDEN_RESPONSE
             if await no_need_credentials(fileObj):
-                return {
-                    "errno": 200,
-                    "errmsg": "no need credentials",
-                    "fileObj": fileObj,
-                }
+                return self.json_response(RET.OK, fileObj=fileObj)
             if auth_param.secret_key != fileObj.secret_key:
                 return FOR_BIDDEN_RESPONSE
             if await verify_credentials(fileObj, auth_param.ciphertext):
-                return {
-                    "errno": 200,
-                    "errmsg": "credentials verification passed",
-                    "fileObj": fileObj,
-                }
+                return self.json_response(RET.OK, fileObj=fileObj)
 
             return REQUIRE_PWD_RESPONSE(fileObj.secret_key)
 
@@ -394,28 +384,21 @@ class HttpService(BaseService):
             fileObj = request.scope.get("fileObj")
             fileObj: Union[None, FileModel, DirModel]
             if not fileObj:
+                print("not fileObj", uuid)
                 sysLogger.error(
                     "发生了错误, 获取不到用户访问的文件/文件夹对象, "
                     "请用uuid对比`file_sharing_backups.json`文件, "
                     f"查看分享的文件/文件夹状态, uuid: {uuid}"
                 )
-                return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
+                return self.json_response(RET.FILETRANSFERERR)
             if fileObj.shareType is ptype.ShareType.ftp:
                 return FOR_BIDDEN_RESPONSE
             if await no_need_credentials(fileObj):
-                return {
-                    "errno": 200,
-                    "errmsg": "no need credentials",
-                    "fileObj": fileObj,
-                }
+                return self.json_response(RET.OK, fileObj=fileObj)
             if secret_key != fileObj.secret_key:
                 return FOR_BIDDEN_RESPONSE
             if await verify_credentials(fileObj, ciphertext):
-                return {
-                    "errno": 200,
-                    "errmsg": "credentials verification passed",
-                    "fileObj": fileObj,
-                }
+                return self.json_response(RET.OK, fileObj=fileObj)
 
             return REQUIRE_PWD_RESPONSE(fileObj.secret_key)
 
@@ -441,12 +424,12 @@ class HttpService(BaseService):
                     "请用uuid对比`file_sharing_backups.json`文件, "
                     f"查看分享的文件/文件夹状态, uuid: {uuid}"
                 )
-                return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
+                return self.json_response(RET.FILETRANSFERERR)
             if fileObj.shareType is ptype.ShareType.ftp:
                 return FOR_BIDDEN_RESPONSE
             if await no_need_credentials(fileObj):
                 data = await fileObj.to_dict_mobile()
-                return {"errno": 200, "errmsg": "", "data": data}
+                return self.json_response(RET.OK, data=data)
 
             return REQUIRE_PWD_RESPONSE(fileObj.secret_key)
 
@@ -459,7 +442,7 @@ class HttpService(BaseService):
 
             fileObj = verify_result.get("fileObj")
             data = await fileObj.to_dict_mobile()
-            return {"errno": 200, "errmsg": "", "data": data}
+            return self.json_response(RET.OK, data=data)
 
         @mobile.get("%s/{uuid}" % ptype.FILE_SIZE_URI)
         async def get_file_size(uuid: str, request: Request) -> Dict[str, Any]:
@@ -471,16 +454,16 @@ class HttpService(BaseService):
                     "请用uuid对比`file_sharing_backups.json`文件, "
                     f"查看分享的文件/文件夹状态, uuid: {uuid}"
                 )
-                return {"errno": 500, "errmsg": "系统发生错误, 文件/文件夹对象没有被正确传递"}
+                return self.json_response(RET.FILETRANSFERERR)
             if fileObj.shareType is ptype.ShareType.ftp:
                 return FOR_BIDDEN_RESPONSE
 
             if fileObj.isDir:
-                return {"errno": 300, "errmsg": "Can not get size for folder"}
+                return self.json_response(RET.SIZEOFFOLDER)
             if not fileObj.isExists:
-                return {"errno": 404, "errmsg": "The File is not exists"}
+                return self.json_response(RET.FILENOTFOUND)
 
-            return {"errno": 200, "errmsg": "", "fileSize": fileObj.file_size}
+            return self.json_response(RET.OK, fileSize=fileObj.file_size)
 
         @mobile.post("%s/{uuid}" % ptype.DOWNLOAD_URI, response_model=None)
         async def download_mobile(
@@ -504,10 +487,7 @@ class HttpService(BaseService):
             if verify_result.get("errno", 400) != 200:
                 return verify_result
             if not os.path.isdir(curr_path):
-                return {
-                    "errno": 400,
-                    "errmsg": "Cannot upload files to non folder locations",
-                }
+                return self.json_response(RET.UPLOADTONONFOLDER)
             # verification the curr_path
             fileObj: Union[FileModel, DirModel] = request.scope.get("fileObj")
             if fileObj.targetPath not in curr_path:
@@ -515,11 +495,10 @@ class HttpService(BaseService):
 
             merge_file_name = os.path.join(curr_path, file_name)
             chunk_file_name = os.path.join(curr_path, f"{file_name}_{chunk_id}.part")
-            if os.path.exists(merge_file_name) or os.path.exists(chunk_file_name):
-                return {
-                    "errno": 400,
-                    "errmsg": "The file with the same name already exists!",
-                }
+            if os.path.exists(merge_file_name):
+                return self.json_response(RET.UPLOADFILEISEXISTS)
+            if os.path.exists(chunk_file_name):
+                return self.json_response(RET.UPLOADCHUNKEXISTS)
 
             with open(chunk_file_name, "wb") as f:
                 f.write(await file.read())
@@ -530,11 +509,9 @@ class HttpService(BaseService):
                     f"用户IP： {client_ip}, 用户正在上传文件: {file_name}, 上传路径: {curr_path}"
                 )
 
-            return {
-                "errno": 200,
-                "errmsg": "Upload chunk succed",
-                "data": {"fileName": file_name, "chunkId": chunk_id},
-            }
+            return self.json_response(
+                RET.OK, data={"fileName": file_name, "chunkId": chunk_id}
+            )
 
         @mobile.post("%s/{uuid}" % ptype.UPLOAD_MERGE_URI)
         async def upload_merge_mobile(
@@ -548,15 +525,12 @@ class HttpService(BaseService):
                 return verify_result
 
             if not os.path.isdir(curr_path):
-                return {
-                    "errno": 400,
-                    "errmsg": "Cannot upload files to non folder locations",
-                }
+                return self.json_response(RET.UPLOADTONONFOLDER)
 
             for i in range(chunk_count):
                 chunk_file_name = os.path.join(curr_path, f"{file_name}_{i}.part")
                 if not os.path.exists(chunk_file_name):
-                    return {"errno": 400, "errmsg": f"There is chunk loss: {i}"}
+                    return self.json_response(RET.MERGELOSSCHUNK, f"不存在的分片索引: {i}")
 
             merge_file_name = os.path.join(curr_path, file_name)
             with open(merge_file_name, "wb") as merge_f:
@@ -582,11 +556,9 @@ class HttpService(BaseService):
                 }
             )
 
-            return {
-                "errno": 200,
-                "errmsg": "Merge chunks succed",
-                "data": {"fileName": file_name, "chunkCount": chunk_count},
-            }
+            return self.json_response(
+                RET.OK, data={"fileName": file_name, "chunkCount": chunk_count}
+            )
 
         @mobile.post("%s/{uuid}" % ptype.UPLOAD_REMOVE_URI)
         async def upload_remove_mobile(
@@ -597,10 +569,7 @@ class HttpService(BaseService):
             if verify_result.get("errno", 400) != 200:
                 return verify_result
             if not os.path.isdir(curr_path):
-                return {
-                    "errno": 400,
-                    "errmsg": "The curr_path is not a folder.",
-                }
+                return self.json_response(RET.UPLOADTONONFOLDER)
             rm_count = 0
             for curr_file in os.listdir(curr_path):
                 curr_file_path = os.path.join(curr_path, curr_file)
@@ -610,11 +579,9 @@ class HttpService(BaseService):
                     os.remove(os.path.join(curr_path, curr_file))
                     rm_count += 1
 
-            return {
-                "errno": 200,
-                "errmsg": "Remove all chunk file succ",
-                "data": {"fileName": file_name, "removeCount": rm_count},
-            }
+            return self.json_response(
+                RET.OK, data={"fileName": file_name, "removeCount": rm_count}
+            )
 
         # mount app
         self._app.mount(ptype.MOBILE_PREFIX, mobile)
@@ -668,3 +635,9 @@ class HttpService(BaseService):
             },
             status_code=206 if start > 0 else 200,
         )
+
+    @staticmethod
+    def json_response(
+        ret: RET.__class__, special_msg: Optional[str] = None, **datas
+    ) -> Dict[str, Any]:
+        return json_response(ret, special_msg, **datas)

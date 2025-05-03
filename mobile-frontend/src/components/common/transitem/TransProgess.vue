@@ -20,7 +20,6 @@ export default {
       type: Array,
       require: true,
       default: [
-        "下载失败",
         "已暂停",
         "下载中...",
         "合并分片中...",
@@ -31,15 +30,15 @@ export default {
   computed: {
     TransStatus() {
       if ( this.transItem.failed ) {
-        return this.statusList[0]
+        return this.transItem.err_msg;
       } else if ( this.transItem.is_pause ) {
-        return this.statusList[1]
+        return this.statusList[0]
       } else if ( this.transItem.succed_chunks.length != this.transItem.chunk_count ) {
-        return this.statusList[2]
+        return this.statusList[1]
       } else if ( !this.transItem.merged ) {
-        return this.statusList[3]
+        return this.statusList[2]
       } else {
-        return this.statusList[4]
+        return this.statusList[3]
       }
     },
     progess() {

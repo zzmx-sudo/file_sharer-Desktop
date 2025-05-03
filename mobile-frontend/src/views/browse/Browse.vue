@@ -91,7 +91,7 @@ export default {
             this.can_upload = true;
           }
           this.loading = false;
-        } else if (res.errno == 401) {
+        } else if (res.errno == 4003) {
           var secret_key = res.secret_key;
           const browse_params = this.$store.state.browse_params;
           if (browse_params != null && browse_params.uuid == this.uuid
@@ -162,7 +162,7 @@ export default {
             this.can_upload = true;
           }
           this.loading = false;
-        } else if (res.errno == 401) {
+        } else if (res.errno == 4003) {
           this.$message.error('密码错误, 请重新输入密码');
           var secret_key = res.secret_key;
           this.$prompt("请输入浏览密码", "提示", {
@@ -218,7 +218,7 @@ export default {
               if ( res.errno == 404 ) {
                 this.$message({message: "该文件已被删除, 加入下载失败", type: "error"});
               } else {
-                this.$message({message: "获取文件大小发生未知错误, 加入下载失败", type: "error"});
+                this.$message({message: "获取文件大小错误(" + res.err_msg + "), 加入下载失败", type: "error"});
               }
             }
           });
@@ -249,10 +249,10 @@ export default {
       var browse_params = this.$store.state.browse_params;
       var download_history = this.$store.state.download_history;
       if ( download_history != null ) {
-        var download_item = download_history.find(obj => obj.uuid == row.uuid);
+        var download_item = download_history[row.uuid];
         if ( download_item != undefined ) {
           if ( download_item.is_pause ) {
-            this.$store.dispatch("REDOWNLOAD_FILE", download_item.uuid)
+            this.$store.dispatch("REDOWNLOAD_FILE", download_item.uuid);
             this.$message({message: "该文件在历史下载中, 已继续对该文件下载", type: "success"})
           } else {
             this.$message({message: "该文件已在历史下载中且未暂停, 请勿重复下载", type: "warning"})
@@ -271,7 +271,8 @@ export default {
         merged: false,
         secret_key: browse_params != null ? browse_params.secret_key : "",
         pwd: browse_params != null ? browse_params.pwd : "",
-        failed: false
+        failed: false,
+        err_msg: "",
       });
       this.$store.dispatch("START_DOWNLOAD_FILE", row.uuid);
       this.$message({message: "加入下载成功", type: "success"});
@@ -281,9 +282,13 @@ export default {
       var browse_params = this.$store.state.browse_params;
       var upload_history = this.$store.state.upload_history;
       if ( upload_history != null ) {
-        var upload_item = upload_history.find(obj =>  obj.uuid == this.uuid &&
-          obj.curr_dir == this.curr_dir && obj.file_name == selectedFile.name);
-        if ( upload_item != undefined ) {
+        var upload_item = null;
+        Object.values(upload_history).forEach(obj => {
+          if ( obj.uuid == this.uuid && obj.curr_dir == this.curr_dir && obj.file_name == selectedFile.name ) {
+            upload_item = obj;
+          }
+        })
+        if ( upload_item != null ) {
           if ( upload_item.is_pause ) {
             if ( upload_item.file == null ) {
               this.UPDATE_UPLOAD_ITEM({file_id: upload_item.file_id, data: {file: selectedFile}});
@@ -311,7 +316,8 @@ export default {
         merged: false,
         secret_key: browse_params != null ? browse_params.secret_key : "",
         pwd: browse_params != null ? browse_params.pwd : "",
-        failed: false
+        failed: false,
+        err_msg: ""
       });
       this.$store.dispatch("START_UPLOAD_FILE", file_id);
       this.$message({message: "加入下载成功", type: "success"});

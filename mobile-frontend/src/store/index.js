@@ -59,15 +59,9 @@ export default new Vuex.Store({
     UPDATE_DOWNLOAD_HISTORY(state, download_data) {
       var download_history = state.download_history;
       if (download_history == null) {
-        download_history = [download_data];
-      } else {
-        const idx = download_history.findIndex(obj => obj.uuid == download_data.uuid);
-        if (idx != -1) {
-          download_history.splice(idx, 1, download_data);
-        } else {
-          download_history.push(download_data);
-        }
-      };
+        download_history = {};
+      }
+      Vue.set(download_history, download_data.uuid, download_data);
       state.download_history = download_history;
       var download_history_ = copyHistoryRMChunks(download_history);
       serviceStorage.set(serviceStorage.DOWNLOAD_HISTORY, JSON.stringify(download_history_));
@@ -78,10 +72,10 @@ export default new Vuex.Store({
         return;
       }
       const {uuid, data} = params;
-      const idx = download_history.findIndex(obj => obj.uuid == uuid);
-      if (idx != -1) {
-        const new_item = {...state.download_history[idx], ...data};
-        download_history.splice(idx, 1, new_item);
+      const download_item = download_history[uuid];
+      if (download_item != undefined) {
+        const new_item = {...download_item, ...data};
+        Vue.set(download_history, uuid, new_item);
       };
       state.download_history = download_history;
       var download_history_ = copyHistoryRMChunks(download_history);
@@ -92,9 +86,8 @@ export default new Vuex.Store({
       if (download_history == null) {
         return;
       };
-      const idx = download_history.findIndex(obj => obj.uuid == uuid);
-      if (idx != -1) {
-        const download_item = download_history[idx];
+      const download_item = download_history[uuid];
+      if (download_item != undefined) {
         download_item.is_pause = true;
         state.download_history = download_history;
         var download_history_ = copyHistoryRMChunks(download_history);
@@ -106,9 +99,9 @@ export default new Vuex.Store({
       if (download_history == null) {
         return;
       };
-      const idx = download_history.findIndex(obj => obj.uuid == uuid);
-      if (idx != -1) {
-        download_history.splice(idx, 1);
+      const download_item = download_history[uuid];
+      if (download_item != undefined) {
+        Vue.delete(download_history, uuid);
         state.download_history = download_history;
         var download_history_ = copyHistoryRMChunks(download_history);
         serviceStorage.set(serviceStorage.DOWNLOAD_HISTORY, JSON.stringify(download_history_));
@@ -119,10 +112,8 @@ export default new Vuex.Store({
       if (download_history == null) {
         return;
       };
-      download_history.forEach(downloadItem => {
-        if ( !downloadItem.merged ) {
-          downloadItem.is_pause = true;
-        };
+      Object.values(download_history).forEach(download_item => {
+        download_item.is_pause = true;
       });
       state.download_history = download_history;
       var download_history_ = copyHistoryRMChunks(download_history);
@@ -135,15 +126,9 @@ export default new Vuex.Store({
     UPDATE_UPLOAD_HISTORY(state, upload_data) {
       var upload_history = state.upload_history;
       if (upload_history == null) {
-        upload_history = [upload_data];
-      } else {
-        const idx = upload_history.findIndex(obj => obj.file_id == upload_data.file_id);
-        if (idx != -1) {
-          upload_history.splice(idx, 1, upload_data);
-        } else {
-          upload_history.push(upload_data);
-        }
-      };
+        upload_history = {};
+      }
+      Vue.set(upload_history, upload_data.file_id, upload_data);
       state.upload_history = upload_history;
       var upload_history_ = copyHistoryRMFile(upload_history);
       serviceStorage.set(serviceStorage.UPLOAD_HISTORY, JSON.stringify(upload_history_));
@@ -154,10 +139,10 @@ export default new Vuex.Store({
         return;
       }
       const {file_id, data} = params;
-      const idx = upload_history.findIndex(obj => obj.file_id == file_id);
-      if (idx != -1) {
-        const new_item = {...state.upload_history[idx], ...data};
-        upload_history.splice(idx, 1, new_item);
+      const upload_item = upload_history[file_id];
+      if (upload_item != undefined) {
+        const new_item = {...upload_item, ...data};
+        Vue.set(upload_history, file_id, new_item);
       }
       state.upload_history = upload_history;
       var upload_history_ = copyHistoryRMFile(upload_history);
@@ -168,9 +153,8 @@ export default new Vuex.Store({
       if (upload_history == null) {
         return;
       };
-      const idx = upload_history.findIndex(obj => obj.file_id == file_id);
-      if (idx != -1) {
-        const upload_item = upload_history[idx];
+      const upload_item = upload_history[file_id];
+      if (upload_item != undefined) {
         upload_item.is_pause = true;
         state.upload_history = upload_history;
         var upload_history_ = copyHistoryRMFile(upload_history);
@@ -182,9 +166,9 @@ export default new Vuex.Store({
       if (upload_history == null) {
         return;
       };
-      const idx = upload_history.findIndex(obj => obj.file_id == file_id);
-      if (idx != -1) {
-        upload_history.splice(idx, 1);
+      const upload_item = upload_history[file_id];
+      if (upload_item != undefined) {
+        Vue.delete(upload_history, file_id);
         state.upload_history = upload_history;
         var upload_history_ = copyHistoryRMFile(upload_history);
         serviceStorage.set(serviceStorage.UPLOAD_HISTORY, JSON.stringify(upload_history_));
@@ -195,11 +179,9 @@ export default new Vuex.Store({
       if (upload_history == null) {
         return;
       };
-      upload_history.forEach(uploadItem => {
-        if ( !uploadItem.merged ) {
-          uploadItem.is_pause = true;
-        };
-      })
+      Object.values(upload_history).forEach(upload_item => {
+        upload_item.is_pause = true;
+      });
       state.upload_history = upload_history;
       var upload_history_ = copyHistoryRMFile(upload_history);
       serviceStorage.set(serviceStorage.UPLOAD_HISTORY, JSON.stringify(upload_history_));
@@ -211,20 +193,15 @@ export default new Vuex.Store({
   },
   actions: {
     async START_DOWNLOAD_FILE(context, uuid) {
+      // 理应不会进这个判断
       var download_history = context.state.download_history;
-      if ( download_history == null ) {
-        return;
+      if ( download_history == null || download_history[uuid] == undefined ) {
+        return
       }
-      var idx = download_history.findIndex(obj => obj.uuid == uuid);
-      if ( idx == undefined ) {
-        return;
-      };
-      var download_item = download_history[idx];
+      var download_item = download_history[uuid];
       context.commit("UPDATE_DOWNLOAD_ITEM", {uuid: uuid, data: {succed_chunks: []}});
       for (let i = 0; i < download_item.chunk_count; i++) {
-        // fix for #41
-        idx = download_history.findIndex(obj => obj.uuid == uuid);
-        if ( context.state.download_history[idx].is_pause ) {
+        if ( context.state.download_history[uuid].is_pause ) {
           return;
         }
         const start = i * download_item.chunk_size;
@@ -234,40 +211,31 @@ export default new Vuex.Store({
           download_item.pwd, start, end, i == 0
         );
         if ( !res.succed ) {
-          context.commit("UPDATE_DOWNLOAD_ITEM", {uuid: uuid, data: {failed: true}});
+          context.commit("UPDATE_DOWNLOAD_ITEM", {uuid: uuid, data: {failed: true, err_msg: res.data}});
           return;
         }
-        idx = download_history.findIndex(obj => obj.uuid == uuid);
         context.commit("UPDATE_DOWNLOAD_ITEM", {
           uuid: uuid,
           data: {
-            succed_chunks: [...context.state.download_history[idx].succed_chunks, res.data]
+            succed_chunks: [...context.state.download_history[uuid].succed_chunks, res.data]
           }
         });
       };
-      idx = download_history.findIndex(obj => obj.uuid == uuid);
-      mergeChunks(context.state.download_history[idx].succed_chunks, download_item.file_name);
+      mergeChunks(context.state.download_history[uuid].succed_chunks, download_item.file_name);
       context.commit("UPDATE_DOWNLOAD_ITEM", {
         uuid: uuid, data: {merged: true, succed_chunks: new Array(download_item.chunk_count).fill(0)}
       });
     },
     async REDOWNLOAD_FILE(context, uuid) {
+      // 理应不会进这个判断
       var download_history = context.state.download_history;
-      if ( download_history == null ) {
+      if ( download_history == null || download_history[uuid] == undefined ) {
         return;
       }
-      var idx = download_history.findIndex(obj => obj.uuid == uuid);
-      if ( idx == undefined ) {
-        return;
-      };
-      var download_item = download_history[idx];
-      if ( download_item.failed ) {
-        context.commit("UPDATE_DOWNLOAD_ITEM", {uuid: uuid, data: {failed: false}});
-      }
-      context.commit("UPDATE_DOWNLOAD_ITEM", {uuid: uuid, data: {is_pause: false}});
+      var download_item = download_history[uuid];
+      context.commit("UPDATE_DOWNLOAD_ITEM", {uuid: uuid, data: {failed: false, err_msg: "", is_pause: false}});
       for (let i = download_item.succed_chunks.length; i < download_item.chunk_count; i++) {
-        idx = download_history.findIndex(obj => obj.uuid == uuid);
-        if ( context.state.download_history[idx].is_pause ) {
+        if ( context.state.download_history[uuid].is_pause ) {
           return;
         }
         const start = i * download_item.chunk_size;
@@ -277,41 +245,35 @@ export default new Vuex.Store({
           download_item.pwd, start, end
         );
         if ( !res.succed ) {
-          context.commit("UPDATE_DOWNLOAD_ITEM", {uuid: uuid, data: {failed: true}});
+          context.commit("UPDATE_DOWNLOAD_ITEM", {uuid: uuid, data: {failed: true, err_msg: res.data}});
           return;
         }
-        idx = download_history.findIndex(obj => obj.uuid == uuid);
         context.commit("UPDATE_DOWNLOAD_ITEM", {
           uuid: uuid,
           data: {
-            succed_chunks: [...context.state.download_history[idx].succed_chunks, res.data]
+            succed_chunks: [...context.state.download_history[uuid].succed_chunks, res.data]
           }
         });
       }
-      idx = download_history.findIndex(obj => obj.uuid == uuid);
-      mergeChunks(context.state.download_history[idx].succed_chunks, download_item.file_name);
+      mergeChunks(context.state.download_history[uuid].succed_chunks, download_item.file_name);
       context.commit("UPDATE_DOWNLOAD_ITEM", {
         uuid: uuid, data: {merged: true, succed_chunks: new Array(download_item.chunk_count).fill(0)}
       });
     },
     async START_UPLOAD_FILE(context, file_id) {
+      // 理应不会进这个判断
       var upload_history = context.state.upload_history;
-      if ( upload_history == null ) {
+      if ( upload_history == null || upload_history[file_id] == undefined ) {
         return;
       }
-      var idx = upload_history.findIndex(obj => obj.file_id == file_id);
-      if ( idx == undefined ) {
-        return;
-      }
-      var upload_item = upload_history[idx];
+      var upload_item = upload_history[file_id];
       if ( upload_item.file == null ) {
-        context.commit("UPDATE_UPLOAD_ITEM", {file_id: file_id, data: {failed: true}});
+        context.commit("UPDATE_UPLOAD_ITEM", {file_id: file_id, data: {failed: true, err_msg: "选择的文件数据丢失"}});
         return;
       }
-      context.commit("UPDATE_UPLOAD_ITEM", {file_id: file_id, data: {succed_chunks: []}});
+      context.commit("UPDATE_UPLOAD_ITEM", {file_id: file_id, data: {succed_chunks: [], failed: false}});
       for (let i = 0; i < upload_item.chunk_count; i++) {
-        idx = upload_history.findIndex(obj => obj.file_id == file_id);
-        if ( context.state.upload_history[idx].is_pause ) {
+        if ( context.state.upload_history[file_id].is_pause ) {
           return;
         }
         const start = i * upload_item.chunk_size;
@@ -322,14 +284,13 @@ export default new Vuex.Store({
           upload_item.file_name, i, upload_item.curr_path, i == 0
         );
         if ( !res.succed ) {
-          context.commit("UPDATE_UPLOAD_ITEM", {file_id: file_id, data: {failed: true}});
+          context.commit("UPDATE_UPLOAD_ITEM", {file_id: file_id, data: {failed: true, err_msg: res.data}});
           return;
         }
-        idx = upload_history.findIndex(obj => obj.file_id == file_id);
         context.commit("UPDATE_UPLOAD_ITEM", {
           file_id: file_id,
           data: {
-            succed_chunks: [...context.state.upload_history[idx].succed_chunks, i]
+            succed_chunks: [...context.state.upload_history[file_id].succed_chunks, i]
           }
         });
       };
@@ -338,28 +299,24 @@ export default new Vuex.Store({
         upload_item.file_name, upload_item.chunk_count, upload_item.curr_path
       )
       if ( !res.succed ){
-        context.commit("UPDATE_UPLOAD_ITEM", {file_id: file_id, data: {failed: true}});
+        context.commit("UPDATE_UPLOAD_ITEM", {file_id: file_id, data: {failed: true, err_msg: res.data}});
         return;
       }
       context.commit("UPDATE_UPLOAD_ITEM", {file_id: file_id, data: {merged: true, file: null}});
     },
     async REUPLOAD_FILE(context, file_id) {
       var upload_history = context.state.upload_history;
-      if ( upload_history == null ) {
+      if ( upload_history == null || upload_history[file_id] == undefined ) {
         return;
       }
-      var idx = upload_history.findIndex(obj => obj.file_id == file_id);
-      if ( idx == undefined ) {
-        return;
-      }
-      var upload_item = upload_history[idx];
+      var upload_item = upload_history[file_id];
       if ( upload_item.file == null ) {
-        context.commit("UPDATE_UPLOAD_ITEM", {file_id: file_id, data: {failed: true}});
+        context.commit("UPDATE_UPLOAD_ITEM", {file_id: file_id, data: {failed: true, err_msg: "选择的文件数据丢失"}});
         return;
       }
+      context.commit("UPDATE_UPLOAD_ITEM", {file_id: file_id, data: {failed: false, err_msg: "", is_pause: false}});
       for (let i = upload_item.succed_chunks.length; i < upload_item.chunk_count; i++) {
-        idx = upload_history.findIndex(obj => obj.file_id == file_id);
-        if ( context.state.upload_history[idx].is_pause ) {
+        if ( context.state.upload_history[file_id].is_pause ) {
           return;
         }
         const start = i * upload_item.chunk_size;
@@ -370,14 +327,13 @@ export default new Vuex.Store({
           upload_item.file_name, i, upload_item.curr_path, i == 0
         );
         if ( !res.succed ) {
-          context.commit("UPDATE_UPLOAD_ITEM", {file_id: file_id, data: {failed: true}});
+          context.commit("UPDATE_UPLOAD_ITEM", {file_id: file_id, data: {failed: true, err_msg: res.data}});
           return;
         }
-        idx = upload_history.findIndex(obj => obj.file_id == file_id);
         context.commit("UPDATE_UPLOAD_ITEM", {
           file_id: file_id,
           data: {
-            succed_chunks: [...context.state.upload_history[idx].succed_chunks, i]
+            succed_chunks: [...context.state.upload_history[file_id].succed_chunks, i]
           }
         });
       };
@@ -386,21 +342,17 @@ export default new Vuex.Store({
         upload_item.file_name, upload_item.chunk_count, upload_item.curr_path
       )
       if ( !res.succed ){
-        context.commit("UPDATE_UPLOAD_ITEM", {file_id: file_id, data: {failed: true}});
+        context.commit("UPDATE_UPLOAD_ITEM", {file_id: file_id, data: {failed: true, err_msg: res.data}});
         return;
       }
       context.commit("UPDATE_UPLOAD_ITEM", {file_id: file_id, data: {merged: true, file: null}});
     },
     async REMOVE_UPLOAD_FILE(context, file_id) {
       var upload_history = context.state.upload_history;
-      if ( upload_history == null ) {
+      if ( upload_history == null || upload_history[file_id] == undefined ) {
         return;
       }
-      var idx = upload_history.findIndex(obj => obj.file_id == file_id);
-      if ( idx == undefined ) {
-        return;
-      }
-      var upload_item = upload_history[idx];
+      var upload_item = upload_history[file_id];
       if ( !upload_item.merged && upload_item.succed_chunks.length != 0 ) {
         await UploadRemove(
           upload_item.uuid, upload_item.secret_key, upload_item.pwd,
@@ -408,6 +360,14 @@ export default new Vuex.Store({
         );
       }
       context.commit("REMOVE_UPLOAD_ITEM", upload_item.file_id);
+    }
+  },
+  getters: {
+    download_list: state => {
+      return Object.values(state.download_history);
+    },
+    upload_list: state => {
+      return Object.values(state.upload_history);
     }
   },
   modules: {}

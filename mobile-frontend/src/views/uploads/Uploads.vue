@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import { mapMutations } from "vuex";
+import { mapMutations, mapGetters } from "vuex";
 import TransOptions from '../../components/common/transitem/TransOptions.vue';
 import TransProgess from '../../components/common/transitem/TransProgess.vue';
 
@@ -43,9 +43,7 @@ export default {
   name: 'Upload',
   data() {
     return {
-      UploadList: this.$store.state.upload_history,
       statusList: [
-        "上传失败, 文件已存在或对方开启了密码验证",
         "已暂停",
         "上传中...",
         "请求合并中...",
@@ -105,10 +103,14 @@ export default {
     file_change(event) {
       const files = event.target.files
       if (!files || files.length === 0) {
+        this.selectFile = null;
         return;
       }
       this.selectFile = files[0];
     }
+  },
+  computed: {
+    ...mapGetters({UploadList: "upload_list"})
   }
 };
 </script>
