@@ -30,7 +30,7 @@ export default {
   computed: {
     TransStatus() {
       if ( this.transItem.failed ) {
-        return this.transItem.err_msg;
+        return this.transItem.err_msg || "网络异常";
       } else if ( this.transItem.is_pause ) {
         return this.statusList[0]
       } else if ( this.transItem.succed_chunks.length != this.transItem.chunk_count ) {
