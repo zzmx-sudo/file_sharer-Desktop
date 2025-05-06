@@ -305,6 +305,7 @@ export default new Vuex.Store({
       context.commit("UPDATE_UPLOAD_ITEM", {file_id: file_id, data: {merged: true, file: null}});
     },
     async REUPLOAD_FILE(context, file_id) {
+      console.log("REUPLOAD_FILE...");
       var upload_history = context.state.upload_history;
       if ( upload_history == null || upload_history[file_id] == undefined ) {
         return;
@@ -364,10 +365,10 @@ export default new Vuex.Store({
   },
   getters: {
     download_list: state => {
-      return Object.values(state.download_history);
+      return state.download_history ? Object.values(state.download_history) : [];
     },
     upload_list: state => {
-      return Object.values(state.upload_history);
+      return state.upload_history ? Object.values(state.upload_history) : [];
     }
   },
   modules: {}

@@ -1,5 +1,5 @@
 [file-sharer]
-version = "0.4.1"
+version = "0.4.2"
 saveSystemLog = true
 saveShareLog = true
 logsPath = "F:\\GitSource\\file_sharer-Desktop\\logs"
