@@ -320,7 +320,7 @@ export default {
         err_msg: ""
       });
       this.$store.dispatch("START_UPLOAD_FILE", file_id);
-      this.$message({message: "加入下载成功", type: "success"});
+      this.$message({message: "加入上传成功", type: "success"});
     }
   },
   computed: {

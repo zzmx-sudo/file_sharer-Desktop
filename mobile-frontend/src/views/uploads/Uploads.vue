@@ -49,7 +49,7 @@ export default {
         "请求合并中...",
         "已完成"
       ],
-      selectFile: null,
+      fileResolve: null,
     }
   },
   methods: {
@@ -78,35 +78,32 @@ export default {
       this.$store.dispatch("REMOVE_UPLOAD_FILE", upload_item.file_id);
       this.$message({"message": "删除上传成功", type: "success"});
     },
-    reselect_file(upload_item) {
+    async reselect_file(upload_item) {
       this.$message({"message": "文件对象已丢失, 请重新选择该上传的文件", type: "warning"});
-      this.selectFile = null;
-      while (true) {
+      const file = await new Promise(resolve => {
+        this.fileResolve = resolve;
         this.$refs.fileInput.click();
-        if ( this.selectFile == null ) {
-          this.$message({"message": "未选择文件, 已取消重新上传", type: "warning"});
-          return;
-        };
-        if (
-          this.selectFile.name == upload_item.file_name &&
-          this.selectFile.size == upload_item.file_size
-        ) {
-          this.UPDATE_UPLOAD_ITEM({file_id: upload_item.file_id, data: {file: this.selectFile}});
-          this.$store.dispatch("REUPLOAD_FILE", upload_item.file_id);
-          break;
-        } else {
-          this.$message({"message": "非同一文件或文件已更新, 请选择正确文件或删除记录重新上传", type: "warning"});
-        }
-      };
-      this.$message({"message": "继续上传成功", type: "success"});
+      });
+      this.process_file(file, upload_item);
     },
     file_change(event) {
-      const files = event.target.files
-      if (!files || files.length === 0) {
-        this.selectFile = null;
+      if ( this.fileResolve ) {
+        this.fileResolve(event.target.files[0]);
+        this.fileResolve = null;
+      }
+    },
+    process_file(file, upload_item) {
+      if ( !file ) {
+        this.$message({"message": "未选择文件, 已取消重新上传", type: "warning"});
         return;
       }
-      this.selectFile = files[0];
+      if ( file.name == upload_item.file_name && file.size == upload_item.file_size ) {
+        this.UPDATE_UPLOAD_ITEM({file_id: upload_item.file_id, data: {file: file}});
+        this.$store.dispatch("REUPLOAD_FILE", upload_item.file_id);
+        this.$message({"message": "继续上传成功", type: "success"});
+        return;
+      }
+      this.$message({"message": "非同一文件或文件已更新, 请选择正确文件或删除记录重新上传", type: "warning"});
     }
   },
   computed: {
