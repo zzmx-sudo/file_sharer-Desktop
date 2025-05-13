@@ -54,7 +54,7 @@ export default {
       uuid: "",
       secret_key: "",
       curr_dir: "",
-      chunk_size: 10485760,
+      chunk_size: 1048576,
     }
   },
   mounted() {
