@@ -113,7 +113,9 @@ export default new Vuex.Store({
         return;
       };
       Object.values(download_history).forEach(download_item => {
-        download_item.is_pause = true;
+        if ( !download_item.merged ) {
+          download_item.is_pause = true;
+        }
       });
       state.download_history = download_history;
       var download_history_ = copyHistoryRMChunks(download_history);
@@ -180,7 +182,9 @@ export default new Vuex.Store({
         return;
       };
       Object.values(upload_history).forEach(upload_item => {
-        upload_item.is_pause = true;
+        if ( !upload_item.merged ) {
+          upload_item.is_pause = true;
+        }
       });
       state.upload_history = upload_history;
       var upload_history_ = copyHistoryRMFile(upload_history);

@@ -23,5 +23,9 @@ export async function DownloadChunk(uuid, secret_key, pwd, start, end, hit_log=f
   if ( !response instanceof Blob) {
     return {succed: false, data: "后端异常, 返回非预期数据类型"}
   }
+  const chunk_size = end - start;
+  if ( chunk_size > 0 && chunk_size != response.size ) {
+    return {succed: false, data: "下载片段失败, 服务器网络异常"}
+  }
   return {succed: true, data: response}
 }
