@@ -17,10 +17,10 @@ Router.prototype.replace = function (location) {
 
 export default new Router({
   routes: [
-    {
-      path: '/',
-      redirect: '/browse'
-    },
+    // {
+    //   path: '/',
+    //   redirect: '/browse'
+    // },
     {
       path: '/browse',
       name: 'Browse',

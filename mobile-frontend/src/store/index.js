@@ -2,9 +2,10 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 
 import serviceStorage from "./serviceStorage"
+import { GetDownloadSpeed, PostUploadSpeed } from '@/network/browse'
 import { DownloadChunk } from "@/network/download"
 import { UploadChunk, UploadMerge, UploadRemove } from "@/network/upload"
-import { copyHistoryRMChunks, mergeChunks, copyHistoryRMFile } from "@/utils/public_func"
+import { copyHistoryRMChunks, mergeChunks, copyHistoryRMFile, calcChunkSize } from "@/utils/public_func"
 
 Vue.use(Vuex)
 
@@ -14,7 +15,9 @@ export default new Vuex.Store({
     browse_params: JSON.parse(serviceStorage.get(serviceStorage.BROWSE_PARAMS)),
     browse_history: JSON.parse(serviceStorage.get(serviceStorage.BROWSE_HISTORY)),
     download_history: JSON.parse(serviceStorage.get(serviceStorage.DOWNLOAD_HISTORY)),
-    upload_history: JSON.parse(serviceStorage.get(serviceStorage.UPLOAD_HISTORY))
+    upload_history: JSON.parse(serviceStorage.get(serviceStorage.UPLOAD_HISTORY)),
+    Dchunk_size: 1048576,
+    Uchunk_size: 1048576
   },
   mutations: {
     SET_BROWSE_PARAMS(state, params) {
@@ -193,6 +196,15 @@ export default new Vuex.Store({
     CLEAR_UPLOAD_HISTORY(state) {
       state.upload_history = null;
       serviceStorage.remove(serviceStorage.UPLOAD_HISTORY);
+    },
+    UPDATE_CHUNK_SIZE(state, chunk_sizes) {
+      const [Dchunk_size, Uchunk_size] = chunk_sizes;
+      if (Dchunk_size != 0) {
+        state.Dchunk_size = Dchunk_size;
+      }
+      if (Uchunk_size != 0) {
+        state.Uchunk_size = Uchunk_size
+      }
     }
   },
   actions: {
@@ -309,7 +321,6 @@ export default new Vuex.Store({
       context.commit("UPDATE_UPLOAD_ITEM", {file_id: file_id, data: {merged: true, file: null}});
     },
     async REUPLOAD_FILE(context, file_id) {
-      console.log("REUPLOAD_FILE...");
       var upload_history = context.state.upload_history;
       if ( upload_history == null || upload_history[file_id] == undefined ) {
         return;
@@ -365,6 +376,21 @@ export default new Vuex.Store({
         );
       }
       context.commit("REMOVE_UPLOAD_ITEM", upload_item.file_id);
+    },
+    async GEN_CHUNK_SIZE(context) {
+      var Dchunk_size = 0;
+      var Uchunk_size = 0;
+      const start_time = new Date().getTime();
+      var res = await GetDownloadSpeed();
+      if (res.succed) {
+        const download_duration = new Date().getTime() - start_time;
+        Dchunk_size = calcChunkSize(download_duration);
+      }
+      res = await PostUploadSpeed();
+      if (res.succed) {
+        Uchunk_size = calcChunkSize(res.duration);
+      }
+      context.commit("UPDATE_CHUNK_SIZE", [Dchunk_size, Uchunk_size]);
     }
   },
   getters: {

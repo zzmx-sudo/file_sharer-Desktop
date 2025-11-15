@@ -35,7 +35,6 @@
 </template>
 
 <script>
-import request from "@/network/request";
 import { encrypt } from '@/utils/credentials';
 import { GetListMobile, PostListMobile } from "@/network/browse";
 import { GetFileSize } from "@/network/download";
@@ -54,7 +53,8 @@ export default {
       uuid: "",
       secret_key: "",
       curr_dir: "",
-      chunk_size: 1048576,
+      Dchunk_size: this.$store.state.Dchunk_size,
+      Uchunk_size: this.$store.state.Uchunk_size
     }
   },
   mounted() {
@@ -63,7 +63,6 @@ export default {
     this.base_url = document.getElementById('baseUrl').innerText;
     // 获取uuid并正式请求文件列表
     this.uuid = document.getElementById('uuid').innerText;
-    request.defaults.baseURL = this.base_url;
     this.get_list_mobile();
   },
   methods: {
@@ -265,9 +264,9 @@ export default {
         file_name: row.fileName,
         file_size: file_size,
         is_pause: false,
-        chunk_size: this.chunk_size,
+        chunk_size: this.$store.state.Dchunk_size,
         succed_chunks: [],
-        chunk_count: Math.ceil(file_size / this.chunk_size),
+        chunk_count: Math.ceil(file_size / this.$store.state.Dchunk_size),
         merged: false,
         secret_key: browse_params != null ? browse_params.secret_key : "",
         pwd: browse_params != null ? browse_params.pwd : "",
@@ -310,9 +309,9 @@ export default {
         type: selectedFile.type,
         curr_path: this.curr_dir,
         is_pause: false,
-        chunk_size: this.chunk_size,
+        chunk_size: this.$store.state.Uchunk_size,
         succed_chunks: [],
-        chunk_count: Math.ceil(selectedFile.size / this.chunk_size),
+        chunk_count: Math.ceil(selectedFile.size / this.$store.state.Uchunk_size),
         merged: false,
         secret_key: browse_params != null ? browse_params.secret_key : "",
         pwd: browse_params != null ? browse_params.pwd : "",
