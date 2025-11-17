@@ -17,6 +17,7 @@
 </template>
 
 <script>
+import request from "@/network/request";
 import MenuBar from './components/content/menubar/MenuBar.vue';
 import { mapMutations } from "vuex";
 
@@ -37,12 +38,17 @@ export default {
     // 将所有未完成上传置为暂停
     this.PAUSE_ALL_UPLOAD_HISTORY();
     document.title = "File-Sharer";
+  },
+  mounted() {
+    const base_url = document.getElementById('baseUrl').innerText;
+    request.defaults.baseURL = base_url;
     this.$alert('请勿在任何情况下刷新页面,否则上传/下载会暂停(下载进度也会消失),且需重新扫码!!!', '温馨提示', {
       showClose: false,
       center: true,
       confirmButtonText: '确定并进入',
       callback: action => {
         this.show_msg_box = false;
+        this.$store.dispatch("GEN_CHUNK_SIZE");
         this.$router.replace('/browse');
       }
     });

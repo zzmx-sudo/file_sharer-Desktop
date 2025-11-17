@@ -64,3 +64,22 @@ export function copyHistoryRMFile(upload_history) {
   });
   return upload_history_;
 }
+
+export function calcChunkSize(duration) {
+  // < 1 M/s
+  if (duration > 1000) {
+    return 512 * 1024;
+  // < 2 M/s
+  } else if (duration > 500) {
+    return 1024 * 1024;
+  // < 5 M/s
+  } else if (duration > 200) {
+    return 2 * 1024 * 1024;
+  // < 10 M/s
+  } else if (duration > 100) {
+    return 5 * 1024 * 1024;
+  // > 10 M/s
+  } else {
+    return 10 * 1024 * 1024;
+  }
+}

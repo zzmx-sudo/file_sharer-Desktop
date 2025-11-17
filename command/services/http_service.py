@@ -2,6 +2,7 @@ __all__ = ["HttpService"]
 
 import os
 import re
+import time
 from typing import Union, Any, AsyncGenerator, Dict, Optional
 from multiprocessing import Queue
 from urllib.parse import quote
@@ -211,8 +212,9 @@ class HttpService(BaseService):
             uri, param = _request["path"].rsplit("/", 1)
             if param == "favicon.ico":
                 return FileResponse(os.path.join(self.STATIC_PATH, "favicon.ico"))
-            if uri.startswith("/static"):
+            if uri.startswith(ptype.STATIC_PREFIX) or ptype.SPEED_TEST in uri:
                 return await cell_next(request)
+
             # client_platform = _request["client_platform"]
             fileObj = await generate_fileObj_recursive(param)
             # 文件是否存在判断
@@ -413,6 +415,51 @@ class HttpService(BaseService):
             )
             replace_content = replace_content.replace("{{ UUID }}", uuid)
             return HTMLResponse(replace_content)
+
+        @mobile.get("%s/download" % ptype.SPEED_TEST)
+        async def get_download_speed() -> StreamingResponse:
+            test_data = b"0" * 1048576
+
+            def generate_file_data():
+                yield test_data
+
+            return StreamingResponse(
+                generate_file_data(),
+                media_type="application/octet-stream",
+                headers={
+                    "Content-Length": "1048576",
+                    "Content-Type": "application/octet-stream",
+                    "Cache-Control": "no-cache, no-store, must-revalidate",
+                    "Pragma": "no-cache",
+                    "Expires": "0",
+                    "Content-Disposition": "attachment; filename=speed_test.bin",
+                },
+            )
+
+        @mobile.post("%s/upload" % ptype.SPEED_TEST)
+        async def post_upload_speed(
+            request: Request, file: UploadFile = File(...)
+        ) -> Dict[str, Any]:
+            start_time = time.time() * 1000
+            received_size = 0
+
+            while True:
+                chunk = await file.read(8192)
+                if not chunk:
+                    break
+
+                received_size += len(chunk)
+                if received_size > 1048576:
+                    client_ip = request.get("client", ["未知IP"])[0]
+                    sysLogger.warning(f"用户IP: {client_ip} 所在客户端异常, 测速仅需1M大小文件!")
+                    received_size = 1048576
+                    break
+
+            duration = time.time() * 1000 - start_time
+            return self.json_response(
+                RET.OK,
+                data={"received_size": received_size, "duration": round(duration, 3)},
+            )
 
         @mobile.get("%s/{uuid}" % ptype.FILE_LIST_URI)
         async def get_list_mobile(uuid: str, request: Request) -> Dict[str, Any]:

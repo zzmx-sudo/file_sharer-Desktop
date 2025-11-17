@@ -22,6 +22,7 @@ FILE_SIZE_URI: str = "/file_size"
 HIT_LOG: str = "hit_log"
 MOBILE_PREFIX: str = "/mobile"
 QRCODE_URL: str = "/start"
+SPEED_TEST: str = "/speed-test"
 STATIC_PREFIX: str = "/static"
 
 

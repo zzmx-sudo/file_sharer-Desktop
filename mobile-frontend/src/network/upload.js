@@ -62,7 +62,6 @@ export async function UploadRemove(
       headers: { 'Content-Type': 'multipart/form-data' }
     }
   );
-  console.log(response);
   if ( response.errno != 200 ) {
     return {succed: false, data: response.errmsg}
   }
