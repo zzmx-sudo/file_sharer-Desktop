@@ -34,6 +34,7 @@ jobs:
         run: |
           choco install nsis -y
           choco install 7zip -y
+          echo "C:\Program Files (x86)\NSIS" >> $env:GITHUB_PATH
 
       - name: Set code page to UTF-8
         run: chcp 65001
@@ -80,6 +81,7 @@ jobs:
         run: |
           choco install nsis -y
           choco install 7zip -y
+          echo "C:\Program Files (x86)\NSIS" >> $env:GITHUB_PATH
 
       - name: Set code page to UTF-8
         run: chcp 65001
@@ -101,7 +103,7 @@ jobs:
 
   Build-MacOs-x64:
     name: Build-MacOs-x64
-    runs-on: macos-13
+    runs-on: macos-15-intel
     needs: ['remove-old-artifacts']
     steps:
       - name: Clone code
