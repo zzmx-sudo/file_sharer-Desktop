@@ -33,26 +33,31 @@ class BaseService:
         Returns:
             None
         """
-        self._sysLogger_debug("开启监听线程")
-        self._watch_thread = Thread(target=self._watch)
-        self._watch_thread.setDaemon(True)
+        sysLogger.debug(f"[{self._service_name}] 开启监听线程")
+        self._watch_thread = Thread(target=self._watch, daemon=True)
         self._watch_thread.start()
-        self._sysLogger_debug("监听线程开启成功")
+        sysLogger.debug(f"[{self._service_name}] 监听线程开启成功")
 
     def _watch(self) -> None:
         while True:
             command_type, command_msg = self._input_q.get()
             if command_type == "add":
-                self._sysLogger_debug(f"接到添加分享任务, 分享路径: {command_msg.targetPath}")
+                sysLogger.debug(
+                    f"[{self._service_name}] 接到添加分享任务, 分享路径: {command_msg.targetPath}"
+                )
                 self._add_share(command_msg)
             elif command_type == "remove":
-                self._sysLogger_debug(f"接到移除分享任务, 分享的uuid: {command_msg}")
+                sysLogger.debug(
+                    f"[{self._service_name}] 接到移除分享任务, 分享的uuid: {command_msg}"
+                )
                 self._remove_share(command_msg)
             elif command_type == "settings":
-                self._sysLogger_debug(f"接到同步配置任务, 配置参数: {command_msg}")
+                sysLogger.debug(f"[{self._service_name}] 接到同步配置任务, 配置参数: {command_msg}")
                 self._modify_settings(*command_msg)
             elif command_type == "free-secret":
-                self._sysLogger_debug(f"接到修改免密状态任务, 配置参数: {command_msg}")
+                sysLogger.debug(
+                    f"[{self._service_name}] 接到修改免密状态任务, 配置参数: {command_msg}"
+                )
                 self._change_free_secret(*command_msg)
 
     def _add_share(self, fileObj: Union[FileModel, DirModel]) -> None:
@@ -89,7 +94,7 @@ class BaseService:
         Returns:
             None
         """
-        self._sysLogger_debug("开始同步配置项")
+        sysLogger.debug(f"[{self._service_name}] 开始同步配置项")
         if len(args) != 2:
             sysLogger.error(
                 f"[{self._service_name}] 同步配置任务参数个数不合法, 参数个数需为2, 得到的任务参数个数: {len(args)}"
@@ -99,7 +104,7 @@ class BaseService:
         if args[0] == "LOGS_PATH":
             sysLogger.reload()
             sharerLogger.reload()
-        self._sysLogger_debug("同步配置完成")
+        sysLogger.debug(f"[{self._service_name}] 同步配置完成")
 
     def _change_free_secret(self, uuid: str, value: bool) -> None:
         """
@@ -113,15 +118,6 @@ class BaseService:
             None
         """
         raise NotImplException("实现service对象的类必须有定义`_change_free_secret`方法")
-
-    def _sysLogger_debug(self, msg) -> None:
-        """
-        添加系统debug日志
-
-        Args:
-            msg: 要添加的日志内容
-        """
-        sysLogger.debug(f"[{self._service_name}] {msg}")
 
     def run(self) -> None:
         """

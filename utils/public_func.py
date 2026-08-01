@@ -25,6 +25,7 @@ import toml
 from PyQt5.Qt import QApplication, QWidget
 from PyQt5.QtGui import QGuiApplication
 from model import public_types as ptype
+from model.browse import BrowseFileDictModel
 from .response_code import RET, MSG_MAP
 
 
@@ -255,7 +256,7 @@ def window_reservation_when_box_destroyed(show_box: Callable) -> Callable:
     return _inner
 
 
-def update_downloadUrl_with_hitLog(fileDict: Dict[str, Any]) -> None:
+def update_downloadUrl_with_hitLog(fileDict: BrowseFileDictModel) -> None:
     """
     更新download_url, 以便告知服务端存储下载记录日志
 
@@ -265,8 +266,8 @@ def update_downloadUrl_with_hitLog(fileDict: Dict[str, Any]) -> None:
     Returns:
         None
     """
-    if ptype.HIT_LOG not in fileDict["downloadUrl"]:
-        new_download_url = f"{fileDict['downloadUrl']}?{ptype.HIT_LOG}=true"
+    if ptype.HIT_LOG not in fileDict.downloadUrl:
+        new_download_url = f"{fileDict.downloadUrl}?{ptype.HIT_LOG}=true"
         fileDict.update({"downloadUrl": new_download_url})
 
 

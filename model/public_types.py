@@ -36,6 +36,22 @@ class ShareType(str, Enum):
     ftp = "ftp"
 
 
+# browse status
+class BrowseStatus(int, Enum):
+    """
+    访问状态枚举类
+    """
+
+    ConnectErr = 0
+    NotFoundErr = 1
+    ServerErr = 2
+    UnDefineErr = 3
+    Succ = 4
+
+    def __str__(self):
+        return f"BrowseStatus.{self.name}"
+
+
 # download status
 class DownloadStatus(int, Enum):
     """
@@ -46,6 +62,9 @@ class DownloadStatus(int, Enum):
     PAUSE = 1
     SUCCESS = 2
     FAILED = 3
+
+    def __str__(self):
+        return f"DownloadStatus.{self.name}"
 
 
 # verify status
@@ -58,6 +77,9 @@ class VerifyStatus(int, Enum):
     WARN = 1
     FATAL = 2
     DONE = 3
+
+    def __str__(self):
+        return f"VerifyStatus.{self.name}"
 
 
 # theme color

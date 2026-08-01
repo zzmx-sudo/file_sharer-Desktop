@@ -1,17 +1,23 @@
-__all__ = ["BrowseFileDictModel"]
+__all__ = ["BrowseFileDictModel", "BrowseFileDataModel"]
 
-from typing import Dict, Any
+import logging
+from typing import Dict, Any, List
+from dataclasses import dataclass
 
-from utils.logger import sysLogger
+from exceptions import OperationException
 
 
 class BrowseFileDictModel(dict):
-    def __init__(self):
+    def __init__(self, _sentinel: bool = False):
         """
         浏览目录文件集类初始化函数
         """
         super(BrowseFileDictModel, self).__init__()
         self._current_dict = self
+        if not _sentinel:
+            self._prev = BrowseFileDictModel(True)
+        else:
+            self._prev = None
 
     def prev(self) -> None:
         """
@@ -20,7 +26,11 @@ class BrowseFileDictModel(dict):
         Returns:
             None
         """
-        self._current_dict = self._current_dict["prev"]
+        prev = self._current_dict._prev
+        if prev is None or prev._prev is None:
+            self.sysLogger.error("系统错误, 无上级路径的目录下触发了返回上一层")
+            return
+        self._current_dict = prev
 
     def reload(self) -> None:
         """
@@ -32,7 +42,7 @@ class BrowseFileDictModel(dict):
         self._current_dict = self
 
     @property
-    def currentDict(self) -> Dict[str, Any]:
+    def currentDict(self) -> "BrowseFileDictModel":
         """
         当前目录文件集
 
@@ -42,17 +52,17 @@ class BrowseFileDictModel(dict):
         return self._current_dict
 
     @currentDict.setter
-    def currentDict(self, newVaule: Dict[str, Any]) -> None:
+    def currentDict(self, newValue: "BrowseFileDictModel") -> None:
         """
         修改当前目录文件集
 
         Args:
-            newVaule: 将要修改的目录文件集
+            newValue: 将要修改的目录文件集
 
         Returns:
             None
         """
-        self._current_dict = newVaule
+        self._current_dict = newValue
 
     @property
     def isRoot(self) -> bool:
@@ -62,7 +72,11 @@ class BrowseFileDictModel(dict):
         Returns:
             bool: 当前是否为主目录文件集
         """
-        return self._current_dict == self
+        return self._current_dict is self
+
+    @isRoot.setter
+    def isRoot(self, newVaule: Dict[str, Any]) -> None:
+        raise OperationException("isRoot属性不可修改")
 
     @property
     def isDir(self) -> bool:
@@ -74,8 +88,131 @@ class BrowseFileDictModel(dict):
         """
         return bool(self["isDir"])
 
+    @isDir.setter
+    def isDir(self, newVaule: Dict[str, Any]) -> None:
+        raise OperationException("isDir属性不可修改")
+
+    @property
+    def children(self) -> List["BrowseFileDictModel"]:
+        """
+        子集文件列表, 当前若不是文件夹, 则返回空列表
+
+        Returns:
+            List["BrowseFileDictModel"]: 子集文件列表
+        """
+        return self.get("children", [])
+
+    @children.setter
+    def children(self, newVaule: List["BrowseFileDictModel"]) -> None:
+        raise OperationException("children属性不可通过该方式修改")
+
+    @property
+    def fileName(self) -> str:
+        """
+        文件名称
+
+        Returns:
+            str: 文件名称
+        """
+        return self["fileName"]
+
+    @fileName.setter
+    def fileName(self, newVaule: str) -> None:
+        raise OperationException("fileName属性不可修改")
+
+    @property
+    def shareType(self) -> str:
+        """
+        文件的分享类型
+
+        Returns:
+            str: 文件的分享类型
+        """
+        return self["shareType"]
+
+    @shareType.setter
+    def shareType(self, newVaule: str) -> None:
+        raise OperationException("shareType属性不可修改")
+
+    @property
+    def downloadUrl(self) -> str:
+        """
+        下载链接
+
+        Returns:
+            str: 下载链接
+        """
+        return self["downloadUrl"]
+
+    @downloadUrl.setter
+    def downloadUrl(self, newVaule: str) -> None:
+        raise OperationException("downloadUrl不可通过该方式修改")
+
+    @property
+    def relativePath(self) -> str:
+        """
+        相对主目录的路径
+
+        Returns:
+            str: 相对主目录的路径
+        """
+        return self["relativePath"]
+
+    @relativePath.setter
+    def relativePath(self, newValue: str) -> None:
+        raise OperationException("relativePath属性不可修改")
+
+    @property
+    def uuid(self) -> str:
+        """
+        uuid属性
+
+        Returns:
+            str: uuid属性
+        """
+        return self["uuid"]
+
+    @uuid.setter
+    def uuid(self, newValue: str) -> None:
+        raise OperationException("uuid属性不可修改")
+
+    @property
+    def oriUuid(self) -> str:
+        """
+        作为下载源头的父级文件对象uuid属性, 未加入下载时为`NotFound`
+
+        Returns:
+            str: 下载源头的文件对象uuid属性
+        """
+        return self.get("oriUuid", "NotFound")
+
+    @oriUuid.setter
+    def oriUuid(self, newValue: str) -> None:
+        """
+        修改下载源头的文件对象uuid属性
+
+        Args:
+            newValue: 欲修改的uuid属性值
+
+        Returns:
+            None
+        """
+        self["oriUuid"] = newValue
+
+    @property
+    def sysLogger(self) -> logging.Logger:
+        """
+        sysLogger
+
+        Returns:
+            logging.Logger: logger.sysLogger
+        """
+        from utils.logger import sysLogger
+
+        return sysLogger
+
     @classmethod
-    def load(cls, data: Dict[str, Any]) -> "BrowseFileDictModel":
+    def load(cls, data: Dict[str, Any], with_log: bool = True) -> "BrowseFileDictModel":
         """
         加载数据为目录集
 
@@ -85,29 +222,80 @@ class BrowseFileDictModel(dict):
         Returns:
             BrowseFileDictModel: 浏览目录文件集对象
         """
-        sysLogger.debug("开始读取分享链接的数据")
         model = cls()
+        if with_log:
+            model.sysLogger.debug("开始读取分享链接的数据")
         if not data:
             return model
 
+        model.update(data)
         if data["isDir"]:
-            data = cls._load_dict_recursive(data)
+            child_list = cls._load_children(data)
+            for child in child_list:
+                child._prev = model
+            model.update({"children": child_list})
 
-        for key, value in data.items():
-            model[key] = value
-
-        sysLogger.debug("读取分享链接的数据完成")
+        if with_log:
+            model.sysLogger.debug("读取分享链接的数据完成")
         return model
 
     @classmethod
-    def _load_dict_recursive(cls, data: dict) -> dict:
-        children = data["children"]
-        data["children"] = []
-        for child in children:
-            child = [x for x in child.values()][0]
-            data["children"].append(child)
-            if child["isDir"]:
-                child["prev"] = data
-                cls._load_dict_recursive(child)
+    def _load_children(cls, data: Dict[str, Any]) -> List["BrowseFileDictModel"]:
+        child_list = [cls.load(child, False) for child in data["children"]]
 
-        return data
+        return child_list
+
+
+@dataclass
+class BrowseFileDataModel:
+    """下载文件对象Map表"""
+
+    __doc__ = """
+    nativeObj: 原始下载文件对象
+    downloadList: 拆分后的需下载的文件对象列表
+    count: 该文件对象下文件个数
+    """
+
+    nativeObj: BrowseFileDictModel
+    downloadList: List[BrowseFileDictModel]
+    __file_count: int
+    __finish_count: int = 0
+
+    @property
+    def isDir(self) -> bool:
+        """
+        当前下载文件对象是否为文件夹
+
+        Returns:
+            bool: 当前是否为文件夹
+        """
+        return self.nativeObj.isDir
+
+    @property
+    def progress(self) -> int:
+        """
+        当前下载对象的下载进度
+
+        Returns:
+            int: 下载进度
+        """
+        return int(self.__finish_count * 100 / self.__file_count)
+
+    @property
+    def allDone(self) -> bool:
+        """
+        所有文件是否均下载完成
+
+        Returns:
+            bool: 所有文件是否均下载完成
+        """
+        return not self.downloadList and self.__finish_count == self.__file_count
+
+    def increase(self) -> None:
+        """
+        下载成功文件个数+1
+
+        Returns:
+            None
+        """
+        self.__finish_count += 1

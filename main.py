@@ -1,9 +1,8 @@
 import os
 import sys
-import copy
 import traceback
 from multiprocessing import Queue
-from typing import Union, Dict, Any, Tuple, List, Sequence
+from typing import Union, Dict, Any, Tuple, Optional
 
 from PyQt5.QtWidgets import (
     QMainWindow,
@@ -11,6 +10,7 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QButtonGroup,
     QPushButton,
+    QTableWidget,
 )
 from PyQt5.Qt import QApplication, QIcon
 from PyQt5 import QtGui
@@ -23,7 +23,7 @@ from model.sharing import FuseSharingModel
 from model.file import FileModel, DirModel
 from model.public_types import ShareType as shareType
 from model.public_types import ThemeColor as themeColor
-from model.public_types import DownloadStatus
+from model.public_types import BrowseStatus, DownloadStatus
 from model.qt_thread import *
 from model.browse import BrowseFileDictModel
 from model.assert_env import AssertEnvWindow
@@ -32,7 +32,6 @@ from model.QRCode import QRCodeWindow
 from utils.credentials import Credentials
 from utils.public_func import (
     generate_uuid,
-    update_downloadUrl_with_hitLog,
     resize_window,
 )
 
@@ -168,7 +167,7 @@ class MainWindow(QMainWindow):
         self._ui_function.show_info_messageBox(f"操作成功, 本次成功关闭分享个数: {close_count}")
 
     def create_download_record_and_start(
-        self, fileDict: Union[None, Dict[str, Any]] = None
+        self, fileDict: Optional[BrowseFileDictModel] = None
     ) -> None:
         """
         当发生下载意愿时的回调
@@ -184,7 +183,7 @@ class MainWindow(QMainWindow):
         if fileDict:
             if (
                 self._ui_function.show_question_messageBox(
-                    f"当前正要下载文件: {fileDict.get('fileName', '未知文件名')}, 确认是否下载？",
+                    f"当前正要下载文件: {fileDict.fileName}, 确认是否下载？",
                     "确认是否下载",
                     "没错, 我就要下载它",
                     "点错了",
@@ -193,23 +192,17 @@ class MainWindow(QMainWindow):
             ):
                 self.ui.downloadDirButton.setEnabled(self._browse_data.isDir)
                 return
-            copy_fileDict = copy.copy(fileDict)
-            copy_fileDict.update({"relativePath": copy_fileDict["fileName"]})
-            sysLogger.debug("给下载路径添加HIT_LOG标志")
-            update_downloadUrl_with_hitLog(copy_fileDict)
-            fileList = [copy_fileDict]
-            fileCount = 1
         else:
-            fileList, fileCount = self._generate_fileList_recursive()
-        self._append_download_fileList(fileList)
+            fileDict = self._browse_data.currentDict
+        self._append_download_file(fileDict)
 
-        sysLogger.info(f"加入下载成功, 此次下载文件个数: {fileCount}")
+        sysLogger.info(f"加入下载成功, 文件: {fileDict.fileName}")
         self._ui_function.show_info_messageBox("加入下载成功")
         self.ui.removeDownloadsButton.setEnabled(True)
 
         self.ui.downloadDirButton.setEnabled(self._browse_data.isDir)
 
-    def enter_dir(self, fileDict: Dict[str, Any]) -> None:
+    def enter_dir(self, fileDict: BrowseFileDictModel) -> None:
         """
         浏览文件时点击文件夹的回调
 
@@ -221,7 +214,7 @@ class MainWindow(QMainWindow):
         """
         sysLogger.debug("浏览文件夹被点击, 正在进入该文件夹")
         self._browse_data.currentDict = fileDict
-        self._UIClass.show_file_list(self, self._browse_data.currentDict)
+        self._UIClass.show_file_list(self)
         self.ui.backupButton.setEnabled(True)
         sysLogger.debug("进入文件夹成功")
 
@@ -438,7 +431,7 @@ class MainWindow(QMainWindow):
         sysLogger.debug("初始化必要属性")
         from model.download import DownloadFileDictModel
 
-        self._prev_browse_url, self._is_browse_succ = "", False
+        self._prev_browse_url = ""
         self._browse_data = BrowseFileDictModel.load({})
         self._download_data = DownloadFileDictModel(self)
 
@@ -682,7 +675,7 @@ class MainWindow(QMainWindow):
         if browse_url == self._prev_browse_url and self._is_browse_succ:
             if self._browse_data:
                 self._load_browse_url_reload()
-                self._UIClass.show_file_list(self, self._browse_data)
+                self._UIClass.show_file_list(self)
                 sysLogger.info("相同的链接使用缓存加载完成")
             return
         self._prev_browse_url = browse_url
@@ -693,7 +686,9 @@ class MainWindow(QMainWindow):
             self._browse_thread.quit()
         sysLogger.debug("初始化加载分享链接任务并开启")
         self._browse_thread = LoadBrowseUrlThread(browse_url)
-        self._browse_thread.signal.connect(self._show_file_list)
+        self._browse_thread.signal.connect(
+            lambda x: self._show_browse_data(browse_url, x)
+        )
         self._browse_thread.start()
         sysLogger.debug("加载分享链接任务开启成功")
 
@@ -706,41 +701,28 @@ class MainWindow(QMainWindow):
         sysLogger.debug("重制加载分享链接")
         self._browse_data.reload()
 
-    def _show_file_list(self, browse_response: Dict[str, Any]) -> None:
+    def _show_browse_data(
+        self, browse_url: str, status_data: Tuple[BrowseStatus, BrowseFileDictModel]
+    ) -> None:
         sysLogger.debug("正在显示分享链接加载的数据")
-        self._is_browse_succ = False
-        if (
-            not browse_response
-            or not isinstance(browse_response, dict)
-            or not browse_response.get("errno")
-        ):
-            sysLogger.warning("分享服务器异常, 未能连接服务器或服务器返回非法数据")
-            self._browse_data = BrowseFileDictModel.load({})
-            self._UIClass.show_error_browse(self)
-        elif browse_response.get("errno", 0) == 404:
-            sysLogger.warning("来晚了, 分享的文件/文件夹已被删除")
-            self._browse_data = BrowseFileDictModel.load({})
+        browse_status, self._browse_data = status_data
+        if browse_status is BrowseStatus.ConnectErr:
             self._UIClass.show_not_found_browse(self)
-        elif browse_response.get("errno", 0) == 500:
-            sysLogger.warning("分享服务器存在异常")
-            self._browse_data = BrowseFileDictModel.load({})
+            self._prev_browse_url = ""
+        elif browse_status is BrowseStatus.NotFoundErr:
+            self._UIClass.show_not_found_browse(self)
+            self._prev_browse_url = ""
+        elif browse_status is BrowseStatus.ServerErr:
             self._UIClass.show_server_error_browse(self)
-        elif browse_response.get("errno", 0) == 200:
-            browse_data = browse_response.get("data", {})
-            if not self._verify_data(browse_data):
-                sysLogger.warning("分享服务器返回的数据格式存在非标")
-                self._browse_data = BrowseFileDictModel.load({})
-                self._UIClass.show_server_error_browse(self)
-            else:
-                sysLogger.debug("分享链接数据正确返回, 正在显示")
-                self._browse_data = BrowseFileDictModel.load(browse_data)
-                self._UIClass.show_file_list(self, self._browse_data)
-                self._is_browse_succ = True
-                sysLogger.debug("分享链接数据加载并显示完成")
+            self._prev_browse_url = ""
+        elif browse_status is BrowseStatus.UnDefineErr:
+            self._UIClass.show_server_error_browse(self)
+            self._prev_browse_url = ""
         else:
-            sysLogger.error(f"发生未知错误, 返回的response: {browse_response}")
-            self._browse_data = BrowseFileDictModel.load({})
-            self._UIClass.show_server_error_browse(self)
+            self._UIClass.show_file_list(self)
+            self._prev_browse_url = browse_url
+
+        sysLogger.debug("显示分享链接加载的数据完成")
         self._browse_thread = None
         self.ui.shareLinkButton.setText("点击加载")
         self.ui.shareLinkButton.setEnabled(True)
@@ -749,70 +731,73 @@ class MainWindow(QMainWindow):
     def _backup_button_clicked(self) -> None:
         sysLogger.debug("正在返回上一级目录")
         self._browse_data.prev()
-        self._UIClass.show_file_list(self, self._browse_data.currentDict)
+        self._UIClass.show_file_list(self)
         self.ui.backupButton.setEnabled(not self._browse_data.isRoot)
         sysLogger.debug("返回上一级路径完成")
 
-    def _generate_fileList_recursive(self) -> Tuple[List[Dict[str, Any]], int]:
-        sysLogger.debug("下载的是文件夹, 正在获取下载文件列表和文件个数")
-
-        def _generate_fileList_recursive_inner(
-            fileList: List[Dict[str, Any]], fileDict: Dict[str, Any]
-        ) -> List[Dict[str, Any]]:
-            copy_fileDict = copy.deepcopy(fileDict)
-            dir_name = copy_fileDict["fileName"]
-            for children in copy_fileDict["children"]:
-                relativePath = os.path.join(dir_name, children["fileName"])
-                if children["isDir"]:
-                    children.update({"fileName": relativePath})
-                    _generate_fileList_recursive_inner(fileList, children)
-                else:
-                    children.update({"relativePath": relativePath})
-                    fileList.append(children)
-
-                QApplication.processEvents()
-
-            return fileList
-
-        current_fileDict = self._browse_data.currentDict
-        parent_fileDict = copy.copy(current_fileDict)
-        sysLogger.debug("给下载路径添加HIT_LOG标志")
-        update_downloadUrl_with_hitLog(parent_fileDict)
-        fileList = [parent_fileDict]
-
-        fileList = _generate_fileList_recursive_inner(fileList, parent_fileDict)
-        sysLogger.debug("获取文件下载列表和文件个数完成")
-        return fileList, len(fileList) - 1
-
-    def _append_download_fileList(self, fileList: Sequence[Dict[str, Any]]) -> None:
+    def _append_download_file(self, fileDict: BrowseFileDictModel) -> None:
         sysLogger.debug("添加下载记录并开启下载")
-        self._UIClass.add_download_table_item(self, fileList)
+        self._UIClass.add_download_table_item(self, fileDict)
         sysLogger.debug("添加下载记录完成")
 
-        if fileList[0]["stareType"] == "ftp":
+        if fileDict.shareType == "ftp":
             if self._download_ftp_thread is None:
                 sysLogger.debug("正在初始化ftp分享文件下载")
-                self._download_ftp_thread = DownloadFtpFileThread(fileList)
+                self._download_ftp_thread = DownloadFtpFileThread(fileDict)
                 self._download_ftp_thread.signal.connect(self._update_download_status)
                 self._download_ftp_thread.start()
                 sysLogger.debug("初始化ftp分享文件下载成功")
             else:
                 sysLogger.debug("正在追加ftp分享文件下载")
-                self._download_ftp_thread.append(fileList)
+                self._download_ftp_thread.append(fileDict)
                 sysLogger.debug("追加ftp分享文件下载成功")
             sysLogger.debug("添加ftp分享文件下载成功")
         else:
             if self._download_http_thread is None:
                 sysLogger.debug("正在初始化http分享文件下载")
-                self._download_http_thread = DownloadHttpFileThread(fileList)
+                self._download_http_thread = DownloadHttpFileThread(fileDict)
                 self._download_http_thread.signal.connect(self._update_download_status)
                 self._download_http_thread.start()
                 sysLogger.debug("初始化http分享文件下载成功")
             else:
                 sysLogger.debug("正在追加http分享文件下载")
-                self._download_http_thread.append(fileList)
+                self._download_http_thread.append(fileDict)
                 sysLogger.debug("追加ftp分享文件下载成功")
             sysLogger.debug("添加http分享文件下载完成")
+
+    def _resume_download_file(self, fileDict: BrowseFileDictModel) -> None:
+        sysLogger.debug("重新下载")
+        if fileDict.shareType == "ftp":
+            if self._download_ftp_thread is None:
+                sysLogger.error(f"发生错误, 未初始化FTP下载器时触发重新下载, 路径: {fileDict.relativePath}")
+                return
+            self._download_ftp_thread.resume(fileDict)
+        else:
+            if self._download_http_thread is None:
+                sysLogger.error(
+                    f"发生错误, 未初始化HTTP下载器时触发重新下载, 路径: {fileDict.relativePath}"
+                )
+                return
+            self._download_http_thread.resume(fileDict)
+        self._UIClass.add_download_table_item(self, fileDict)
+
+    def _remove_download_item(
+        self, fileDict: BrowseFileDictModel, tableWidget: QTableWidget
+    ) -> None:
+        sysLogger.debug("移除下载")
+        if fileDict.shareType == "ftp":
+            if self._download_ftp_thread is None:
+                sysLogger.error(f"发生错误, 未初始化FTP下载器时触发移除下载, 路径: {fileDict.relativePath}")
+                return
+            self._download_ftp_thread.remove(fileDict)
+        else:
+            if self._download_http_thread is None:
+                sysLogger.error(
+                    f"发生错误, 未初始化HTTP下载器时触发移除下载, 路径: {fileDict.relativePath}"
+                )
+                return
+            self._download_http_thread.remove(fileDict)
+        self._download_data._remove_download_item(fileDict, tableWidget)
 
     def _change_free_secret(self, fileObj: Union[FileModel, DirModel]) -> None:
         sysLogger.debug("正在打开/关闭临时免密")
@@ -827,38 +812,6 @@ class MainWindow(QMainWindow):
             if settings.IS_WINDOWS:
                 folder_path = folder_path.replace("/", "\\")
             lineEdit.setText(folder_path)
-
-    def _verify_data(self, data: Dict[str, Any]) -> bool:
-        sysLogger.debug("正在校验分享链接对应服务器返回数据的格式")
-        if not data or not isinstance(data, dict):
-            return False
-        status = True
-        isDir = data.get("isDir")
-        if isDir is None:
-            return False
-        if isDir:
-            other_full_keys = [
-                "uuid",
-                "downloadUrl",
-                "fileName",
-                "stareType",
-                "children",
-            ]
-        else:
-            other_full_keys = ["uuid", "downloadUrl", "fileName", "stareType"]
-        if not all(key in data for key in other_full_keys):
-            return False
-        if isDir:
-            for child in data["children"]:
-                try:
-                    if len(child) != 1:
-                        return False
-                    for file_dict in child.values():
-                        status &= self._verify_data(file_dict)
-                except AttributeError:
-                    return False
-
-        return status
 
     def _calc_file_count(self, base_path: str, initial_count: int = 0) -> int:
         sysLogger.debug("正在计算文件夹下文件个数")
@@ -880,7 +833,7 @@ class MainWindow(QMainWindow):
         return initial_count
 
     def _update_download_status(
-        self, status_tuple: Tuple[Dict[str, Any], DownloadStatus, str]
+        self, status_tuple: Tuple[BrowseFileDictModel, DownloadStatus, Union[str, int]]
     ) -> None:
         sysLogger.debug("正在更新下载状态")
         self._download_data.update_download_status(

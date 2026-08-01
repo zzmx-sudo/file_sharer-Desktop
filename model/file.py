@@ -226,19 +226,6 @@ class FileModel:
         return self._ftp_base_path
 
     @property
-    def ftp_cwd(self) -> str:
-        """
-        文件对象对于FTP服务根目录的相对路径
-
-        Returns:
-            str: 文件对象对于FTP服务根目录的相对路径
-        """
-        result = os.path.dirname(self._target_path.replace(self._ftp_base_path, "", 1))
-        if settings.IS_WINDOWS:
-            result = result.replace("\\", "/")
-        return result
-
-    @property
     def browse_url(self) -> str:
         """
         文件对象浏览的url
@@ -352,7 +339,7 @@ class FileModel:
             "uuid": self._uuid,
             "downloadUrl": self.download_url,
             "fileName": self.file_name,
-            "stareType": self._share_type.value,
+            "shareType": self._share_type.value,
             "isDir": self.isDir,
         }
 
@@ -384,7 +371,6 @@ class FileModel:
             "port": self._ftp_port,
             "user": "a",
             "passwd": self._ftp_pwd,
-            "cwd": self.ftp_cwd,
             "filename": self.file_name,
         }
 
@@ -399,7 +385,7 @@ class FileModel:
             "uuid": self._uuid,
             "downloadUrl": self.download_url,
             "fileName": self.file_name,
-            "stareType": self._share_type.value,
+            "shareType": self._share_type.value,
             "isDir": self.isDir,
             "browseUrl": self.browse_url,
             "targetPath": self._target_path,
@@ -576,7 +562,7 @@ class DirModel(FileModel):
             "uuid": self._uuid,
             "downloadUrl": self.download_url,
             "fileName": self.file_name,
-            "stareType": self._share_type.value,
+            "shareType": self._share_type.value,
             "isDir": self.isDir,
             "children": children,
         }
@@ -617,7 +603,7 @@ class DirModel(FileModel):
             "uuid": self._uuid,
             "downloadUrl": self.download_url,
             "fileName": self.file_name,
-            "stareType": self._share_type.value,
+            "shareType": self._share_type.value,
             "isDir": self.isDir,
             "browseUrl": self.browse_url,
             "targetPath": self._target_path,

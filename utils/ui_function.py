@@ -1,7 +1,7 @@
 __all__ = ["UiFunction"]
 
 import webbrowser
-from typing import Union, Optional, Dict, Any, Sequence, Tuple
+from typing import Union, Optional, Tuple
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QListView, QComboBox
@@ -563,20 +563,19 @@ class UiFunction:
         table_item.setForeground(QColor(154, 96, 2))
         self.ui.fileListTable.setItem(0, 0, table_item)
 
-    def show_file_list(
-        self: MainWindow, fileDict: Union[Dict[str, Any], BrowseFileDictModel]
-    ) -> None:
+    def show_file_list(self: MainWindow) -> None:
         """
         显示加载链接文件列表
 
         Args:
-            fileDict: 文件列表对象
+            self: MainWindow
 
         Returns:
             None
         """
         sysLogger.debug("正在显示分享链接加载后文件列表")
-        if not fileDict["isDir"]:
+        fileDict = self._browse_data.currentDict
+        if not fileDict.isDir:
             self.ui.fileListTable.setRowCount(0)
             self.ui.fileListTable.setRowCount(1)
             file_button = self._UIClass.generate_file_button(self, fileDict)
@@ -587,7 +586,7 @@ class UiFunction:
             self.ui.downloadDirButton.setEnabled(True)
 
     def generate_file_button(
-        self: MainWindow, fileDict: Union[Dict[str, Any], BrowseFileDictModel]
+        self: MainWindow, fileDict: BrowseFileDictModel
     ) -> QPushButton:
         """
         生成文件按钮控件
@@ -598,7 +597,7 @@ class UiFunction:
         Returns:
             QPushButton: 文件按钮控件
         """
-        file_name = fileDict["fileName"]
+        file_name = fileDict.fileName
         button = QPushButton(file_name)
         button.setStyleSheet(self._ui_function.file_dir_button_style())
         file_icon = QIcon()
@@ -609,7 +608,9 @@ class UiFunction:
         button.clicked.connect(lambda: self.create_download_record_and_start(fileDict))
         return button
 
-    def generate_dir_button(self: MainWindow, fileDict: Dict[str, Any]) -> QPushButton:
+    def generate_dir_button(
+        self: MainWindow, fileDict: BrowseFileDictModel
+    ) -> QPushButton:
         """
         生成文件夹按钮控件
 
@@ -619,7 +620,7 @@ class UiFunction:
         Returns:
             QPushButton: 文件夹按钮控件
         """
-        dir_name = fileDict["fileName"]
+        dir_name = fileDict.fileName
         button = QPushButton(dir_name)
         button.setStyleSheet(self._ui_function.file_dir_button_style())
         dir_icon = QIcon()
@@ -630,9 +631,7 @@ class UiFunction:
         button.clicked.connect(lambda: self.enter_dir(fileDict))
         return button
 
-    def set_dir_table(
-        self: MainWindow, fileDict: Union[Dict[str, Any], BrowseFileDictModel]
-    ) -> None:
+    def set_dir_table(self: MainWindow, fileDict: BrowseFileDictModel) -> None:
         """
         配置文件夹下各子文件/子文件夹按钮控件
 
@@ -643,7 +642,7 @@ class UiFunction:
             None
         """
         self.ui.fileListTable.setRowCount(0)
-        children = fileDict.get("children")
+        children = fileDict.children
         if not children:
             self.ui.fileListTable.setRowCount(1)
             table_item = QTableWidgetItem("该文件夹下空空如也~")
@@ -653,102 +652,94 @@ class UiFunction:
         else:
             self.ui.fileListTable.setRowCount(len(children))
             for index, childDict in enumerate(children):
-                if childDict["isDir"]:
+                if childDict.isDir:
                     table_item = self._UIClass.generate_dir_button(self, childDict)
                 else:
                     table_item = self._UIClass.generate_file_button(self, childDict)
                 self.ui.fileListTable.setCellWidget(index, 0, table_item)
 
     def add_download_table_item(
-        self: MainWindow, fileList: Sequence[Dict[str, Any]]
+        self: MainWindow, fileDict: BrowseFileDictModel
     ) -> None:
         """
         追加下载记录到下载列表表格控件
 
         Args:
-            fileList: 下载文件对象列表
+            fileDict: 下载文件对象
 
         Returns:
             None
         """
-        if fileList[0]["isDir"]:
-            table_fileList = fileList[1:]
-        else:
-            table_fileList = fileList
-
         row_count = self._download_data.length
-        shareType = fileList[0]["stareType"]
-        for fileObj in table_fileList:
-            fileName = fileObj["relativePath"]
-            try:
-                index = self._download_data.index(fileObj)
-            except ValueError:
-                row_index = row_count
-                row_count += 1
-                self.ui.downloadListTable.setRowCount(row_count)
-                fileName_item = QTableWidgetItem(fileName)
-                fileName_item.setForeground(QColor(0, 0, 0))
-                fileName_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-                self.ui.downloadListTable.setItem(
-                    row_index, self._ui_function._download_fileName_col, fileName_item
-                )
-
-                init_progressBar = self._ui_function.init_download_progressBar()
-                self.ui.downloadListTable.setCellWidget(
-                    row_index,
-                    self._ui_function._download_progress_col,
-                    init_progressBar,
-                )
-                self._download_data.append(fileObj)
-            else:
-                row_index = index
-                self.ui.downloadListTable.item(
-                    row_index, self._ui_function._download_fileName_col
-                ).setText(fileName)
-
-                progressBar = self.ui.downloadListTable.cellWidget(
-                    row_index, self._ui_function._download_progress_col
-                )
-                self._ui_function.progressBar_change_to_normal(progressBar)
-
-            init_pushButton = self._ui_function.init_download_pushButton(
-                shareType, fileObj
+        fileName = fileDict.relativePath
+        shareType = fileDict.shareType
+        try:
+            index = self._download_data.index(fileDict)
+        except ValueError:
+            row_index = row_count
+            row_count += 1
+            self.ui.downloadListTable.setRowCount(row_count)
+            fileName_item = QTableWidgetItem(fileName)
+            fileName_item.setForeground(QColor(0, 0, 0))
+            fileName_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            self.ui.downloadListTable.setItem(
+                row_index, self._ui_function._download_fileName_col, fileName_item
             )
+
+            init_progressBar = self._ui_function.init_download_progressBar()
             self.ui.downloadListTable.setCellWidget(
-                row_index, self._ui_function._download_options_col, init_pushButton
+                row_index,
+                self._ui_function._download_progress_col,
+                init_progressBar,
             )
+            self._download_data.append(fileDict)
+        else:
+            row_index = index
+            self.ui.downloadListTable.item(
+                row_index, self._ui_function._download_fileName_col
+            ).setText(fileName)
 
-            QApplication.processEvents()
+            progressBar = self.ui.downloadListTable.cellWidget(
+                row_index, self._ui_function._download_progress_col
+            )
+            self._ui_function.progressBar_change_to_normal(progressBar)
+
+        init_pushButton = self._ui_function.init_download_pushButton(
+            shareType, fileDict
+        )
+        self.ui.downloadListTable.setCellWidget(
+            row_index, self._ui_function._download_options_col, init_pushButton
+        )
 
     def init_download_pushButton(
-        self, shareType: str, fileObj: Dict[str, Any]
+        self, shareType: str, fileDict: BrowseFileDictModel
     ) -> QPushButton:
         """
         初始化下载记录的按钮控件
 
         Args:
             shareType: 下载记录对应文件的分享类型
-            fileObj: 下载记录对应的文件对象
+            fileDict: 下载记录对应的文件对象
 
         Returns:
             QPushButton: 下载记录的按钮控件
         """
 
-        def _pause_download(shareType: str, fileObj: dict):
+        def _pause_download(shareType: str, fileDict: BrowseFileDictModel):
             if shareType == "http":
                 if self._main_window._download_http_thread is None:
                     self.show_info_messageBox("暂停失败, 下载线程还未初始化, 请等待所有文件加入下载成功后再点击")
                     return
-                self._main_window._download_http_thread.pause(fileObj)
+                self._main_window._download_http_thread.pause(fileDict)
             else:
                 if self._main_window._download_ftp_thread is None:
                     self.show_info_messageBox("暂停失败, 下载线程还未初始化, 请等待所有文件加入下载成功后再点击")
                     return
-                self._main_window._download_ftp_thread.pause(fileObj)
+                self._main_window._download_ftp_thread.pause(fileDict)
 
         pushButton = QPushButton(self._pause_button_str)
         pushButton.setStyleSheet(self.download_pause_button_style())
-        pushButton.clicked.connect(lambda: _pause_download(shareType, fileObj))
+        pushButton.clicked.connect(lambda: _pause_download(shareType, fileDict))
 
         return pushButton
 

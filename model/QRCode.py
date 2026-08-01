@@ -2,6 +2,7 @@ __all__ = ["QRCodeWindow"]
 
 
 import io
+import logging
 from typing import Union
 
 from PyQt5 import QtWidgets, QtCore, QtGui
@@ -14,7 +15,6 @@ from PIL import Image, ImageDraw
 from model.public_types import ThemeColor as themeColor
 from model.file import FileModel, DirModel
 from settings import settings
-from utils.logger import sysLogger
 
 
 class QRCodeWindow(QDialog):
@@ -81,7 +81,7 @@ class QRCodeWindow(QDialog):
         """
         self._fileObj = fileObj
         browse_url = fileObj.mobile_browse_url
-        sysLogger.debug(f"开始显示二维码, 浏览URL: {browse_url}")
+        self.sysLogger.debug(f"开始显示二维码, 浏览URL: {browse_url}")
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -98,7 +98,7 @@ class QRCodeWindow(QDialog):
         image.loadFromData(fp.getvalue(), "PNG")
         pixmap = QtGui.QPixmap.fromImage(image)
         self.qrcode_label.setPixmap(pixmap)
-        sysLogger.debug("二维码插入成功")
+        self.sysLogger.debug("二维码插入成功")
 
     @staticmethod
     def add_rounded_corners(image: GenericImage, radius: int = 12) -> GenericImage:
@@ -131,16 +131,16 @@ class QRCodeWindow(QDialog):
         Returns:
             None
         """
-        sysLogger.debug("正在修改临时免密按钮样式")
+        self.sysLogger.debug("正在修改临时免密按钮样式")
         if self._fileObj is None or fileObj.uuid != self._fileObj.uuid:
-            sysLogger.error("系统错误, 欲修改免密状态的文件/文件夹对象与当前二维码显示的不一致")
+            self.sysLogger.error("系统错误, 欲修改免密状态的文件/文件夹对象与当前二维码显示的不一致")
             return
 
         self._fileObj.free_secret = not self._fileObj.free_secret
         button_text = "关闭临时免密" if self._fileObj.free_secret else "打开临时免密"
         self.freeSecretButton.setText(button_text)
         self.freeSecretButton.setStyleSheet(self.free_secret_button_style())
-        sysLogger.debug("临时免密按钮样式修改完成")
+        self.sysLogger.debug("临时免密按钮样式修改完成")
 
     def reset_free_secret(self) -> None:
         """
@@ -149,9 +149,9 @@ class QRCodeWindow(QDialog):
         Returns:
             None
         """
-        sysLogger.debug("正在重置(关闭)上一分享文件的临时免密")
+        self.sysLogger.debug("正在重置(关闭)上一分享文件的临时免密")
         if self._fileObj is None:
-            sysLogger.debug("无历史分享, 退出关闭临时免密")
+            self.sysLogger.debug("无历史分享, 退出关闭临时免密")
             return
 
         if self._fileObj.free_secret:
@@ -159,7 +159,7 @@ class QRCodeWindow(QDialog):
             self.freeSecretButton.setText("打开临时免密")
             self.freeSecretButton.setStyleSheet(self.free_secret_button_style())
             self.parent().change_free_secret(self._fileObj)
-        sysLogger.debug("重置(关闭)上一分享文件的临时免密完成")
+        self.sysLogger.debug("重置(关闭)上一分享文件的临时免密完成")
 
     def close(self) -> bool:
         """
@@ -265,3 +265,15 @@ class QRCodeWindow(QDialog):
                 border: 2px solid rgb({control_color.SpecialHovColor});
             }}
             """
+
+    @property
+    def sysLogger(self) -> logging.Logger:
+        """
+        sysLogger
+
+        Returns:
+            logging.Logger: logger.self.self.sysLogger
+        """
+        from utils.logger import sysLogger
+
+        return sysLogger

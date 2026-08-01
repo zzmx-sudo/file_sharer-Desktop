@@ -2,12 +2,12 @@ __all__ = ["SharingModel", "FuseSharingModel"]
 
 import os
 import json
+import logging
 from typing import Union, Optional
 
 from .file import FileModel, DirModel
 from .public_types import ShareType as shareType
 from settings import settings
-from utils.logger import sysLogger
 
 
 class SharingModel(dict):
@@ -49,6 +49,18 @@ class FuseSharingModel(list):
         """
         return len(self)
 
+    @property
+    def sysLogger(self) -> logging.Logger:
+        """
+        sysLogger
+
+        Returns:
+            logging.Logger: logger.sysLogger
+        """
+        from utils.logger import sysLogger
+
+        return sysLogger
+
     def append(self, fileObj: Union[FileModel, DirModel]) -> None:
         """
         追加分享文件/文件夹对象
@@ -59,10 +71,10 @@ class FuseSharingModel(list):
         Returns:
             None
         """
-        sysLogger.debug("追加分享文件对象")
+        self.sysLogger.debug("追加分享文件对象")
         super(FuseSharingModel, self).append(fileObj)
         fileObj.rowIndex = self.length - 1
-        sysLogger.debug("追加分享文件对象完成")
+        self.sysLogger.debug("追加分享文件对象完成")
 
     def remove(self, rowIndex: int) -> None:
         """
@@ -74,11 +86,11 @@ class FuseSharingModel(list):
         Returns:
             None
         """
-        sysLogger.debug("移除分享文件对象")
+        self.sysLogger.debug("移除分享文件对象")
         super(FuseSharingModel, self).pop(rowIndex)
         for index in range(rowIndex, self.length):
             self[index].rowIndex -= 1
-        sysLogger.debug("移除分享文件对象完成")
+        self.sysLogger.debug("移除分享文件对象完成")
 
     def contains(self, target_path: str, share_type: shareType) -> Optional[int]:
         """
@@ -91,7 +103,7 @@ class FuseSharingModel(list):
         Returns:
             Optional[int]: 目标分享文件/文件夹对象的行号
         """
-        sysLogger.debug("检验分享文件对象是否存在")
+        self.sysLogger.debug("检验分享文件对象是否存在")
         for fileObj in self:
             if fileObj == target_path and fileObj.shareType is share_type:
                 return fileObj.rowIndex
@@ -108,7 +120,7 @@ class FuseSharingModel(list):
         Returns:
             Union[FileModel, DirModel, None]: 可复用FTP的文件/文件夹对象
         """
-        sysLogger.debug("获取可复用的FTP")
+        self.sysLogger.debug("获取可复用的FTP")
         basePath_file_params: dict = {}
         for fileObj in self:
             if fileObj.shareType is shareType.ftp:
@@ -128,7 +140,7 @@ class FuseSharingModel(list):
         Returns:
             None
         """
-        sysLogger.debug("开始写入历史分享记录")
+        self.sysLogger.debug("开始写入历史分享记录")
         backup_result: list = [fileObj.to_dump_backup() for fileObj in self]
 
         backup_file_path: str = os.path.join(
@@ -139,7 +151,7 @@ class FuseSharingModel(list):
                 backup_result, f, indent=4, separators=(",", ": "), ensure_ascii=False
             )
 
-        sysLogger.debug("写入历史分享记录成功")
+        self.sysLogger.debug("写入历史分享记录成功")
 
     @classmethod
     def load(cls) -> "FuseSharingModel":
@@ -149,20 +161,20 @@ class FuseSharingModel(list):
         Returns:
             FuseSharingModel: 加载成融合分享对象
         """
-        sysLogger.debug("开始读取历史分享记录")
         model = cls()
+        model.sysLogger.debug("开始读取历史分享记录")
         backup_file_path: str = os.path.join(
             settings.BASE_DIR, "file_sharing_backups.json"
         )
         if not os.path.exists(backup_file_path):
-            sysLogger.info("file_sharing_backups.json文件不存在, 跳过历史分享记录加载")
+            model.sysLogger.info("file_sharing_backups.json文件不存在, 跳过历史分享记录加载")
             return model
 
         with open(backup_file_path, encoding="utf-8") as f:
             try:
                 backup_result = json.loads(f.read())
             except json.JSONDecodeError:
-                sysLogger.error("加载历史分享记录失败, file_sharing_backups.json文件已损坏")
+                model.sysLogger.error("加载历史分享记录失败, file_sharing_backups.json文件已损坏")
                 return model
 
         path_share_params: list = []
@@ -185,12 +197,12 @@ class FuseSharingModel(list):
             try:
                 fileObj = fileModel(**file_dict)
             except TypeError:
-                sysLogger.error("加载历史分享记录失败, file_sharing_backups.json文件已损坏")
+                model.sysLogger.error("加载历史分享记录失败, file_sharing_backups.json文件已损坏")
                 return model
             except FileNotFoundError:
                 continue
 
             model.append(fileObj)
 
-        sysLogger.debug("读取历史分享记录完成")
+        model.sysLogger.debug("读取历史分享记录完成")
         return model
