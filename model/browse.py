@@ -47,7 +47,7 @@ class BrowseFileDictModel(dict):
         当前目录文件集
 
         Returns:
-            Dict[str, Any]: 当前目录文件
+            BrowseFileDictModel: 当前目录文件
         """
         return self._current_dict
 
@@ -75,7 +75,7 @@ class BrowseFileDictModel(dict):
         return self._current_dict is self
 
     @isRoot.setter
-    def isRoot(self, newVaule: Dict[str, Any]) -> None:
+    def isRoot(self, newValue: bool) -> None:
         raise OperationException("isRoot属性不可修改")
 
     @property
@@ -89,7 +89,7 @@ class BrowseFileDictModel(dict):
         return bool(self["isDir"])
 
     @isDir.setter
-    def isDir(self, newVaule: Dict[str, Any]) -> None:
+    def isDir(self, newValue: bool) -> None:
         raise OperationException("isDir属性不可修改")
 
     @property
@@ -100,10 +100,10 @@ class BrowseFileDictModel(dict):
         Returns:
             List["BrowseFileDictModel"]: 子集文件列表
         """
-        return self.get("children", [])
+        return self["children"]
 
     @children.setter
-    def children(self, newVaule: List["BrowseFileDictModel"]) -> None:
+    def children(self, newValue: List["BrowseFileDictModel"]) -> None:
         raise OperationException("children属性不可通过该方式修改")
 
     @property
@@ -114,10 +114,10 @@ class BrowseFileDictModel(dict):
         Returns:
             str: 文件名称
         """
-        return self["fileName"]
+        return self.get("fileName", "None")
 
     @fileName.setter
-    def fileName(self, newVaule: str) -> None:
+    def fileName(self, newValue: str) -> None:
         raise OperationException("fileName属性不可修改")
 
     @property
@@ -131,7 +131,7 @@ class BrowseFileDictModel(dict):
         return self["shareType"]
 
     @shareType.setter
-    def shareType(self, newVaule: str) -> None:
+    def shareType(self, newValue: str) -> None:
         raise OperationException("shareType属性不可修改")
 
     @property
@@ -145,7 +145,7 @@ class BrowseFileDictModel(dict):
         return self["downloadUrl"]
 
     @downloadUrl.setter
-    def downloadUrl(self, newVaule: str) -> None:
+    def downloadUrl(self, newValue: str) -> None:
         raise OperationException("downloadUrl不可通过该方式修改")
 
     @property

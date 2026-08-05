@@ -1,4 +1,4 @@
-__all__ = ["logger"]
+__all__ = ["sysLogger", "sharerLogger"]
 
 import os
 import logging

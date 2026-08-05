@@ -23,7 +23,7 @@ from starlette.types import Scope
 
 from ._base_service import BaseService
 from model import public_types as ptype
-from model.file import FileModel, DirModel
+from model.file import FileModel
 from settings import settings
 from utils.logger import sharerLogger, sysLogger
 from utils.credentials import Credentials
@@ -69,7 +69,7 @@ class HttpService(BaseService):
         self._service_name = "HTTP"
         self._app = None
 
-    def _add_share(self, fileObj: Union[FileModel, DirModel]) -> None:
+    def _add_share(self, fileObj: FileModel) -> None:
         """
         添加共享文件或文件夹
 
@@ -81,7 +81,7 @@ class HttpService(BaseService):
         """
         sysLogger.debug(f"开始添加分享, 分享路径: {fileObj.targetPath}")
         self._sharing_dict.update({fileObj.uuid: fileObj})
-        sysLogger.debug(f"添加分享完成, 分享路径: {fileObj.targetPath}")
+        sysLogger.info(f"添加分享完成, 分享路径: {fileObj.targetPath}")
 
     def _remove_share(self, uuid: str) -> None:
         """
@@ -96,7 +96,7 @@ class HttpService(BaseService):
         sysLogger.debug(f"开始移除分享, 分享的uuid: {uuid}")
         if uuid in self._sharing_dict:
             del self._sharing_dict[uuid]
-        sysLogger.debug(f"移除分享完成, 分享的uuid: {uuid}")
+        sysLogger.info(f"移除分享完成, 分享的uuid: {uuid}")
 
     def _change_free_secret(self, uuid: str, value: bool) -> None:
         """
@@ -115,7 +115,7 @@ class HttpService(BaseService):
             return
 
         self._sharing_dict[uuid].free_secret = value
-        sysLogger.debug(f"修改免密状态完成, 分享的uuid: {uuid}")
+        sysLogger.info(f"修改免密状态完成, 分享的uuid: {uuid}")
 
     def run(self) -> None:
         """
@@ -132,7 +132,7 @@ class HttpService(BaseService):
         sysLogger.debug("初始化FastAPI")
         self._app = FastAPI()
         self._setup()
-        sysLogger.debug("开启服务")
+        sysLogger.info("开启服务")
         uvicorn.run(
             app=self._app, host=settings.LOCAL_HOST, port=settings.init_wsgi_port()
         )
@@ -158,8 +158,8 @@ class HttpService(BaseService):
         """
 
         async def generate_fileObj_recursive(
-            uuid: str, parentObj: Union[None, DirModel] = None
-        ) -> Union[FileModel, DirModel, None]:
+            uuid: str, parentObj: Optional[FileModel] = None
+        ) -> Optional[FileModel]:
             if parentObj is None:
                 try:
                     parent_uuid, other_uuid = uuid.split(">", 1)
@@ -282,8 +282,7 @@ class HttpService(BaseService):
         ### root app
         @self._app.get("%s/{uuid}" % ptype.FILE_LIST_URI)
         async def file_list(uuid: str, request: Request) -> Dict[str, Any]:
-            fileObj = request.scope.get("fileObj")
-            fileObj: Union[None, FileModel, DirModel]
+            fileObj: FileModel = request.scope.get("fileObj")
             if not fileObj:
                 sysLogger.error(
                     "发生了错误, 获取不到用户访问的文件/文件夹对象, "
@@ -299,8 +298,7 @@ class HttpService(BaseService):
         async def download(
             uuid: str, request: Request
         ) -> Union[Dict[str, Any], StreamingResponse]:
-            fileObj = request.scope.get("fileObj")
-            fileObj: Union[None, FileModel, DirModel]
+            fileObj: FileModel = request.scope.get("fileObj")
             if not fileObj:
                 sysLogger.error(
                     "发生了错误, 获取不到用户访问的文件/文件夹对象, "
@@ -325,7 +323,7 @@ class HttpService(BaseService):
         def REQUIRE_PWD_RESPONSE(secret_key):
             return self.json_response(RET.REQUIREPWD, secret_key=secret_key)
 
-        async def no_need_credentials(fileObj: Union[FileModel, DirModel]) -> bool:
+        async def no_need_credentials(fileObj: FileModel) -> bool:
             """
             是否需要校验凭据
 
@@ -339,9 +337,7 @@ class HttpService(BaseService):
                 not fileObj.secret_key or not fileObj.credentials or fileObj.free_secret
             )
 
-        async def verify_credentials(
-            fileObj: Union[FileModel, DirModel], pwd: str
-        ) -> bool:
+        async def verify_credentials(fileObj: FileModel, pwd: str) -> bool:
             """
             凭据校验
 
@@ -356,9 +352,8 @@ class HttpService(BaseService):
 
         async def with_credentials(
             uuid: str, request: Request, auth_param: AuthParam
-        ) -> Dict[str, Union[int, str, FileModel, DirModel]]:
-            fileObj = request.scope.get("fileObj")
-            fileObj: Union[None, FileModel, DirModel]
+        ) -> Dict[str, Union[int, str, FileModel]]:
+            fileObj: FileModel = request.scope.get("fileObj")
             if not fileObj:
                 sysLogger.error(
                     "发生了错误, 获取不到用户访问的文件/文件夹对象, "
@@ -382,9 +377,8 @@ class HttpService(BaseService):
             request: Request,
             secret_key: str = Form(...),
             ciphertext: str = Form(...),
-        ) -> Dict[str, Union[int, str, FileModel, DirModel]]:
-            fileObj = request.scope.get("fileObj")
-            fileObj: Union[None, FileModel, DirModel]
+        ) -> Dict[str, Union[int, str, FileModel]]:
+            fileObj: FileModel = request.scope.get("fileObj")
             if not fileObj:
                 print("not fileObj", uuid)
                 sysLogger.error(
@@ -463,8 +457,7 @@ class HttpService(BaseService):
 
         @mobile.get("%s/{uuid}" % ptype.FILE_LIST_URI)
         async def get_list_mobile(uuid: str, request: Request) -> Dict[str, Any]:
-            fileObj = request.scope.get("fileObj")
-            fileObj: Union[None, FileModel, DirModel]
+            fileObj: FileModel = request.scope.get("fileObj")
             if not fileObj:
                 sysLogger.error(
                     "发生了错误, 获取不到用户访问的文件/文件夹对象, "
@@ -493,8 +486,7 @@ class HttpService(BaseService):
 
         @mobile.get("%s/{uuid}" % ptype.FILE_SIZE_URI)
         async def get_file_size(uuid: str, request: Request) -> Dict[str, Any]:
-            fileObj = request.scope.get("fileObj")
-            fileObj: Union[None, FileModel, DirModel]
+            fileObj: FileModel = request.scope.get("fileObj")
             if not fileObj:
                 sysLogger.error(
                     "发生了错误, 获取不到用户访问的文件/文件夹对象, "
@@ -536,7 +528,7 @@ class HttpService(BaseService):
             if not os.path.isdir(curr_path):
                 return self.json_response(RET.UPLOADTONONFOLDER)
             # verification the curr_path
-            fileObj: Union[FileModel, DirModel] = request.scope.get("fileObj")
+            fileObj: FileModel = request.scope.get("fileObj")
             if fileObj.targetPath not in curr_path:
                 return FOR_BIDDEN_RESPONSE
 
@@ -587,10 +579,10 @@ class HttpService(BaseService):
                         merge_f.write(chunk_f.read())
                     os.remove(chunk_file_name)
 
-            fileObj: Union[FileModel, DirModel] = request.scope.get("fileObj")
+            fileObj = request.scope.get("fileObj")
             self._sharing_dict.update(
                 {
-                    fileObj.uuid: DirModel(
+                    fileObj.uuid: FileModel(
                         fileObj.targetPath,
                         fileObj.uuid,
                         None,

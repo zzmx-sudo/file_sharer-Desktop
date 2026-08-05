@@ -5,7 +5,7 @@ from multiprocessing import Queue, Process
 
 import psutil
 
-from model.file import FileModel, DirModel
+from model.file import FileModel
 from model import public_types as ptype
 from utils.logger import sysLogger
 from .services import HttpService, FtpService
@@ -25,7 +25,7 @@ class ServiceProcessManager:
         self._ftp_input_q = None
         self._output_q = output_q
 
-    def add_share(self, fileObj: Union[FileModel, DirModel]) -> bool:
+    def add_share(self, fileObj: FileModel) -> bool:
         """
         添加分享文件或文件夹
 
@@ -40,13 +40,19 @@ class ServiceProcessManager:
         )
         share_type = fileObj.shareType
         if share_type is ptype.ShareType.http:
-            return self._add_http_share(fileObj)
+            status = self._add_http_share(fileObj)
         elif share_type is ptype.ShareType.ftp:
             self._add_http_share(fileObj)
-            return self._add_ftp_share(fileObj)
+            status = self._add_ftp_share(fileObj)
         else:
             sysLogger.error(f"未知的共享类型参数: {share_type}, 共享失败！")
-            return False
+            status = False
+
+        if status:
+            sysLogger.info(
+                f"添加分享完成, 分享路径: {fileObj.targetPath}, 分享类型: {fileObj.shareType}"
+            )
+        return status
 
     def remove_share(self, uuid: str) -> bool:
         """
@@ -62,12 +68,15 @@ class ServiceProcessManager:
         share_type = uuid[0]
         if share_type == "f":
             self._remove_http_share(uuid)
-            return self._remove_ftp_share(uuid)
+            status = self._remove_ftp_share(uuid)
         elif share_type == "h":
-            return self._remove_http_share(uuid)
+            status = self._remove_http_share(uuid)
         else:
             sysLogger.error(f"未知的共享类型参数: {share_type}, 共享失败！")
-            return False
+            status = False
+        if status:
+            sysLogger.info(f"移除分享完成, 分享的uuid: {uuid}")
+        return status
 
     def modify_settings(self, key: str, value: Union[bool, str]) -> bool:
         """
@@ -86,6 +95,7 @@ class ServiceProcessManager:
         if self._ftp_input_q is not None:
             self._ftp_input_q.put(("settings", (key, value)))
 
+        sysLogger.info(f"同步配置完成, 配置项名称: {key}, 配置项值: {value}")
         return True
 
     def change_free_secret(self, key: str, value: bool) -> bool:
@@ -103,6 +113,7 @@ class ServiceProcessManager:
         if self._http_input_q is not None:
             self._http_input_q.put(("free-secret", (key, value)))
 
+        sysLogger.info(f"修改免密状态完成, 文件的uuid: {key}, 新的免密状态: {value}")
         return True
 
     def close_ftp(self) -> bool:
@@ -122,6 +133,7 @@ class ServiceProcessManager:
             self._ftp_input_q.close()
             self._ftp_input_q = None
             sysLogger.debug("[FTP] 关闭输入队列成功")
+        sysLogger.info(f"关闭FTP服务完成")
         return True
 
     def close_all(self) -> bool:
@@ -143,10 +155,10 @@ class ServiceProcessManager:
             self._http_input_q.close()
             self._http_input_q = None
             sysLogger.debug("[HTTP] 关闭输入队列成功")
-        sysLogger.debug("关闭所有分享服务成功")
+        sysLogger.info("关闭所有分享服务成功")
         return True
 
-    def _add_http_share(self, fileObj: Union[FileModel, DirModel]) -> bool:
+    def _add_http_share(self, fileObj: FileModel) -> bool:
         sysLogger.debug(f"[HTTP] 开始添加分享, 分享路径: {fileObj.targetPath}")
         if self._http_input_q is None:
             sysLogger.debug("[HTTP] 开始初始化输入队列")
@@ -163,7 +175,7 @@ class ServiceProcessManager:
         self._http_input_q.put(("add", fileObj))
         return True
 
-    def _add_ftp_share(self, fileObj: Union[FileModel, DirModel]) -> bool:
+    def _add_ftp_share(self, fileObj: FileModel) -> bool:
         sysLogger.debug(f"[FTP] 开始添加分享, 分享路径: {fileObj.targetPath}")
         if self._ftp_input_q is None:
             sysLogger.debug("[FTP] 开始初始化输入队列")

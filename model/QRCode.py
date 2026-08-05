@@ -3,7 +3,7 @@ __all__ = ["QRCodeWindow"]
 
 import io
 import logging
-from typing import Union
+from typing import Optional
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QDialog
@@ -13,7 +13,7 @@ from qrcode.main import GenericImage
 from PIL import Image, ImageDraw
 
 from model.public_types import ThemeColor as themeColor
-from model.file import FileModel, DirModel
+from model.file import FileModel
 from settings import settings
 
 
@@ -23,7 +23,7 @@ class QRCodeWindow(QDialog):
         校验环境窗口初始化函数
         """
         super(QRCodeWindow, self).__init__(parent)
-        self._fileObj: Union[FileModel, DirModel, None] = None
+        self._fileObj: Optional[FileModel] = None
         self.resize(300, 350)
         self.setStyleSheet(self.styleSheet())
         self.verticalLayout = QtWidgets.QVBoxLayout(self)
@@ -69,7 +69,7 @@ class QRCodeWindow(QDialog):
         self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
 
-    def show_qrcode(self, fileObj: Union[FileModel, DirModel]) -> None:
+    def show_qrcode(self, fileObj: FileModel) -> None:
         """
         显示二维码
 
@@ -121,7 +121,7 @@ class QRCodeWindow(QDialog):
         image.putalpha(mask)
         return image
 
-    def free_secret_button_clicked(self, fileObj: Union[FileModel, DirModel]) -> None:
+    def free_secret_button_clicked(self, fileObj: FileModel) -> None:
         """
         临时免密按钮点击回调
 

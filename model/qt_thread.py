@@ -94,21 +94,21 @@ class LoadBrowseUrlThread(BaseThread):
         """
         self.sysLogger.debug(f"正在加载分享链接[{self._browse_url}]")
         os.environ["NO_PROXY"] = "127.0.0.1"
+        empty_data = BrowseFileDictModel.load({})
         try:
             response = requests.get(self._browse_url, timeout=2)
         except:
             self.sysLogger.warning(f"连接服务异常, 正在发射显示分享链接数据事件")
-            self.emit(BrowseStatus.ConnectErr, {})
+            self.emit(BrowseStatus.ConnectErr, empty_data)
             return
 
         try:
             result = json.loads(response.text)
         except json.JSONDecodeError:
             self.sysLogger.warning(f"服务器返回非法数据[{self._browse_url}]")
-            self.emit(BrowseStatus.ServerErr, {})
+            self.emit(BrowseStatus.ServerErr, empty_data)
             return
 
-        empty_data = BrowseFileDictModel.load({})
         if not result or not isinstance(result, dict) or result.get("errno") is None:
             self.sysLogger.warning("分享服务器异常, 未能连接服务器或服务器返回非法数据")
             self.emit(BrowseStatus.ServerErr, empty_data)
@@ -162,7 +162,7 @@ class LoadBrowseUrlThread(BaseThread):
         self.sysLogger.debug("处理文件路径完成")
         return new_fileDict
 
-    def emit(self, status: BrowseStatus, data: Dict[str, Any]) -> None:
+    def emit(self, status: BrowseStatus, data: BrowseFileDictModel) -> None:
         """
         发射数据给回调函数
 
@@ -181,30 +181,24 @@ class LoadBrowseUrlThread(BaseThread):
         if not data or not isinstance(data, dict):
             return False
         status = True
-        isDir = data.get("isDir")
-        if isDir is None:
+        full_keys = [
+            "uuid",
+            "downloadUrl",
+            "fileName",
+            "shareType",
+            "isDir",
+            "children",
+        ]
+        if not all(key in data for key in full_keys):
             return False
-        if isDir:
-            other_full_keys = [
-                "uuid",
-                "downloadUrl",
-                "fileName",
-                "shareType",
-                "children",
-            ]
-        else:
-            other_full_keys = ["uuid", "downloadUrl", "fileName", "shareType"]
-        if not all(key in data for key in other_full_keys):
-            return False
-        if isDir:
-            for child in data["children"]:
-                try:
-                    if len(child) != 1:
-                        return False
-                    for file_dict in child.values():
-                        status &= self._verify_data(file_dict, False)
-                except AttributeError:
+        for child in data["children"]:
+            try:
+                if len(child) != 1:
                     return False
+                for file_dict in child.values():
+                    status &= self._verify_data(file_dict, False)
+            except AttributeError:
+                return False
 
         return status
 
@@ -267,6 +261,7 @@ class BaseDownloadFileThread(BaseThread):
 
         file_copy = deepcopy(fileDict)
         uuid = fileDict.uuid
+        file_copy.oriUuid = uuid
         update_downloadUrl_with_hitLog(file_copy)
 
         download_list = [file_copy]

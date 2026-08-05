@@ -1,12 +1,16 @@
-__all__ = ["FileModel", "DirModel"]
+__all__ = ["FileModel"]
 
 import os
 import random
-from typing import Any, Union, Dict, Optional
+from typing import Union, Dict, Optional
 
 from model import public_types as ptype
 from settings import settings
 from utils import public_func
+
+
+class _DirChildrenModel(dict):
+    pass
 
 
 class FileModel:
@@ -46,6 +50,7 @@ class FileModel:
         self._secret_key = secret_key
         self._credentials = credentials
         self._free_secret = False
+        self._children = _DirChildrenModel({})
 
         if self._uuid[0] == "h":
             self._share_type = ptype.ShareType.http
@@ -53,28 +58,37 @@ class FileModel:
             self._share_type = ptype.ShareType.ftp
 
         if self._share_type is ptype.ShareType.ftp:
-            self._ftp_base_path = (
-                ftp_base_path if ftp_base_path else os.path.dirname(self._target_path)
-            )
             if self._ftp_port is None:
                 self._ftp_port = self._generate_ftp_port()
             if self._ftp_pwd is None:
                 self._ftp_pwd = public_func.generate_ftp_passwd()
+            if self.isDir:
+                self._ftp_base_path = (
+                    ftp_base_path if ftp_base_path else self._target_path
+                )
+                self._setup_child()
+            else:
+                self._ftp_base_path = (
+                    ftp_base_path
+                    if ftp_base_path
+                    else os.path.dirname(self._target_path)
+                )
         else:
             self._ftp_base_path = None
+            if self.isDir:
+                self._setup_child()
 
-    def _generate_ftp_port(self) -> int:
+    def get(self, item: str) -> "FileModel":
         """
-        生成FTP服务端口
+        获取子级文件/文件夹对象
+
+        Args:
+            item: 子级文件/文件夹对象对应的key(uuid)
 
         Returns:
-            int: FTP服务器端口
+            FileModel: 目标文件/文件夹对象
         """
-        port = random.randint(10000, 65500)
-        if not public_func.exists_port(port):
-            return port
-        else:
-            return self._generate_ftp_port()
+        return self._children.get(item)
 
     @property
     def uuid(self) -> str:
@@ -140,7 +154,7 @@ class FileModel:
         Returns:
             bool: 文件对象是否为文件夹
         """
-        return False
+        return os.path.isdir(self._target_path)
 
     @property
     def isExists(self) -> bool:
@@ -327,6 +341,8 @@ class FileModel:
             None
         """
         self._free_secret = bool(newValue)
+        for child in self._children.values():
+            child.free_secret = newValue
 
     async def to_dict_client(self) -> Dict[str, Union[str, bool]]:
         """
@@ -335,12 +351,18 @@ class FileModel:
         Returns:
             Dict[str, Union[str, bool]]: 给客户端的格式化数据
         """
+        children = []
+        for child_uuid, child in self._children.items():
+            child_dict = {child_uuid: await child.to_dict_client()}
+            children.append(child_dict)
+
         return {
             "uuid": self._uuid,
             "downloadUrl": self.download_url,
             "fileName": self.file_name,
             "shareType": self._share_type.value,
             "isDir": self.isDir,
+            "children": children,
         }
 
     async def to_dict_mobile(self) -> Dict[str, Union[str, bool]]:
@@ -350,12 +372,17 @@ class FileModel:
         Returns:
             Dict[str, Union[str, bool]]: 给移动设备(浏览器)浏览的格式化数据
         """
+        children = []
+        for child_uuid, child in self._children.items():
+            children.append(await child.to_dict_mobile())
+
         return {
             "uuid": self._uuid,
             "downloadUrl": self.browse_download_url,
             "fileName": self.file_name,
             "isDir": self.isDir,
             "targetPath": self.targetPath,
+            "children": children,
         }
 
     async def to_ftp_data(self) -> Dict[str, Union[str, int]]:
@@ -381,6 +408,11 @@ class FileModel:
         Returns:
             Dict[str, Union[str, int, bool]]: 给服务端的格式化数据
         """
+        children = []
+        for child_uuid, child in self._children.items():
+            child_dict = {child_uuid: await child.to_dict_server()}
+            children.append(child_dict)
+
         return {
             "uuid": self._uuid,
             "downloadUrl": self.download_url,
@@ -393,6 +425,7 @@ class FileModel:
             "ftpPort": self._ftp_port,
             "ftpBasePath": self._ftp_base_path,
             "browseNumber": self._browse_number,
+            "children": children,
         }
 
     def to_dump_backup(self) -> Dict[str, Union[str, bool, int, None]]:
@@ -422,60 +455,18 @@ class FileModel:
 
         return normal
 
-    def __eq__(self, other: str) -> bool:
-        return other.rstrip(os.sep) == self._target_path
-
-
-class DirChildrenModel(dict):
-    pass
-
-
-class DirModel(FileModel):
-    def __init__(
-        self,
-        path: str,
-        uuid: str,
-        parent_uuid: Optional[str] = None,
-        pwd: Optional[str] = None,
-        port: Optional[int] = None,
-        ftp_base_path: Optional[str] = None,
-        secret_key: Optional[str] = None,
-        credentials: Optional[str] = None,
-        **kwargs,
-    ):
+    def _generate_ftp_port(self) -> int:
         """
-        文件夹模型类初始化函数
+        生成FTP服务端口
 
-        Args:
-            path: 文件夹所在路径
-            uuid: 文件夹uuid
-            parent_uuid: 父级文件夹的uuid, 若无父级则为None, 默认为None
-            pwd: FTP服务的密码, 若不是FTP共享则为None, 默认为None
-            port: FTP服务的端口, 若不是FTP共享则为None, 默认为None
-            ftp_base_path: FTP服务的根路径, 若不是FTP共享则为None, 默认为None
-            secret_key: 文件分享的盐值, 用于密码校验, 默认无校验
-            credentials: 文件分享的凭据, 用于密码校验, 默认无校验
-            **kwargs: 其他关键字参数
+        Returns:
+            int: FTP服务器端口
         """
-        super(DirModel, self).__init__(
-            path,
-            uuid,
-            parent_uuid,
-            pwd,
-            port,
-            ftp_base_path,
-            secret_key,
-            credentials,
-            **kwargs,
-        )
-
-        if self._share_type is ptype.ShareType.ftp:
-            self._ftp_base_path = ftp_base_path if ftp_base_path else self._target_path
+        port = random.randint(10000, 65500)
+        if not public_func.exists_port(port):
+            return port
         else:
-            self._ftp_base_path = None
-
-        self._children: Dict[str, Union[FileModel, DirModel]] = DirChildrenModel()
-        self._setup_child()
+            return self._generate_ftp_port()
 
     def _setup_child(self) -> None:
         """
@@ -487,8 +478,7 @@ class DirModel(FileModel):
         for file_name in os.listdir(self._target_path):
             file_path = os.path.join(self._target_path, file_name)
             child_uuid = public_func.generate_uuid()
-            fileModel = DirModel if os.path.isdir(file_path) else FileModel
-            child = fileModel(
+            child = FileModel(
                 file_path,
                 child_uuid,
                 self._uuid,
@@ -499,116 +489,5 @@ class DirModel(FileModel):
 
             self._children[child_uuid] = child
 
-    def get(self, item: str) -> Union[FileModel, "DirModel"]:
-        """
-        获取子级文件/文件夹对象
-
-        Args:
-            item: 子级文件/文件夹对象对应的key(uuid)
-
-        Returns:
-            Union[FileModel, "DirModel"]: 目标文件/文件夹对象
-        """
-        return self._children.get(item)
-
-    @property
-    def isDir(self) -> bool:
-        """
-        文件对象是否为文件夹
-
-        Returns:
-            bool: 文件对象是否为文件夹
-        """
-        return True
-
-    @property
-    def free_secret(self) -> bool:
-        """
-        临时免密属性
-
-        Returns:
-            bool: 是否临时免密
-        """
-        return self._free_secret
-
-    @free_secret.setter
-    def free_secret(self, newValue: bool) -> None:
-        """
-        修改临时免密属性
-
-        Args:
-            newValue: 需修改临时免密属性的新值
-
-        Returns:
-            None
-        """
-        self._free_secret = bool(newValue)
-        for child in self._children.values():
-            child.free_secret = newValue
-
-    async def to_dict_client(self) -> Dict[str, Any]:
-        """
-        给客户端的格式化数据
-
-        Returns:
-            Dict[str, Any]: 给客户端的格式化数据
-        """
-        children = []
-        for child_uuid, child in self._children.items():
-            child_dict = {child_uuid: await child.to_dict_client()}
-            children.append(child_dict)
-
-        return {
-            "uuid": self._uuid,
-            "downloadUrl": self.download_url,
-            "fileName": self.file_name,
-            "shareType": self._share_type.value,
-            "isDir": self.isDir,
-            "children": children,
-        }
-
-    async def to_dict_mobile(self) -> Dict[str, Any]:
-        """
-        移动设备(浏览器)浏览的格式化数据
-
-        Returns:
-            Dict[str, Any]: 给移动设备(浏览器)浏览的格式化数据
-        """
-        children = []
-        for child_uuid, child in self._children.items():
-            children.append(await child.to_dict_mobile())
-
-        return {
-            "uuid": self._uuid,
-            "downloadUrl": self.browse_download_url,
-            "fileName": self.file_name,
-            "isDir": self.isDir,
-            "targetPath": self.targetPath,
-            "children": children,
-        }
-
-    async def to_dict_server(self) -> Dict[str, Any]:
-        """
-        给服务端的格式化数据
-
-        Returns:
-            Dict[str, Any]: 给服务端的格式化数据
-        """
-        children = []
-        for child_uuid, child in self._children.items():
-            child_dict = {child_uuid: await child.to_dict_server()}
-            children.append(child_dict)
-
-        return {
-            "uuid": self._uuid,
-            "downloadUrl": self.download_url,
-            "fileName": self.file_name,
-            "shareType": self._share_type.value,
-            "isDir": self.isDir,
-            "browseUrl": self.browse_url,
-            "targetPath": self._target_path,
-            "ftpPwd": self._ftp_pwd,
-            "ftpPort": self._ftp_port,
-            "ftpBasePath": self._ftp_base_path,
-            "children": children,
-        }
+    def __eq__(self, other: str) -> bool:
+        return other.rstrip(os.sep) == self._target_path

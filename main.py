@@ -2,7 +2,7 @@ import os
 import sys
 import traceback
 from multiprocessing import Queue
-from typing import Union, Dict, Any, Tuple, Optional
+from typing import Union, Tuple, Optional
 
 from PyQt5.QtWidgets import (
     QMainWindow,
@@ -19,8 +19,8 @@ from static.ui.main_ui import Ui_MainWindow
 from settings import settings
 from utils.logger import sysLogger, sharerLogger
 from command.manage import ServiceProcessManager
-from model.sharing import FuseSharingModel
-from model.file import FileModel, DirModel
+from model.share import FuseSharingModel
+from model.file import FileModel
 from model.public_types import ShareType as shareType
 from model.public_types import ThemeColor as themeColor
 from model.public_types import BrowseStatus, DownloadStatus
@@ -140,6 +140,8 @@ class MainWindow(QMainWindow):
                 open_button = button_widget.findChild(QPushButton, "open_close")
                 open_button.click()
                 open_count += 1
+            QApplication.processEvents()
+
         sysLogger.debug("打开所有分享任务下发成功")
         self._ui_function.show_info_messageBox(f"操作成功, 本次成功打开分享个数: {open_count}")
 
@@ -163,6 +165,8 @@ class MainWindow(QMainWindow):
                 close_button = button_widget.findChild(QPushButton, "open_close")
                 close_button.click()
                 close_count += 1
+            QApplication.processEvents()
+
         sysLogger.debug("关闭所有分享任务下发成功")
         self._ui_function.show_info_messageBox(f"操作成功, 本次成功关闭分享个数: {close_count}")
 
@@ -218,7 +222,7 @@ class MainWindow(QMainWindow):
         self.ui.backupButton.setEnabled(True)
         sysLogger.debug("进入文件夹成功")
 
-    def remove_share(self, fileObj: Union[FileModel, DirModel]) -> None:
+    def remove_share(self, fileObj: FileModel) -> None:
         """
         移除分享记录时的回调
 
@@ -243,7 +247,7 @@ class MainWindow(QMainWindow):
         sysLogger.debug("移除分享记录成功")
         self._ui_function.show_info_messageBox("移除成功~")
 
-    def show_mobile_browse_qrcode(self, fileObj: Union[FileModel, DirModel]) -> None:
+    def show_mobile_browse_qrcode(self, fileObj: FileModel) -> None:
         """
         扫码浏览按钮点击时的回调
 
@@ -274,7 +278,7 @@ class MainWindow(QMainWindow):
         )
         self.qrcode.show()
 
-    def open_share(self, fileObj: Union[FileModel, DirModel]) -> None:
+    def open_share(self, fileObj: FileModel) -> None:
         """
         打开分享时的回调
 
@@ -293,7 +297,7 @@ class MainWindow(QMainWindow):
         self._service_process.add_share(fileObj)
         sysLogger.debug("打开分享任务下发成功")
 
-    def close_share(self, fileObj: Union[FileModel, DirModel]) -> None:
+    def close_share(self, fileObj: FileModel) -> None:
         """
         关闭分享时的回调
 
@@ -316,7 +320,7 @@ class MainWindow(QMainWindow):
             return
         sysLogger.debug("关闭分享任务下发成功")
 
-    def change_free_secret(self, fileObj: Union[FileModel, DirModel]) -> None:
+    def change_free_secret(self, fileObj: FileModel) -> None:
         """
         向后端下发修改文件/文件夹对象的免密状态任务
 
@@ -353,12 +357,12 @@ class MainWindow(QMainWindow):
             sysLogger.debug("取消退出, 忽略退出事件")
             event.ignore()
 
-    def except_hook(self, type: Exception, value: str, tb: traceback) -> None:
+    def except_hook(self, exc_type: Exception, value: str, tb: traceback) -> None:
         """
         程序发生异常时的钩子回调
 
         Args:
-            type: 异常类型
+            exc_type: 异常类型
             value: 异常的信息
             tb: 调用栈对象
 
@@ -373,7 +377,7 @@ class MainWindow(QMainWindow):
             err_msg += f"File {filename} line {line_no} in {func_name}\n"
 
             tb = tb.tb_next
-        err_msg += f"{type.__name__}: {value}"
+        err_msg += f"{exc_type.__name__}: {value}"
 
         self._ui_function.show_critical_messageBox(err_msg)
 
@@ -438,6 +442,9 @@ class MainWindow(QMainWindow):
         self._browse_thread = None
         self._download_http_thread = None
         self._download_ftp_thread = None
+
+        self.ti: Optional[TrayIcon] = None
+        self.qrcode: Optional[QRCodeWindow] = None
         sysLogger.info("必要属性初始化成功")
 
     def _setup_event_connect(self) -> None:
@@ -565,7 +572,9 @@ class MainWindow(QMainWindow):
                 )
                 self._ui_function.show_info_messageBox(errmsg, msg_color="red")
                 return
-            target_path = os.path.join(base_path, self.ui.shareFileCombo.currentText())
+            target_path = str(
+                os.path.join(base_path, self.ui.shareFileCombo.currentText())
+            )
             # 路径整好看一点
             if settings.IS_WINDOWS:
                 target_path = target_path.replace("/", "\\")
@@ -628,18 +637,17 @@ class MainWindow(QMainWindow):
                     sysLogger.info("成功取消文件个数大于100的文件夹的分享")
                     return
             uuid = f"{share_type.value[0]}{generate_uuid()}"
-            fileModel = DirModel if os.path.isdir(target_path) else FileModel
             if share_type is shareType.ftp:
                 shared_fileObj = self._sharing_list.get_ftp_shared(target_path)
             else:
                 shared_fileObj = None
             if shared_fileObj is None:
-                fileObj = fileModel(
+                fileObj = FileModel(
                     target_path, uuid, secret_key=secret_key, credentials=credentials
                 )
             else:
                 sysLogger.debug(f"存在可复用的FTP, 其工作路径为: {shared_fileObj.ftp_basePath}")
-                fileObj = fileModel(
+                fileObj = FileModel(
                     target_path,
                     uuid,
                     pwd=shared_fileObj.ftp_pwd,
@@ -672,7 +680,7 @@ class MainWindow(QMainWindow):
             self._ui_function.show_info_messageBox(errmsg, msg_color="rgb(154, 96, 2)")
             return
         # 简单提高下效率
-        if browse_url == self._prev_browse_url and self._is_browse_succ:
+        if browse_url == self._prev_browse_url:
             if self._browse_data:
                 self._load_browse_url_reload()
                 self._UIClass.show_file_list(self)
@@ -799,7 +807,7 @@ class MainWindow(QMainWindow):
             self._download_http_thread.remove(fileDict)
         self._download_data._remove_download_item(fileDict, tableWidget)
 
-    def _change_free_secret(self, fileObj: Union[FileModel, DirModel]) -> None:
+    def _change_free_secret(self, fileObj: FileModel) -> None:
         sysLogger.debug("正在打开/关闭临时免密")
         self.qrcode.free_secret_button_clicked(fileObj)
         self.change_free_secret(fileObj)

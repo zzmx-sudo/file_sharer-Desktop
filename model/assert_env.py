@@ -45,7 +45,7 @@ class AssertThread(QThread):
         self.single.emit((VerifyStatus.INFO, f"本机IP: {settings.LOCAL_HOST}"))
         sysLogger.debug("已发射追加本机IP INFO信息")
         self.single.emit((VerifyStatus.DONE, "校验完成, 点击按钮后进入"))
-        sysLogger.debug("已发射校验完成DONE信息")
+        sysLogger.info("已发射校验完成DONE信息")
 
     def _verify_pyproject_toml(self) -> None:
         """
@@ -145,6 +145,7 @@ class AssertEnvWindow(QDialog):
         sysLogger.debug("开启Assert窗口")
         self.show()
         self._verify()
+        sysLogger.info("已开启Assert窗口")
 
     def _verify(self) -> None:
         """

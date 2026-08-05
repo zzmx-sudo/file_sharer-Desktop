@@ -2,7 +2,6 @@ __all__ = ["FtpService"]
 
 import sys
 import time
-from typing import Union
 from multiprocessing import Queue
 from threading import Thread
 
@@ -11,7 +10,7 @@ from pyftpdlib.handlers import FTPHandler
 from pyftpdlib.servers import FTPServer
 
 from ._base_service import BaseService
-from model.file import FileModel, DirModel
+from model.file import FileModel
 from settings import settings
 from utils.logger import sysLogger
 
@@ -31,9 +30,9 @@ class FtpService(BaseService):
         """
         super(FtpService, self).__init__(input_q, output_q)
         self._service_name = "FTP"
-        self._uuid_ftpServer_params = UuidServerMode()
+        self._uuid_ftpServer_params = UuidServerMode({})
 
-    def _add_share(self, fileObj: Union[FileModel, DirModel]) -> None:
+    def _add_share(self, fileObj: FileModel) -> None:
         """
         添加共享文件或文件夹
 
@@ -49,12 +48,13 @@ class FtpService(BaseService):
         for ftpServer in self._uuid_ftpServer_params.values():
             if ftpServer.address[1] == fileObj.ftp_port:
                 need_start_new_server = False
-                sysLogger.debug(f"找到可复用的FTP, 添加分享完成, 分享路径: {fileObj.targetPath}")
+                sysLogger.info(f"找到可复用的FTP, 添加分享完成, 分享路径: {fileObj.targetPath}")
                 break
 
         if need_start_new_server:
             sysLogger.debug(f"未找到可复用FTP, 正在开启新的FTP, 分享路径: {fileObj.targetPath}")
             self._start_new_server(fileObj)
+            sysLogger.info(f"开启新的FTP服务完成, 分享路径: {fileObj.targetPath}")
 
     def _remove_share(self, uuid: str) -> None:
         """
@@ -72,7 +72,7 @@ class FtpService(BaseService):
 
         ftpServer = self._uuid_ftpServer_params.get(uuid)
         if ftpServer is None:
-            sysLogger.debug(f"移除的分享是复用了别的FTP, 移除分享完成, 分享的uuid: {uuid}")
+            sysLogger.info(f"移除的分享是复用了别的FTP, 移除分享完成, 分享的uuid: {uuid}")
             return
 
         need_close_server = True
@@ -80,15 +80,15 @@ class FtpService(BaseService):
             if fileObj.ftp_port == ftpServer.address[1]:
                 need_close_server = False
                 self._uuid_ftpServer_params[fileObj.uuid] = ftpServer
-                sysLogger.debug(f"移除的分享的FTP被复用, 已将FTP转移, 移除分享完成, 分享的uuid: {uuid}")
+                sysLogger.info(f"移除的分享的FTP被复用, 已将FTP转移, 移除分享完成, 分享的uuid: {uuid}")
                 break
 
         if need_close_server:
             self._uuid_ftpServer_params[uuid].close_when_done()
-            sysLogger.debug(f"移除的分享未复用FTP也未被复用, 移除分享完成, 分享的uuid: {uuid}")
+            sysLogger.info(f"移除的分享未复用FTP也未被复用, 移除分享完成, 分享的uuid: {uuid}")
         del self._uuid_ftpServer_params[uuid]
 
-    def _start_new_server(self, fileObj: Union[FileModel, DirModel]) -> None:
+    def _start_new_server(self, fileObj: FileModel) -> None:
         host: str = settings.LOCAL_HOST
         port: int = fileObj.ftp_port
         passwd: str = fileObj.ftp_pwd
@@ -115,7 +115,7 @@ class FtpService(BaseService):
         """
         self.watch()
         super(FtpService, self).run()
-        sysLogger.debug("开启服务")
+        sysLogger.info("开启服务")
 
         while True:
             try:

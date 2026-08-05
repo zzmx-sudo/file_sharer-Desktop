@@ -4,11 +4,20 @@ __all__ = [
     "generate_timestamp",
     "get_local_ip",
     "generate_ftp_passwd",
+    "generate_secret_key",
     "exists_port",
     "generate_http_port",
     "generate_project_path",
     "get_config_from_toml",
     "generate_product_version",
+    "generate_color_card_map",
+    "window_reservation_when_box_destroyed",
+    "update_downloadUrl_with_hitLog",
+    "get_screen_resolution",
+    "resize_window",
+    "json_response",
+    "response_ret_code",
+    "response_err_msg",
 ]
 
 import time

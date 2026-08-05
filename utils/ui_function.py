@@ -21,7 +21,7 @@ import pyperclip as clip
 
 from main import MainWindow
 from .custom_grips import CustomGrip
-from model.file import FileModel, DirModel
+from model.file import FileModel
 from model.public_types import ShareType as shareType
 from model.public_types import ThemeColor as themeColor
 from model.public_types import ControlColorStruct as ControlColor
@@ -253,9 +253,7 @@ class UiFunction:
         )
         critical.exec_()
 
-    def add_share_table_item(
-        self: MainWindow, fileObj: Union[FileModel, DirModel]
-    ) -> None:
+    def add_share_table_item(self: MainWindow, fileObj: FileModel) -> None:
         """
         追加分享记录到分享列表表格控件
 
@@ -297,9 +295,7 @@ class UiFunction:
         open_close_button = QPushButton("")
         open_close_button.setObjectName("open_close")
 
-        def _open_close_button_clicked(
-            fileObj: Union[FileModel, DirModel], button: QPushButton
-        ) -> None:
+        def _open_close_button_clicked(fileObj: FileModel, button: QPushButton) -> None:
             if fileObj.isSharing:
                 button_text = "打开共享"
                 self.close_share(fileObj)
@@ -344,7 +340,7 @@ class UiFunction:
         copy_browse_button.setObjectName("copy_browse")
         copy_browse_button.setStyleSheet(self._ui_function.copy_browse_button_style())
 
-        def _copy_browse_button_clicked(fileObj: Union[FileModel, DirModel]) -> None:
+        def _copy_browse_button_clicked(fileObj: FileModel) -> None:
             clip.copy(fileObj.browse_url)
             if not fileObj.isSharing:
                 self._ui_function.show_info_messageBox(
@@ -359,7 +355,7 @@ class UiFunction:
         remove_share_button.setObjectName("remove_share")
         remove_share_button.setStyleSheet(self._ui_function.remove_share_button_style())
 
-        def _remove_share_button_clicked(fileObj: Union[FileModel, DirModel]) -> None:
+        def _remove_share_button_clicked(fileObj: FileModel) -> None:
             self.remove_share(fileObj)
 
         remove_share_button.clicked.connect(
@@ -372,7 +368,7 @@ class UiFunction:
         hLayout.addWidget(copy_browse_button)
         hLayout.addWidget(remove_share_button)
 
-        def _mobile_browse_button_clicked(fileObj: Union[FileModel, DirModel]) -> None:
+        def _mobile_browse_button_clicked(fileObj: FileModel) -> None:
             self.show_mobile_browse_qrcode(fileObj)
 
         if fileObj.shareType is shareType.http:

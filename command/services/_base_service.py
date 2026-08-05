@@ -1,11 +1,11 @@
 __all__ = ["BaseService"]
 
-from typing import Union, Dict
+from typing import Dict
 from threading import Thread
 from multiprocessing import Queue
 
-from model.sharing import SharingModel
-from model.file import FileModel, DirModel
+from model.share import SharingModel
+from model.file import FileModel
 from exceptions import NotImplException, OperationException
 from settings import settings
 from utils.logger import sysLogger, sharerLogger
@@ -20,7 +20,7 @@ class BaseService:
             input_q: 输入的进程队列
             output_q: 输出的进程队列
         """
-        self._sharing_dict: Dict[str, Union[FileModel, DirModel]] = SharingModel()
+        self._sharing_dict: Dict[str, FileModel] = SharingModel()
         self._input_q = input_q
         self._output_q = output_q
         self._watch_thread = None
@@ -36,7 +36,7 @@ class BaseService:
         sysLogger.debug(f"[{self._service_name}] 开启监听线程")
         self._watch_thread = Thread(target=self._watch, daemon=True)
         self._watch_thread.start()
-        sysLogger.debug(f"[{self._service_name}] 监听线程开启成功")
+        sysLogger.info(f"[{self._service_name}] 监听线程开启成功")
 
     def _watch(self) -> None:
         while True:
@@ -60,7 +60,7 @@ class BaseService:
                 )
                 self._change_free_secret(*command_msg)
 
-    def _add_share(self, fileObj: Union[FileModel, DirModel]) -> None:
+    def _add_share(self, fileObj: FileModel) -> None:
         """
         添加共享文件或文件夹, 具体实现在各共享服务子类中
 
@@ -104,7 +104,7 @@ class BaseService:
         if args[0] == "LOGS_PATH":
             sysLogger.reload()
             sharerLogger.reload()
-        sysLogger.debug(f"[{self._service_name}] 同步配置完成")
+        sysLogger.info(f"[{self._service_name}] 同步配置完成")
 
     def _change_free_secret(self, uuid: str, value: bool) -> None:
         """
@@ -126,6 +126,7 @@ class BaseService:
         Returns:
             None
         """
+        sysLogger.debug(f"[{self._service_name}] 开启服务进程")
         if not settings.DEBUG:
             import sys, os
 
