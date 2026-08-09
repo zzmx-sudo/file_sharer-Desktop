@@ -1,8 +1,8 @@
-import os
 import sys
 import traceback
 from multiprocessing import Queue
 from typing import Union, Tuple, Optional
+from pathlib import Path
 
 from PyQt5.QtWidgets import (
     QMainWindow,
@@ -489,19 +489,21 @@ class MainWindow(QMainWindow):
 
     def _save_settings(self) -> None:
         sysLogger.debug("正在保存配置")
-        logs_path = self.ui.logPathEdit.text()
-        download_path = self.ui.downloadPathEdit.text()
-        if not logs_path or not download_path:
+        logs_path_text = self.ui.logPathEdit.text()
+        download_path_text = self.ui.downloadPathEdit.text()
+        logs_path = Path(logs_path_text)
+        download_path = Path(download_path_text)
+        if not logs_path_text or not download_path_text:
             errmsg = "保存设置错误,日志路径或下载路径不可为空！"
             sysLogger.warning(errmsg + f"欲设置的日志路径: {logs_path}, 下载路径: {download_path}")
             self._ui_function.show_info_messageBox(errmsg, msg_color="red")
             return
-        if not os.path.isdir(logs_path):
+        if not logs_path.is_dir():
             errmsg = "保存设置错误,日志路径不存在！\n建议用按钮打开资源管理器选择路径"
             sysLogger.warning(errmsg.replace("\n", "") + f", 欲设置的日志路径: {logs_path}")
             self._ui_function.show_info_messageBox(errmsg, msg_color="red")
             return
-        if not os.path.isdir(download_path):
+        if not download_path.is_dir():
             errmsg = "保存设置错误,下载路径不存在！\n建议用按钮打开资源管理器选择路径"
             sysLogger.warning(errmsg.replace("\n", "") + f", 欲设置的下载路径: {download_path}")
             self._ui_function.show_info_messageBox(errmsg, msg_color="red")
@@ -540,8 +542,8 @@ class MainWindow(QMainWindow):
         sysLogger.debug("正在取消或加载配置")
         self.ui.saveSystemCheck.setChecked(settings.SAVE_SYSTEM_LOG)
         self.ui.saveShareCheck.setChecked(settings.SAVE_SHARER_LOG)
-        self.ui.logPathEdit.setText(settings.LOGS_PATH)
-        self.ui.downloadPathEdit.setText(settings.DOWNLOAD_DIR)
+        self.ui.logPathEdit.setText(str(settings.LOGS_PATH))
+        self.ui.downloadPathEdit.setText(str(settings.DOWNLOAD_DIR))
         rollback_radioButton = getattr(self.ui, settings.THEME_COLOR.value)
         rollback_radioButton.setChecked(True)
         self.ui.opacitySlider.setValue(settings.THEME_OPACITY)
@@ -550,37 +552,30 @@ class MainWindow(QMainWindow):
 
     def _update_file_combo(self) -> None:
         sysLogger.debug("正在更新分享路径文件夹的内容至下拉框")
-        share_path = self.ui.sharePathEdit.text()
-        if not os.path.isdir(share_path):
+        share_path = Path(self.ui.sharePathEdit.text())
+        if not share_path.is_dir():
             sysLogger.warning("分享路径不是文件夹, 更新失败")
             return
         self.ui.shareFileCombo.clear()
-        fileList = os.listdir(share_path)
-        for item in fileList:
-            self.ui.shareFileCombo.addItem(item)
+        for item in share_path.iterdir():
+            self.ui.shareFileCombo.addItem(item.name)
         sysLogger.debug("更新分享路径文件夹的内容至下拉框完成")
 
     def _create_share(self) -> None:
         sysLogger.debug("正在创建分享")
 
         def _create_share_inner() -> None:
-            base_path = self.ui.sharePathEdit.text()
-            if not os.path.isdir(base_path):
+            base_path = Path(self.ui.sharePathEdit.text())
+            if not base_path.is_dir():
                 errmsg = "分享的路径不存在！\n建议用按钮打开资源管理器选择路径"
                 sysLogger.warning(
                     errmsg.replace("\n", "") + f", 欲分享的文件夹路径: {base_path}"
                 )
                 self._ui_function.show_info_messageBox(errmsg, msg_color="red")
                 return
-            target_path = str(
-                os.path.join(base_path, self.ui.shareFileCombo.currentText())
-            )
+            target_path = base_path / self.ui.shareFileCombo.currentText()
             # 路径整好看一点
-            if settings.IS_WINDOWS:
-                target_path = target_path.replace("/", "\\")
-            else:
-                target_path = target_path.replace("\\", "/")
-            if not os.path.exists(target_path):
+            if not target_path.exists():
                 errmsg = "分享的路径不存在！\n请确认后再新建"
                 sysLogger.warning(errmsg.replace("\n", "") + f", 欲分享的路径: {target_path}")
                 self._ui_function.show_info_messageBox(errmsg, msg_color="red")
@@ -817,17 +812,14 @@ class MainWindow(QMainWindow):
         sysLogger.debug("正在打开系统选择文件夹窗口")
         folder_path = QFileDialog.getExistingDirectory(self, "选择文件夹", "./")
         if folder_path:
-            if settings.IS_WINDOWS:
-                folder_path = folder_path.replace("/", "\\")
-            lineEdit.setText(folder_path)
+            lineEdit.setText(str(Path(folder_path)))
 
-    def _calc_file_count(self, base_path: str, initial_count: int = 0) -> int:
+    def _calc_file_count(self, base_path: Path, initial_count: int = 0) -> int:
         sysLogger.debug("正在计算文件夹下文件个数")
-        if not os.path.isdir(base_path):
+        if not base_path.is_dir():
             return 1
         else:
-            for file_name in os.listdir(base_path):
-                file_path = os.path.join(base_path, file_name)
+            for file_path in base_path.iterdir():
                 try:
                     initial_count += self._calc_file_count(file_path)
                 except:

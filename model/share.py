@@ -1,6 +1,6 @@
 __all__ = ["SharingModel", "FuseSharingModel"]
 
-import os
+from pathlib import Path
 import json
 import logging
 from typing import Optional
@@ -92,7 +92,7 @@ class FuseSharingModel(list):
             self[index].rowIndex -= 1
         self.sysLogger.debug("移除分享文件对象完成")
 
-    def contains(self, target_path: str, share_type: shareType) -> Optional[int]:
+    def contains(self, target_path: Path, share_type: shareType) -> Optional[int]:
         """
         目标分享文件/文件夹对象的行号
 
@@ -110,7 +110,7 @@ class FuseSharingModel(list):
 
         return None
 
-    def get_ftp_shared(self, target_path: str) -> Optional[FileModel]:
+    def get_ftp_shared(self, target_path: Path) -> Optional[FileModel]:
         """
         获取可复用FTP的文件/文件夹对象
 
@@ -126,8 +126,8 @@ class FuseSharingModel(list):
             if fileObj.shareType is shareType.ftp:
                 basePath_file_params[fileObj.ftp_basePath] = fileObj
 
-        while os.path.dirname(target_path) != target_path:
-            target_path = os.path.dirname(target_path)
+        while target_path.parent != target_path:
+            target_path = target_path.parent
             if target_path in basePath_file_params:
                 return basePath_file_params[target_path]
 
@@ -143,10 +143,8 @@ class FuseSharingModel(list):
         self.sysLogger.debug("开始写入历史分享记录")
         backup_result: list = [fileObj.to_dump_backup() for fileObj in self]
 
-        backup_file_path: str = os.path.join(
-            settings.BASE_DIR, "file_sharing_backups.json"
-        )
-        with open(backup_file_path, "w", encoding="utf-8") as f:
+        backup_file_path = Path(settings.BASE_DIR) / "file_sharing_backups.json"
+        with backup_file_path.open("w", encoding="utf-8") as f:
             json.dump(
                 backup_result, f, indent=4, separators=(",", ": "), ensure_ascii=False
             )
@@ -163,14 +161,12 @@ class FuseSharingModel(list):
         """
         model = cls()
         model.sysLogger.debug("开始读取历史分享记录")
-        backup_file_path: str = os.path.join(
-            settings.BASE_DIR, "file_sharing_backups.json"
-        )
-        if not os.path.exists(backup_file_path):
+        backup_file_path = Path(settings.BASE_DIR) / "file_sharing_backups.json"
+        if not backup_file_path.exists():
             model.sysLogger.info("file_sharing_backups.json文件不存在, 跳过历史分享记录加载")
             return model
 
-        with open(backup_file_path, encoding="utf-8") as f:
+        with backup_file_path.open(encoding="utf-8") as f:
             try:
                 backup_result = json.loads(f.read())
             except json.JSONDecodeError:
@@ -180,19 +176,15 @@ class FuseSharingModel(list):
         path_share_params: list = []
         for file_dict in backup_result:
             targetPath = file_dict.get("path")
-            if not targetPath or not os.path.exists(targetPath):
+            if not targetPath or not Path(targetPath).exists():
                 continue
             # 路径整好看一点
-            if settings.IS_WINDOWS:
-                targetPath = targetPath.replace("/", "\\")
-            else:
-                targetPath = targetPath.replace("\\", "/")
+            targetPath = Path(targetPath)
             file_dict.update({"path": targetPath})
             path_share_param = (file_dict.get("path"), file_dict.get("share_type"))
             if path_share_param in path_share_params:
                 continue
             path_share_params.append(path_share_param)
-            isDir = file_dict.get("isDir")
             try:
                 fileObj = FileModel(**file_dict)
             except TypeError:

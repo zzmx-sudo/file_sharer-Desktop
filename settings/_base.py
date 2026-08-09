@@ -1,4 +1,5 @@
-import os
+from pathlib import Path
+from typing import Tuple
 import sys
 
 from utils.public_func import (
@@ -18,8 +19,8 @@ from model.public_types import ThemeColor, ColorCardStruct
 VERSION: str = generate_product_version()
 
 # 项目主目录
-BASE_DIR: str = generate_project_path()
-sys.path.insert(0, BASE_DIR)
+BASE_DIR: Path = generate_project_path()
+sys.path.insert(0, str(BASE_DIR))
 
 # 当前操作系统
 SYSTEM: str = get_system()
@@ -31,7 +32,7 @@ IS_WINDOWS: bool = SYSTEM == "Windows"
 LOCAL_HOST: str = get_local_ip()
 
 # 当前屏幕分辨率
-CURR_RESOLUTION: (int, int) = (0, 0)
+CURR_RESOLUTION: Tuple[int, int] = (0, 0)
 
 # 废除从这配置, 改为开启HTTP前选择有效端口
 # 后端端口
@@ -47,10 +48,10 @@ SAVE_SYSTEM_LOG: bool = False
 SAVE_SHARER_LOG: bool = False
 
 # 日志保存路径
-LOGS_PATH: str = os.path.join(BASE_DIR, "logs")
+LOGS_PATH: Path = Path(BASE_DIR) / "logs"
 
 # 下载目录路径
-DOWNLOAD_DIR: str = os.path.join(BASE_DIR, "Download")
+DOWNLOAD_DIR: Path = Path(BASE_DIR) / "Download"
 
 # 主题颜色
 THEME_COLOR: ThemeColor = ThemeColor.Default

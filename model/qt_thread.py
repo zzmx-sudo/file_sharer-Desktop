@@ -11,6 +11,7 @@ import os
 import asyncio
 import ssl
 import logging
+from pathlib import Path
 from multiprocessing import Queue
 from traceback import format_exc
 from typing import Dict, Any, List, Union, Tuple, Optional
@@ -146,7 +147,7 @@ class LoadBrowseUrlThread(BaseThread):
             dir_name = fileDict["relativePath"]
             for id, child in enumerate(fileDict["children"]):
                 child = next(iter(child.values()))
-                relativePath = os.path.join(dir_name, child["fileName"])
+                relativePath = dir_name / child["fileName"]
                 if child["isDir"]:
                     child.update({"relativePath": relativePath})
                     _process_folder(child)
@@ -156,7 +157,7 @@ class LoadBrowseUrlThread(BaseThread):
 
         self.sysLogger.debug("正在遍历处理文件路径")
         new_fileDict = deepcopy(fileDict)
-        new_fileDict.update({"relativePath": new_fileDict["fileName"]})
+        new_fileDict.update({"relativePath": Path(new_fileDict["fileName"])})
         if new_fileDict["isDir"]:
             _process_folder(new_fileDict)
         self.sysLogger.debug("处理文件路径完成")
@@ -482,29 +483,28 @@ class DownloadHttpFileThread(BaseDownloadFileThread):
         self, session: aiohttp.ClientSession, download_file: BrowseFileDictModel
     ) -> None:
         relativePath = download_file.relativePath
-        file_path = os.path.abspath(os.path.join(settings.DOWNLOAD_DIR, relativePath))
+        file_path = (settings.DOWNLOAD_DIR / relativePath).resolve()
         if self.is_padding(download_file):
             self.emit_download_status(download_file, DownloadStatus.PAUSE, "停止下载成功")
             return
         url = download_file.downloadUrl
         if download_file.isDir:
-            os.makedirs(file_path, exist_ok=True)
+            file_path.mkdir(parents=True, exist_ok=True)
             if HIT_LOG in url:
                 self.sysLogger.debug(f"本次下载动作仅用于让服务器写下载记录, 路径: {relativePath}")
                 await session.get(url)
                 self.sysLogger.debug(f"让服务器写下载记录完成, 路径: {relativePath}")
             return
 
-        if os.path.exists(file_path):
-            local_size = os.path.getsize(file_path)
-            headers = {"Range": f"bytes={os.path.getsize(file_path)}-"}
+        if file_path.exists():
+            local_size = file_path.stat().st_size
+            headers = {"Range": f"bytes={file_path.stat().st_size}-"}
             mode = "ab"
         else:
             local_size = 0
             headers = {}
             mode = "wb"
-            base_path = os.path.dirname(file_path)
-            os.makedirs(base_path, exist_ok=True)
+            file_path.parent.mkdir(parents=True, exist_ok=True)
         try:
             self.sysLogger.debug(f"开始下载文件, 路径: {relativePath}")
             async with session.get(url, headers=headers) as response:
@@ -531,7 +531,7 @@ class DownloadHttpFileThread(BaseDownloadFileThread):
                     )
                     return
                 self.sysLogger.debug(f"正在写入本地, 路径: {relativePath}")
-                with open(file_path, mode) as f:
+                with file_path.open(mode) as f:
                     if full_size == 0:
                         self.emit_download_status(
                             download_file, DownloadStatus.SUCCESS, "文件大小为0"
@@ -633,10 +633,8 @@ class DownloadFtpFileThread(BaseDownloadFileThread):
                     download_file = download_list.pop(0)
                     if download_file.isDir:
                         relativePath = download_file.relativePath
-                        folder_path = os.path.abspath(
-                            os.path.join(settings.DOWNLOAD_DIR, relativePath)
-                        )
-                        os.makedirs(folder_path, exist_ok=True)
+                        folder_path = (settings.DOWNLOAD_DIR / relativePath).resolve()
+                        folder_path.mkdir(parents=True, exist_ok=True)
                         continue
 
                     if self.is_padding(download_file):
@@ -684,17 +682,16 @@ class DownloadFtpFileThread(BaseDownloadFileThread):
             return
         fileName = download_file.fileName
         cwd = self._calc_cwd(relativePath)
-        local_path = os.path.join(settings.DOWNLOAD_DIR, relativePath)
-        if os.path.exists(local_path):
-            local_size = os.path.getsize(local_path)
+        local_path = settings.DOWNLOAD_DIR / relativePath
+        if local_path.exists():
+            local_size = local_path.stat().st_size
             mode = "ab"
         else:
             mode = "wb"
             local_size = 0
-            base_path = os.path.dirname(local_path)
-            os.makedirs(base_path, exist_ok=True)
+            local_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(local_path, mode) as r_f:
+        with local_path.open(mode) as r_f:
             ftp_client.sendcmd("TYPE I")
             try:
                 ftp_client.cwd(cwd)
@@ -781,7 +778,7 @@ class DownloadFtpFileThread(BaseDownloadFileThread):
             self.sysLogger.warning("服务器返回非标数据")
             return {}
 
-    def _calc_cwd(self, relativePath: str) -> str:
+    def _calc_cwd(self, relativePath: Path) -> str:
         """
         从文件相对路径计算出文件所在的FTP cwd路径
             e.g. a/b/c/d.txt, FTP分享路径为a, 结果: /b/c
@@ -793,9 +790,8 @@ class DownloadFtpFileThread(BaseDownloadFileThread):
             str: 文件所在的FTP cwd路径
         """
         self.sysLogger.debug(f"正在计算文件cwd路径, 路径: {relativePath}")
-        dir_name = os.path.dirname(relativePath)
+        dir_name = relativePath.parent.as_posix()
         # FTP的cwd路径用'/'区分层级, 因此需将当前系统的路径分层符替换成'/'
-        dir_name = dir_name.replace(os.sep, "/")
         result = "/"
         if "/" in dir_name:
             result = dir_name[dir_name.find("/") :]

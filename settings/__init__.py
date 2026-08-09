@@ -1,8 +1,8 @@
 __all__ = ["settings"]
 
-import os
 import importlib
-from typing import Any, Optional
+from pathlib import Path
+from typing import Any, Optional, Union
 
 import toml
 from PyQt5.Qt import QWidget
@@ -70,7 +70,10 @@ class FuseSettings:
                 elif setting == "LOGS_PATH":
                     self._check_logs_path(getattr(mod, setting))
 
-                setattr(self._wrapper, setting, getattr(mod, setting))
+                value = getattr(mod, setting)
+                if setting in {"LOGS_PATH", "DOWNLOAD_DIR"}:
+                    value = Path(value)
+                setattr(self._wrapper, setting, value)
 
     def __getattr__(self, item: str) -> Any:
         if self._wrapper is empty:
@@ -84,8 +87,10 @@ class FuseSettings:
     def __setattr__(self, key: str, value: Any) -> None:
         if key == "_wrapper":
             self.__dict__.clear()
-        elif key == "LOGS_PATH":
-            self._check_logs_path(value)
+        elif key in {"LOGS_PATH", "DOWNLOAD_DIR"}:
+            value = Path(value)
+            if key == "LOGS_PATH":
+                self._check_logs_path(value)
             self.__dict__.pop(key, None)
         else:
             self.__dict__.pop(key, None)
@@ -103,8 +108,8 @@ class FuseSettings:
             return f"<FuseSettings Custom fetch to {self.SETTINGS_MODE}>"
 
     @staticmethod
-    def _check_logs_path(logs_path: str) -> None:
-        if not os.path.isdir(logs_path):
+    def _check_logs_path(logs_path: Union[str, Path]) -> None:
+        if not Path(logs_path).is_dir():
             raise OperationException(f"配置的日志文件夹路径不存在, LOGS_PATH: {logs_path}")
 
     def _load(self) -> None:
@@ -122,11 +127,11 @@ class FuseSettings:
         self._wrapper.SAVE_SYSTEM_LOG = settings_config.get("saveSystemLog", True)
         self._wrapper.SAVE_SHARER_LOG = settings_config.get("saveShareLog", True)
         logsPath = settings_config.get("logsPath")
-        if logsPath and os.path.isdir(logsPath):
-            self._wrapper.LOGS_PATH = logsPath
+        if logsPath and Path(logsPath).is_dir():
+            self._wrapper.LOGS_PATH = Path(logsPath)
         downloadPath = settings_config.get("downloadPath")
-        if downloadPath and os.path.isdir(downloadPath):
-            self._wrapper.DOWNLOAD_DIR = downloadPath
+        if downloadPath and Path(downloadPath).is_dir():
+            self._wrapper.DOWNLOAD_DIR = Path(downloadPath)
         theme_color = themeColor.dispatch(settings_config.get("theme_color", "Default"))
         self._wrapper.THEME_COLOR = theme_color or self.THEME_COLOR
         theme_opacity = settings_config.get("theme_opacity", 99)
@@ -153,7 +158,7 @@ class FuseSettings:
         from utils.logger import sysLogger
 
         sysLogger.debug("开始写入配置")
-        settings_file = os.path.join(self.BASE_DIR, "customize.toml")
+        settings_file = Path(self.BASE_DIR) / "customize.toml"
         try:
             tool_config = toml.load(settings_file)
         except Exception:
@@ -164,14 +169,14 @@ class FuseSettings:
                 "file-sharer": {
                     "saveSystemLog": self.SAVE_SYSTEM_LOG,
                     "saveShareLog": self.SAVE_SHARER_LOG,
-                    "logsPath": self.LOGS_PATH,
-                    "downloadPath": self.DOWNLOAD_DIR,
+                    "logsPath": str(self.LOGS_PATH),
+                    "downloadPath": str(self.DOWNLOAD_DIR),
                     "theme_color": self.THEME_COLOR.name,
                     "theme_opacity": self.THEME_OPACITY,
                 }
             }
         )
-        with open(settings_file, "w", encoding="utf-8") as f:
+        with settings_file.open("w", encoding="utf-8") as f:
             toml.dump(tool_config, f)
         sysLogger.debug("写入配置完成")
 

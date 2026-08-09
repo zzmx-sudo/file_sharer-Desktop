@@ -281,7 +281,7 @@ class UiFunction:
         self.ui.shareListTable.setItem(
             fileObj.rowIndex, self._ui_function._share_type_col, share_type_item
         )
-        target_path_item = QTableWidgetItem(fileObj.targetPath)
+        target_path_item = QTableWidgetItem(str(fileObj.targetPath))
         target_path_item.setTextAlignment(Qt.AlignCenter)
         self.ui.shareListTable.setItem(
             fileObj.rowIndex, self._ui_function._share_targetPath_col, target_path_item
@@ -667,7 +667,7 @@ class UiFunction:
             None
         """
         row_count = self._download_data.length
-        fileName = fileDict.relativePath
+        fileName = str(fileDict.relativePath)
         shareType = fileDict.shareType
         try:
             index = self._download_data.index(fileDict)

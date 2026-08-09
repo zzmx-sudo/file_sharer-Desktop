@@ -3,6 +3,7 @@ __all__ = ["BrowseFileDictModel", "BrowseFileDataModel"]
 import logging
 from typing import Dict, Any, List
 from dataclasses import dataclass
+from pathlib import Path
 
 from exceptions import OperationException
 
@@ -149,17 +150,17 @@ class BrowseFileDictModel(dict):
         raise OperationException("downloadUrl不可通过该方式修改")
 
     @property
-    def relativePath(self) -> str:
+    def relativePath(self) -> Path:
         """
         相对主目录的路径
 
         Returns:
-            str: 相对主目录的路径
+            Path: 相对主目录的路径
         """
         return self["relativePath"]
 
     @relativePath.setter
-    def relativePath(self, newValue: str) -> None:
+    def relativePath(self, newValue: Path) -> None:
         raise OperationException("relativePath属性不可修改")
 
     @property

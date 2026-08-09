@@ -23,12 +23,12 @@ __all__ = [
 import time
 import socket
 import random
-import os
 import sys
 import platform
 import uuid
 import json
 from typing import Dict, Any, Callable, Tuple, Optional
+from pathlib import Path
 
 import toml
 from PyQt5.Qt import QApplication, QWidget
@@ -154,7 +154,7 @@ def generate_http_port(start_port: int) -> int:
         return start_port
 
 
-def generate_project_path() -> str:
+def generate_project_path() -> Path:
     """
     生成项目主目录路径
 
@@ -164,18 +164,16 @@ def generate_project_path() -> str:
     if getattr(sys, "frozen", False):
         # MacOS的静态文件均放在Resources路径下
         if get_system() == "Darwin":
-            return os.path.join(
-                os.path.dirname(os.path.dirname(sys.executable)), "Resources"
-            )
+            return Path(sys.executable).parent.parent / "Resources"
         else:
-            return os.path.dirname(sys.executable)
+            return Path(sys.executable).parent
     else:
         # MacOS下子进程为Resources/lib/python3.*/..., 需剔除到Resources
-        curr_path = os.path.abspath(__file__)
-        if "Resources" in curr_path:
-            return f"{curr_path.split('Resources')[0]}Resources"
+        curr_path = Path(__file__).resolve()
+        if "Resources" in curr_path.parts:
+            return Path(*curr_path.parts[: curr_path.parts.index("Resources") + 1])
         else:
-            return os.path.dirname(os.path.dirname(curr_path))
+            return curr_path.parent.parent
 
 
 def get_config_from_toml(is_customize: bool = True) -> Dict[str, Any]:
@@ -191,12 +189,12 @@ def get_config_from_toml(is_customize: bool = True) -> Dict[str, Any]:
     project_path = generate_project_path()
     tool_config = {}
     if is_customize:
-        settings_file = os.path.join(project_path, "customize.toml")
-        if not os.path.exists(settings_file):
-            settings_file = os.path.join(project_path, "pyproject.toml")
+        settings_file = project_path / "customize.toml"
+        if not settings_file.exists():
+            settings_file = project_path / "pyproject.toml"
     else:
-        settings_file = os.path.join(project_path, "pyproject.toml")
-    if not os.path.exists(settings_file):
+        settings_file = project_path / "pyproject.toml"
+    if not settings_file.exists():
         return tool_config
 
     try:
@@ -227,15 +225,13 @@ def generate_color_card_map() -> Dict[str, str]:
         Dict[str, str]: 配置的颜色表
     """
     project_path = generate_project_path()
-    color_card_json_path = os.path.join(
-        project_path, "static", "themes", "color_card.json"
-    )
-    if not os.path.exists(color_card_json_path):
-        color_card_json_path = os.path.join(project_path, "color_card.json")
-    if not os.path.exists(color_card_json_path):
+    color_card_json_path = project_path / "static" / "themes" / "color_card.json"
+    if not color_card_json_path.exists():
+        color_card_json_path = project_path / "color_card.json"
+    if not color_card_json_path.exists():
         return {}
 
-    with open(color_card_json_path, encoding="utf-8") as f:
+    with color_card_json_path.open(encoding="utf-8") as f:
         try:
             return json.load(f)
         except:

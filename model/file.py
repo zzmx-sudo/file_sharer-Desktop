@@ -1,7 +1,7 @@
 __all__ = ["FileModel"]
 
-import os
 import random
+from pathlib import Path
 from typing import Union, Dict, Optional
 
 from model import public_types as ptype
@@ -16,12 +16,12 @@ class _DirChildrenModel(dict):
 class FileModel:
     def __init__(
         self,
-        path: str,
+        path: Path,
         uuid: str,
         parent_uuid: Optional[str] = None,
         pwd: Optional[str] = None,
         port: Optional[int] = None,
-        ftp_base_path: Optional[str] = None,
+        ftp_base_path: Optional[Path] = None,
         secret_key: Optional[str] = None,
         credentials: Optional[str] = None,
         **kwargs,
@@ -41,7 +41,7 @@ class FileModel:
             **kwargs: 其他关键字参数
         """
         self._uuid = f"{parent_uuid}>{uuid}" if parent_uuid else uuid
-        self._target_path = path.rstrip(os.sep) if path.endswith(os.sep) else path
+        self._target_path = path
         self._browse_number = 0
         self._is_sharing = False
         self._row_index = None
@@ -69,9 +69,7 @@ class FileModel:
                 self._setup_child()
             else:
                 self._ftp_base_path = (
-                    ftp_base_path
-                    if ftp_base_path
-                    else os.path.dirname(self._target_path)
+                    ftp_base_path if ftp_base_path else self._target_path.parent
                 )
         else:
             self._ftp_base_path = None
@@ -154,7 +152,7 @@ class FileModel:
         Returns:
             bool: 文件对象是否为文件夹
         """
-        return os.path.isdir(self._target_path)
+        return self._target_path.is_dir()
 
     @property
     def isExists(self) -> bool:
@@ -164,7 +162,7 @@ class FileModel:
         Returns:
             bool: 文件对象的路径是否存在
         """
-        return os.path.exists(self._target_path)
+        return self._target_path.exists()
 
     @property
     def browse_number(self) -> int:
@@ -200,7 +198,7 @@ class FileModel:
         return self._share_type
 
     @property
-    def targetPath(self) -> str:
+    def targetPath(self) -> Path:
         """
         文件对象的路径
 
@@ -230,12 +228,12 @@ class FileModel:
         return self._ftp_port
 
     @property
-    def ftp_basePath(self) -> Union[None, str]:
+    def ftp_basePath(self) -> Optional[Path]:
         """
         FTP服务的根路径
 
         Returns:
-            Union[None, str]: FTP服务的根路径
+            Optional[Path]: FTP服务的根路径
         """
         return self._ftp_base_path
 
@@ -287,7 +285,7 @@ class FileModel:
         Returns:
             str: 文件对象的文件名
         """
-        return os.path.basename(self._target_path)
+        return self._target_path.name
 
     @property
     def file_size(self) -> int:
@@ -297,7 +295,7 @@ class FileModel:
         Returns:
             int: 文件对象的文件大小
         """
-        return os.path.getsize(self._target_path)
+        return self._target_path.stat().st_size
 
     @property
     def secret_key(self) -> str:
@@ -381,7 +379,7 @@ class FileModel:
             "downloadUrl": self.browse_download_url,
             "fileName": self.file_name,
             "isDir": self.isDir,
-            "targetPath": self.targetPath,
+            "targetPath": str(self.targetPath),
             "children": children,
         }
 
@@ -420,10 +418,10 @@ class FileModel:
             "shareType": self._share_type.value,
             "isDir": self.isDir,
             "browseUrl": self.browse_url,
-            "targetPath": self._target_path,
+            "targetPath": str(self._target_path),
             "ftpPwd": self._ftp_pwd,
             "ftpPort": self._ftp_port,
-            "ftpBasePath": self._ftp_base_path,
+            "ftpBasePath": str(self._ftp_base_path) if self._ftp_base_path else None,
             "browseNumber": self._browse_number,
             "children": children,
         }
@@ -436,7 +434,7 @@ class FileModel:
             Dict[str, Union[str, bool, int, None]]: 转存的格式化数据
         """
         normal = {
-            "path": self._target_path,
+            "path": str(self._target_path),
             "uuid": self._uuid,
             "parent_uuid": None,
             "share_type": self._share_type.value,
@@ -449,7 +447,7 @@ class FileModel:
                 {
                     "pwd": self._ftp_pwd,
                     "port": self._ftp_port,
-                    "ftp_base_path": self._ftp_base_path,
+                    "ftp_base_path": str(self._ftp_base_path),
                 }
             )
 
@@ -475,8 +473,7 @@ class FileModel:
         Returns:
             None
         """
-        for file_name in os.listdir(self._target_path):
-            file_path = os.path.join(self._target_path, file_name)
+        for file_path in self._target_path.iterdir():
             child_uuid = public_func.generate_uuid()
             child = FileModel(
                 file_path,
@@ -489,5 +486,5 @@ class FileModel:
 
             self._children[child_uuid] = child
 
-    def __eq__(self, other: str) -> bool:
-        return other.rstrip(os.sep) == self._target_path
+    def __eq__(self, other: Path) -> bool:
+        return other == self._target_path

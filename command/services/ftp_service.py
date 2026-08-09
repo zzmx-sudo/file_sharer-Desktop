@@ -94,7 +94,7 @@ class FtpService(BaseService):
         passwd: str = fileObj.ftp_pwd
 
         authorizer = DummyAuthorizer()
-        authorizer.add_user("a", passwd, fileObj.ftp_basePath, perm="elr")
+        authorizer.add_user("a", passwd, str(fileObj.ftp_basePath), perm="elr")
         handler = FTPHandler
         handler.authorizer = authorizer
         address: tuple = (host, port)

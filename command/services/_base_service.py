@@ -1,6 +1,7 @@
 __all__ = ["BaseService"]
 
 from typing import Dict
+from pathlib import Path
 from threading import Thread
 from multiprocessing import Queue
 
@@ -130,8 +131,8 @@ class BaseService:
         if not settings.DEBUG:
             import sys, os
 
-            sys.stdout = open(os.devnull, "w")
-            sys.stderr = open(os.devnull, "w")
+            sys.stdout = Path(os.devnull).open("w")
+            sys.stderr = Path(os.devnull).open("w")
 
         if self._watch_thread is None:
             raise OperationException("在service运行前必须先开启watch线程")
