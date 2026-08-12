@@ -1,6 +1,7 @@
 __all__ = ["AssertEnvWindow"]
 
 
+import sys
 from typing import Tuple
 
 from PyQt5 import QtWidgets, QtCore
@@ -126,26 +127,25 @@ class AssertEnvWindow(QDialog):
         self.assert_thread = None
         self._all_safe = True
 
-    def resize(self, *args: int) -> None:
+    def setup(self) -> None:
         """
-        重置窗口大小
-
-        Args:
-            *args: 需重置大小的宽高, 为空时根据屏幕分辨率自适应
+        AssertEnv窗口初始化
 
         Returns:
             None
         """
-        if args:
-            super(AssertEnvWindow, self).resize(*args)
-            return
-
+        sysLogger.debug("开启AssertEnv窗口")
+        settings.init_screen_resolution(self)
         resize_window(self, (400, 300), settings.CURR_RESOLUTION)
-
-        sysLogger.debug("开启Assert窗口")
         self.show()
+
+        sysLogger.debug("初始化主窗口")
+        from main import MainWindow
+
+        window = MainWindow()
+        sys.excepthook = window.except_hook
+        self.all_safe.connect(lambda: window.show_normal())
         self._verify()
-        sysLogger.info("已开启Assert窗口")
 
     def _verify(self) -> None:
         """

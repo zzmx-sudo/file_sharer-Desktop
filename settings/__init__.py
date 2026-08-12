@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Optional, Union
 
 import toml
-from PyQt5.Qt import QWidget
+from PyQt5.Qt import QWidget, QGuiApplication
 
 from exceptions import OperationException
 from settings import _base
@@ -13,7 +13,6 @@ from utils.public_func import (
     generate_http_port,
     get_config_from_toml,
     generate_color_card_map,
-    get_screen_resolution,
 )
 from model.public_types import (
     ThemeColor as themeColor,
@@ -202,19 +201,21 @@ class FuseSettings:
         control_color_map.update({"ThemeOpacity": theme_opacity / 100})
         return self.BASIC_QSS % (control_color_map)
 
-    def resize_window(self, *windows: QWidget) -> None:
+    def init_screen_resolution(self, window: QWidget) -> None:
         """
 
         Args:
-            *windows: 各Qt界面对象
+            window: Qt界面对象
 
         Returns:
             None
         """
-        self.CURR_RESOLUTION = get_screen_resolution(windows[0])
+        from utils.logger import sysLogger
 
-        for window in windows:
-            window.resize()
+        sysLogger.debug("获取焦点屏幕分辨率")
+        screen = QGuiApplication.screenAt(window.pos()).geometry()
+
+        self.CURR_RESOLUTION = (screen.width(), screen.height())
 
     def controlColor(
         self, theme_color: Optional[themeColor] = None

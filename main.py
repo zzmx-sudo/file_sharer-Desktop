@@ -26,7 +26,6 @@ from model.public_types import ThemeColor as themeColor
 from model.public_types import BrowseStatus, DownloadStatus
 from model.qt_thread import *
 from model.browse import BrowseFileDictModel
-from model.assert_env import AssertEnvWindow
 from model.tray_icon import TrayIcon
 from model.QRCode import QRCodeWindow
 from utils.credentials import Credentials
@@ -57,37 +56,24 @@ class MainWindow(QMainWindow):
         self._ui_function = UiFunction(self)
         self._ui_function.setup()
 
-        # load env
-        self._load_settings()
-        self._load_sharing_backups()
+        # explicit attr
+        from model.download import DownloadFileDictModel
 
-        # Initialize service process manage and watch thread
-        self._create_service_manager()
-
-        # setup attr
-        self._setup_attr()
-
-        # connect event
-        self._setup_event_connect()
+        self.ti: Optional[TrayIcon] = None
+        self.qrcode: Optional[QRCodeWindow] = None
+        self._prev_browse_url = ""
+        self._sharing_list: Optional[FuseSharingModel] = None
+        self._browse_data = BrowseFileDictModel.load({})
+        self._download_data = DownloadFileDictModel(self)
+        self._browse_record_q: Optional[Queue] = None
+        self._watch_browse_thread: Optional[WatchResultThread] = None
+        self._browse_thread: Optional[WatchResultThread] = None
+        self._download_http_thread: Optional[DownloadHttpFileThread] = None
+        self._download_ftp_thread: Optional[DownloadFtpFileThread] = None
+        self._service_process: Optional[ServiceProcessManager] = None
 
         # show window after assert env successful.
         # self.show()
-
-    def resize(self, *args: int) -> None:
-        """
-        重置窗口大小
-
-        Args:
-            *args: 需重置大小的宽高, 为空时根据屏幕分辨率自适应
-
-        Returns:
-            None
-        """
-        if args:
-            super(MainWindow, self).resize(*args)
-            return
-
-        resize_window(self, (1066, 600), settings.CURR_RESOLUTION)
 
     def show_normal(self) -> None:
         """
@@ -97,10 +83,18 @@ class MainWindow(QMainWindow):
             None
         """
         sysLogger.debug("正在打开主窗口和系统托盘图标")
+        resize_window(self, (1066, 600), settings.CURR_RESOLUTION)
         self.ti = TrayIcon(self)
         self.ti.show()
         self.qrcode = QRCodeWindow(self)
         self.show()
+        # connect event
+        self._setup_event_connect()
+        # Initialize service process manage and watch thread
+        self._create_service_manager()
+        # load env
+        self._load_settings()
+        self._load_sharing_backups()
 
     def save_settings(self) -> None:
         """
@@ -403,6 +397,7 @@ class MainWindow(QMainWindow):
         self._sharing_list = FuseSharingModel.load()
         for fileObj in self._sharing_list:
             self._UIClass.add_share_table_item(self, fileObj)
+            QApplication.processEvents()
         sysLogger.info("加载历史分享记录成功")
 
     def _create_service_manager(self) -> None:
@@ -430,22 +425,6 @@ class MainWindow(QMainWindow):
                 )
                 sysLogger.debug(f"浏览次数+1成功, 其分享记录行号为: {fileObj.rowIndex}")
                 break
-
-    def _setup_attr(self) -> None:
-        sysLogger.debug("初始化必要属性")
-        from model.download import DownloadFileDictModel
-
-        self._prev_browse_url = ""
-        self._browse_data = BrowseFileDictModel.load({})
-        self._download_data = DownloadFileDictModel(self)
-
-        self._browse_thread = None
-        self._download_http_thread = None
-        self._download_ftp_thread = None
-
-        self.ti: Optional[TrayIcon] = None
-        self.qrcode: Optional[QRCodeWindow] = None
-        sysLogger.info("必要属性初始化成功")
 
     def _setup_event_connect(self) -> None:
         sysLogger.debug("初始化事件绑定")
@@ -574,7 +553,6 @@ class MainWindow(QMainWindow):
                 self._ui_function.show_info_messageBox(errmsg, msg_color="red")
                 return
             target_path = base_path / self.ui.shareFileCombo.currentText()
-            # 路径整好看一点
             if not target_path.exists():
                 errmsg = "分享的路径不存在！\n请确认后再新建"
                 sysLogger.warning(errmsg.replace("\n", "") + f", 欲分享的路径: {target_path}")
@@ -848,13 +826,12 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     import multiprocessing
+    from model.assert_env import AssertEnvWindow
 
     multiprocessing.freeze_support()
+
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(":/icons/icon.ico"))
     assert_window = AssertEnvWindow()
-    window = MainWindow()
-    settings.resize_window(assert_window, window)
-    assert_window.all_safe.connect(lambda: window.show_normal())
-    sys.excepthook = window.except_hook
+    assert_window.setup()
     sys.exit(app.exec_())

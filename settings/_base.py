@@ -38,6 +38,9 @@ CURR_RESOLUTION: Tuple[int, int] = (0, 0)
 # 后端端口
 # WSGI_PORT: int = 8080
 
+# HTTP下载最大并行数
+MAX_HTTP_WORKER = 5
+
 # 是否Debug
 DEBUG: bool = False
 

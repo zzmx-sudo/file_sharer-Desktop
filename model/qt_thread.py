@@ -472,7 +472,9 @@ class DownloadHttpFileThread(BaseDownloadFileThread):
 
     async def _main(self, file_list: List[BrowseFileDictModel]) -> None:
         timeout = aiohttp.ClientTimeout(total=600)
-        connector = aiohttp.TCPConnector(force_close=True, limit=5)
+        connector = aiohttp.TCPConnector(
+            force_close=True, limit=settings.MAX_HTTP_WORKER
+        )
         async with aiohttp.ClientSession(
             connector=connector, timeout=timeout
         ) as session:
@@ -578,11 +580,11 @@ class DownloadHttpFileThread(BaseDownloadFileThread):
             self.emit_download_status(download_file, DownloadStatus.FAILED, "未知错误")
 
     def _append_up_to_five_files(self) -> List[BrowseFileDictModel]:
-        self.sysLogger.debug("追加最多5个文件到下载列表")
+        self.sysLogger.debug(f"追加最多{settings.MAX_HTTP_WORKER}个文件到下载列表")
         downloading_list = []
         """
         1. 先从每个文件对象中拿出最多一个文件去下载
-        2. 若第1步不够5个文件, 则继续按序从文件对象中拿取文件, 直至拿满5个文件或拿完所有文件对象的文件
+        2. 若第1步不够`MAX_HTTP_WORKER`个文件, 则继续按序从文件对象中拿取文件, 直至拿满`MAX_HTTP_WORKER`个文件或拿完所有文件对象的文件
         """
         has_full = False
         while self.hasNeedDownload:
@@ -594,7 +596,7 @@ class DownloadHttpFileThread(BaseDownloadFileThread):
                 if uuid in self._padding_fileUuids or not file_map.downloadList:
                     continue
                 downloading_list.append(file_map.downloadList.pop(0))
-                if len(downloading_list) >= 5:
+                if len(downloading_list) >= settings.MAX_HTTP_WORKER:
                     has_full = True
                     break
 

@@ -13,7 +13,6 @@ __all__ = [
     "generate_color_card_map",
     "window_reservation_when_box_destroyed",
     "update_downloadUrl_with_hitLog",
-    "get_screen_resolution",
     "resize_window",
     "json_response",
     "response_ret_code",
@@ -32,7 +31,6 @@ from pathlib import Path
 
 import toml
 from PyQt5.Qt import QApplication, QWidget
-from PyQt5.QtGui import QGuiApplication
 from model import public_types as ptype
 from model.browse import BrowseFileDictModel
 from .response_code import RET, MSG_MAP
@@ -79,10 +77,10 @@ def get_local_ip() -> str:
     try:
         s.connect(("8.8.8.8", 80))
         ip = s.getsockname()[0]
-    except:
+    except Exception:
         try:
             ip = socket.gethostbyname(socket.gethostname())
-        except:
+        except Exception:
             return ""
     finally:
         s.close()
@@ -130,7 +128,7 @@ def exists_port(port: int) -> bool:
         sock.connect((get_local_ip(), port))
         sock.close()
         return True
-    except:
+    except Exception:
         return False
 
 
@@ -234,7 +232,7 @@ def generate_color_card_map() -> Dict[str, str]:
     with color_card_json_path.open(encoding="utf-8") as f:
         try:
             return json.load(f)
-        except:
+        except Exception:
             return {}
 
 
@@ -274,21 +272,6 @@ def update_downloadUrl_with_hitLog(fileDict: BrowseFileDictModel) -> None:
     if ptype.HIT_LOG not in fileDict.downloadUrl:
         new_download_url = f"{fileDict.downloadUrl}?{ptype.HIT_LOG}=true"
         fileDict.update({"downloadUrl": new_download_url})
-
-
-def get_screen_resolution(window: QWidget) -> Tuple[int, int]:
-    """
-    获取当前屏幕分辨率
-
-    Args:
-        window: Qt界面对象
-
-    Returns:
-        Tuple[int, int]: 当前屏幕的分辨率 [宽, 高]
-    """
-    screen = QGuiApplication.screenAt(window.pos()).geometry()
-
-    return screen.width(), screen.height()
 
 
 def resize_window(
