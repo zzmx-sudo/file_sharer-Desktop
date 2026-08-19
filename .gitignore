@@ -13,6 +13,7 @@ logs/
 .DS_Store
 
 # backup files
+file_sharing_backups.json
 
 # download
 Download/

@@ -2,7 +2,6 @@ __all__ = ["Credentials"]
 
 import hashlib
 import base64
-from typing import Union
 
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
@@ -10,7 +9,7 @@ from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
 
-from model.file import FileModel, DirModel
+from model.file import FileModel
 from utils.logger import sysLogger
 
 
@@ -37,7 +36,7 @@ class Credentials:
         return f"pbkdf2_sha256${b64_str}"
 
     @classmethod
-    def verification(cls, fileObj: Union[FileModel, DirModel], pwd: str) -> bool:
+    def verification(cls, fileObj: FileModel, pwd: str) -> bool:
         """
         凭据验证
 

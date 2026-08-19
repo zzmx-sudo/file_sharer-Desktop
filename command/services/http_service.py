@@ -1,6 +1,7 @@
 __all__ = ["HttpService"]
 
 import os
+from pathlib import Path
 import re
 import time
 from typing import Union, Any, AsyncGenerator, Dict, Optional
@@ -23,7 +24,7 @@ from starlette.types import Scope
 
 from ._base_service import BaseService
 from model import public_types as ptype
-from model.file import FileModel, DirModel
+from model.file import FileModel
 from settings import settings
 from utils.logger import sharerLogger, sysLogger
 from utils.credentials import Credentials
@@ -55,7 +56,7 @@ class AuthParam(BaseModel):
 
 
 class HttpService(BaseService):
-    STATIC_PATH = os.path.join(settings.BASE_DIR, "static", "mobile_frontend")
+    STATIC_PATH = settings.BASE_DIR / "static" / "mobile_frontend"
 
     def __init__(self, input_q: Queue, output_q: Queue):
         """
@@ -69,7 +70,7 @@ class HttpService(BaseService):
         self._service_name = "HTTP"
         self._app = None
 
-    def _add_share(self, fileObj: Union[FileModel, DirModel]) -> None:
+    def _add_share(self, fileObj: FileModel) -> None:
         """
         添加共享文件或文件夹
 
@@ -79,9 +80,9 @@ class HttpService(BaseService):
         Returns:
             None
         """
-        self._sysLogger_debug(f"开始添加分享, 分享路径: {fileObj.targetPath}")
+        sysLogger.debug(f"开始添加分享, 分享路径: {fileObj.targetPath}")
         self._sharing_dict.update({fileObj.uuid: fileObj})
-        self._sysLogger_debug(f"添加分享完成, 分享路径: {fileObj.targetPath}")
+        sysLogger.info(f"添加分享完成, 分享路径: {fileObj.targetPath}")
 
     def _remove_share(self, uuid: str) -> None:
         """
@@ -93,10 +94,10 @@ class HttpService(BaseService):
         Returns:
             None
         """
-        self._sysLogger_debug(f"开始移除分享, 分享的uuid: {uuid}")
+        sysLogger.debug(f"开始移除分享, 分享的uuid: {uuid}")
         if uuid in self._sharing_dict:
             del self._sharing_dict[uuid]
-        self._sysLogger_debug(f"移除分享完成, 分享的uuid: {uuid}")
+        sysLogger.info(f"移除分享完成, 分享的uuid: {uuid}")
 
     def _change_free_secret(self, uuid: str, value: bool) -> None:
         """
@@ -109,13 +110,13 @@ class HttpService(BaseService):
         Returns:
             None
         """
-        self._sysLogger_debug(f"开始修改免密状态, 分享的uuid: {uuid}, 新的免密状态: {value}")
+        sysLogger.debug(f"开始修改免密状态, 分享的uuid: {uuid}, 新的免密状态: {value}")
         if uuid not in self._sharing_dict:
             sysLogger.error(f"系统错误, 接收到修改免密状态任务, 但该文件/文件夹并未分享, 文件uuid: {uuid}")
             return
 
         self._sharing_dict[uuid].free_secret = value
-        self._sysLogger_debug(f"修改免密状态完成, 分享的uuid: {uuid}")
+        sysLogger.info(f"修改免密状态完成, 分享的uuid: {uuid}")
 
     def run(self) -> None:
         """
@@ -129,14 +130,14 @@ class HttpService(BaseService):
 
         import uvicorn
 
-        self._sysLogger_debug("初始化FastAPI")
+        sysLogger.debug("初始化FastAPI")
         self._app = FastAPI()
         self._setup()
-        self._sysLogger_debug("开启服务")
+        sysLogger.info("开启服务")
         uvicorn.run(
             app=self._app, host=settings.LOCAL_HOST, port=settings.init_wsgi_port()
         )
-        self._sysLogger_debug("开启HTTP服务失败")
+        sysLogger.debug("开启HTTP服务失败")
 
     def _setup(self) -> None:
         """
@@ -145,7 +146,7 @@ class HttpService(BaseService):
         Returns:
             None
         """
-        self._sysLogger_debug("初始化路由")
+        sysLogger.debug("初始化路由")
         self._setup_middleware()
         self._setup_router()
 
@@ -158,8 +159,8 @@ class HttpService(BaseService):
         """
 
         async def generate_fileObj_recursive(
-            uuid: str, parentObj: Union[None, DirModel] = None
-        ) -> Union[FileModel, DirModel, None]:
+            uuid: str, parentObj: Optional[FileModel] = None
+        ) -> Optional[FileModel]:
             if parentObj is None:
                 try:
                     parent_uuid, other_uuid = uuid.split(">", 1)
@@ -211,7 +212,7 @@ class HttpService(BaseService):
             client_ip = _request["client"][0] if _request["client"] else "未知IP"
             uri, param = _request["path"].rsplit("/", 1)
             if param == "favicon.ico":
-                return FileResponse(os.path.join(self.STATIC_PATH, "favicon.ico"))
+                return FileResponse(self.STATIC_PATH / "favicon.ico")
             if uri.startswith(ptype.STATIC_PREFIX) or ptype.SPEED_TEST in uri:
                 return await cell_next(request)
 
@@ -282,8 +283,7 @@ class HttpService(BaseService):
         ### root app
         @self._app.get("%s/{uuid}" % ptype.FILE_LIST_URI)
         async def file_list(uuid: str, request: Request) -> Dict[str, Any]:
-            fileObj = request.scope.get("fileObj")
-            fileObj: Union[None, FileModel, DirModel]
+            fileObj: FileModel = request.scope.get("fileObj")
             if not fileObj:
                 sysLogger.error(
                     "发生了错误, 获取不到用户访问的文件/文件夹对象, "
@@ -299,8 +299,7 @@ class HttpService(BaseService):
         async def download(
             uuid: str, request: Request
         ) -> Union[Dict[str, Any], StreamingResponse]:
-            fileObj = request.scope.get("fileObj")
-            fileObj: Union[None, FileModel, DirModel]
+            fileObj: FileModel = request.scope.get("fileObj")
             if not fileObj:
                 sysLogger.error(
                     "发生了错误, 获取不到用户访问的文件/文件夹对象, "
@@ -325,7 +324,7 @@ class HttpService(BaseService):
         def REQUIRE_PWD_RESPONSE(secret_key):
             return self.json_response(RET.REQUIREPWD, secret_key=secret_key)
 
-        async def no_need_credentials(fileObj: Union[FileModel, DirModel]) -> bool:
+        async def no_need_credentials(fileObj: FileModel) -> bool:
             """
             是否需要校验凭据
 
@@ -339,9 +338,7 @@ class HttpService(BaseService):
                 not fileObj.secret_key or not fileObj.credentials or fileObj.free_secret
             )
 
-        async def verify_credentials(
-            fileObj: Union[FileModel, DirModel], pwd: str
-        ) -> bool:
+        async def verify_credentials(fileObj: FileModel, pwd: str) -> bool:
             """
             凭据校验
 
@@ -356,9 +353,8 @@ class HttpService(BaseService):
 
         async def with_credentials(
             uuid: str, request: Request, auth_param: AuthParam
-        ) -> Dict[str, Union[int, str, FileModel, DirModel]]:
-            fileObj = request.scope.get("fileObj")
-            fileObj: Union[None, FileModel, DirModel]
+        ) -> Dict[str, Union[int, str, FileModel]]:
+            fileObj: FileModel = request.scope.get("fileObj")
             if not fileObj:
                 sysLogger.error(
                     "发生了错误, 获取不到用户访问的文件/文件夹对象, "
@@ -382,9 +378,8 @@ class HttpService(BaseService):
             request: Request,
             secret_key: str = Form(...),
             ciphertext: str = Form(...),
-        ) -> Dict[str, Union[int, str, FileModel, DirModel]]:
-            fileObj = request.scope.get("fileObj")
-            fileObj: Union[None, FileModel, DirModel]
+        ) -> Dict[str, Union[int, str, FileModel]]:
+            fileObj: FileModel = request.scope.get("fileObj")
             if not fileObj:
                 print("not fileObj", uuid)
                 sysLogger.error(
@@ -406,8 +401,8 @@ class HttpService(BaseService):
 
         @mobile.get("%s/{uuid}" % ptype.QRCODE_URL)
         async def get_mobile_start(uuid: str) -> HTMLResponse:
-            index_html = os.path.join(self.STATIC_PATH, "index.html")
-            with open(index_html) as f:
+            index_html = self.STATIC_PATH / "index.html"
+            with index_html.open() as f:
                 contend = f.read()
             replace_content = contend.replace(
                 "{{ BASE_URL }}",
@@ -463,8 +458,7 @@ class HttpService(BaseService):
 
         @mobile.get("%s/{uuid}" % ptype.FILE_LIST_URI)
         async def get_list_mobile(uuid: str, request: Request) -> Dict[str, Any]:
-            fileObj = request.scope.get("fileObj")
-            fileObj: Union[None, FileModel, DirModel]
+            fileObj: FileModel = request.scope.get("fileObj")
             if not fileObj:
                 sysLogger.error(
                     "发生了错误, 获取不到用户访问的文件/文件夹对象, "
@@ -493,8 +487,7 @@ class HttpService(BaseService):
 
         @mobile.get("%s/{uuid}" % ptype.FILE_SIZE_URI)
         async def get_file_size(uuid: str, request: Request) -> Dict[str, Any]:
-            fileObj = request.scope.get("fileObj")
-            fileObj: Union[None, FileModel, DirModel]
+            fileObj: FileModel = request.scope.get("fileObj")
             if not fileObj:
                 sysLogger.error(
                     "发生了错误, 获取不到用户访问的文件/文件夹对象, "
@@ -533,21 +526,23 @@ class HttpService(BaseService):
         ) -> Dict[str, Any]:
             if verify_result.get("errno", 400) != 200:
                 return verify_result
-            if not os.path.isdir(curr_path):
+            curr_path = Path(curr_path).resolve()
+            if not curr_path.is_dir():
                 return self.json_response(RET.UPLOADTONONFOLDER)
             # verification the curr_path
-            fileObj: Union[FileModel, DirModel] = request.scope.get("fileObj")
-            if fileObj.targetPath not in curr_path:
+            fileObj: FileModel = request.scope.get("fileObj")
+            target_path = fileObj.targetPath.resolve()
+            if target_path not in curr_path.parents and target_path != curr_path:
                 return FOR_BIDDEN_RESPONSE
 
-            merge_file_name = os.path.join(curr_path, file_name)
-            chunk_file_name = os.path.join(curr_path, f"{file_name}_{chunk_id}.part")
-            if os.path.exists(merge_file_name):
+            merge_file_name = curr_path / file_name
+            chunk_file_name = curr_path / f"{file_name}_{chunk_id}.part"
+            if merge_file_name.exists():
                 return self.json_response(RET.UPLOADFILEISEXISTS)
-            if os.path.exists(chunk_file_name):
+            if chunk_file_name.exists():
                 return self.json_response(RET.UPLOADCHUNKEXISTS)
 
-            with open(chunk_file_name, "wb") as f:
+            with chunk_file_name.open("wb") as f:
                 f.write(await file.read())
 
             if request.query_params.get(ptype.HIT_LOG, "false"):
@@ -571,26 +566,27 @@ class HttpService(BaseService):
             if verify_result.get("errno", 400) != 200:
                 return verify_result
 
-            if not os.path.isdir(curr_path):
+            curr_path = Path(curr_path)
+            if not curr_path.is_dir():
                 return self.json_response(RET.UPLOADTONONFOLDER)
 
             for i in range(chunk_count):
-                chunk_file_name = os.path.join(curr_path, f"{file_name}_{i}.part")
-                if not os.path.exists(chunk_file_name):
+                chunk_file_name = curr_path / f"{file_name}_{i}.part"
+                if not chunk_file_name.exists():
                     return self.json_response(RET.MERGELOSSCHUNK, f"不存在的分片索引: {i}")
 
-            merge_file_name = os.path.join(curr_path, file_name)
-            with open(merge_file_name, "wb") as merge_f:
+            merge_file_name = curr_path / file_name
+            with merge_file_name.open("wb") as merge_f:
                 for i in range(chunk_count):
-                    chunk_file_name = os.path.join(curr_path, f"{file_name}_{i}.part")
-                    with open(chunk_file_name, "rb") as chunk_f:
+                    chunk_file_name = curr_path / f"{file_name}_{i}.part"
+                    with chunk_file_name.open("rb") as chunk_f:
                         merge_f.write(chunk_f.read())
-                    os.remove(chunk_file_name)
+                    chunk_file_name.unlink()
 
-            fileObj: Union[FileModel, DirModel] = request.scope.get("fileObj")
+            fileObj = request.scope.get("fileObj")
             self._sharing_dict.update(
                 {
-                    fileObj.uuid: DirModel(
+                    fileObj.uuid: FileModel(
                         fileObj.targetPath,
                         fileObj.uuid,
                         None,
@@ -615,15 +611,15 @@ class HttpService(BaseService):
         ) -> Dict[str, Any]:
             if verify_result.get("errno", 400) != 200:
                 return verify_result
-            if not os.path.isdir(curr_path):
+            curr_path = Path(curr_path)
+            if not curr_path.is_dir():
                 return self.json_response(RET.UPLOADTONONFOLDER)
             rm_count = 0
-            for curr_file in os.listdir(curr_path):
-                curr_file_path = os.path.join(curr_path, curr_file)
-                if os.path.isdir(curr_file_path):
+            for curr_file_path in curr_path.iterdir():
+                if curr_file_path.is_dir():
                     continue
-                if re.match(f"{file_name}_\d+\.part", curr_file):
-                    os.remove(os.path.join(curr_path, curr_file))
+                if re.match(rf"{re.escape(file_name)}_\d+\.part", curr_file_path.name):
+                    curr_file_path.unlink()
                     rm_count += 1
 
             return self.json_response(
@@ -641,7 +637,7 @@ class HttpService(BaseService):
         request: Request, fileObj: FileModel
     ) -> StreamingResponse:
         async def file_generator(
-            file_path: str, offset: int, end: int, chunk_size: int
+            file_path: Path, offset: int, end: int, chunk_size: int
         ) -> AsyncGenerator:
             async with aiofiles.open(file_path, "rb") as f:
                 await f.seek(offset, os.SEEK_SET)
@@ -654,7 +650,7 @@ class HttpService(BaseService):
                     yield chunk
                     remaining_bytes -= chunk_size_
 
-        stat_result = os.stat(fileObj.targetPath)
+        stat_result = fileObj.targetPath.stat()
         st_size = stat_result.st_size
         range_str = request.headers.get("range", "")
         range_match = re.match(r"bytes=(\d+)-(\d+)", range_str) or re.match(

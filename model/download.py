@@ -1,12 +1,12 @@
 __all__ = ["DownloadFileDictModel"]
 
-from typing import Dict, Any, Tuple
+import logging
+from typing import Tuple, Union
 
 from PyQt5.Qt import QTableWidget, QApplication, QPushButton, QProgressBar
 
-from utils.logger import sysLogger
-from model.public_types import DownloadStatus
-from utils.public_func import update_downloadUrl_with_hitLog
+from .public_types import DownloadStatus
+from .browse import BrowseFileDictModel
 from main import MainWindow
 
 
@@ -25,7 +25,7 @@ class DownloadFileDictModel(list):
 
     def update_download_status(
         self,
-        status_tuple: Tuple[Dict[str, Any], DownloadStatus, str],
+        status_tuple: Tuple[BrowseFileDictModel, DownloadStatus, Union[str, int]],
         tableWidget: QTableWidget,
     ) -> None:
         """
@@ -38,20 +38,22 @@ class DownloadFileDictModel(list):
         Returns:
             None
         """
-        sysLogger.debug(f"更新下载状态, {status_tuple}")
+        self.sysLogger.debug(
+            f"更新下载状态, {status_tuple[0].relativePath}-{status_tuple[1]}"
+        )
         if not isinstance(status_tuple, tuple) or len(status_tuple) != 3:
-            sysLogger.error(f"获取的下载状态数据有误, 原始信息: {status_tuple}")
+            self.sysLogger.error(f"获取的下载状态数据有误, 原始信息: {status_tuple}")
             return
-        fileObj, status, msg = status_tuple
-        if fileObj not in self:
-            sysLogger.warning(
-                f"未被存储的下载状态数据对象, 可能是重复下载的, 文件路径: {fileObj['relativePath']}"
+        fileDict, status, msg = status_tuple
+        if fileDict not in self:
+            self.sysLogger.warning(
+                f"未被存储的下载状态数据对象, 可能是重复下载的, 文件路径: {fileDict.relativePath}"
             )
             return
 
-        index = self.index(fileObj)
+        index = self.index(fileDict)
         if index >= tableWidget.rowCount():
-            sysLogger.error(f"程序存在BUG, 存储的下载URL数大于表格行数")
+            self.sysLogger.error(f"程序存在BUG, 存储的下载URL数大于表格行数")
             return
         progressBar: QProgressBar = tableWidget.cellWidget(
             index, self._download_progress_col
@@ -69,20 +71,20 @@ class DownloadFileDictModel(list):
                 button_str = self._window._ui_function._continue_button_str
                 self._window._ui_function.progressBar_change_to_pause(progressBar)
                 pushButton.clicked.disconnect()
-                self._setup_options_widget(index, fileObj, button_str, tableWidget)
+                self._setup_options_widget(index, fileDict, button_str, tableWidget)
         elif status is DownloadStatus.SUCCESS:
             progressBar.setValue(100)
             progressBar.setFormat("下载完成")
             self._window._ui_function.pushButton_change_to_remove(pushButton)
             pushButton.clicked.connect(
-                lambda: self._remove_download_item(fileObj, tableWidget)
+                lambda: self._remove_download_item(fileDict, tableWidget)
             )
         else:
             progressBar.setFormat(f"下载失败({msg})")
             button_str = self._window._ui_function._reset_button_str
             self._window._ui_function.progressBar_change_to_failed(progressBar)
             pushButton.clicked.disconnect()
-            self._setup_options_widget(index, fileObj, button_str, tableWidget)
+            self._setup_options_widget(index, fileDict, button_str, tableWidget)
 
     def remove_download_list(self, tableWidget: QTableWidget) -> None:
         """
@@ -94,7 +96,7 @@ class DownloadFileDictModel(list):
         Returns:
             None
         """
-        sysLogger.debug("清空已完成下载记录")
+        self.sysLogger.debug("清空已完成下载记录")
         row_index = 0
         ignore_urls = []
         for url in self:
@@ -129,6 +131,18 @@ class DownloadFileDictModel(list):
         """
         return len(self)
 
+    @property
+    def sysLogger(self) -> logging.Logger:
+        """
+        sysLogger
+
+        Returns:
+            logging.Logger: logger.sysLogger
+        """
+        from utils.logger import sysLogger
+
+        return sysLogger
+
     def _options_is_button(self, index: int) -> bool:
         call_widget = self._window.ui.downloadListTable.cellWidget(
             index, self._download_options_col
@@ -137,11 +151,11 @@ class DownloadFileDictModel(list):
         return isinstance(call_widget, QPushButton)
 
     def _remove_download_item(
-        self, fileObj: Dict[str, Any], tableWidget: QTableWidget
+        self, fileDict: BrowseFileDictModel, tableWidget: QTableWidget
     ) -> None:
-        sysLogger.debug(f"移除下载记录, {fileObj}")
+        self.sysLogger.debug(f"移除下载记录, {fileDict.fileName}")
         try:
-            index = self.index(fileObj)
+            index = self.index(fileDict)
         except ValueError:
             return
 
@@ -154,23 +168,21 @@ class DownloadFileDictModel(list):
     def _setup_options_widget(
         self,
         index: int,
-        fileObj: Dict[str, Any],
+        fileDict: BrowseFileDictModel,
         reset_str: str,
         tableWidget: QTableWidget,
     ) -> None:
-        sysLogger.debug("初始化操作按钮控件")
+        self.sysLogger.debug("初始化操作按钮控件")
         widget = self._window._ui_function.pushButton_change_to_widget(reset_str)
 
         reset_button = widget.findChild(QPushButton, "restartButton")
-        sysLogger.debug("给下载路径添加HIT_LOG标志")
-        update_downloadUrl_with_hitLog(fileObj)
         reset_button.clicked.connect(
-            lambda: self._window._append_download_fileList([fileObj])
+            lambda: self._window._resume_download_file(fileDict)
         )
 
         remove_button = widget.findChild(QPushButton, "removeButton")
         remove_button.clicked.connect(
-            lambda: self._remove_download_item(fileObj, tableWidget)
+            lambda: self._window._remove_download_item(fileDict, tableWidget)
         )
 
         self._window.ui.downloadListTable.setCellWidget(

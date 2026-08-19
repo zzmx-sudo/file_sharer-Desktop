@@ -1,6 +1,5 @@
-__all__ = ["logger"]
+__all__ = ["sysLogger", "sharerLogger"]
 
-import os
 import logging
 import logging.config
 from logging import LogRecord
@@ -43,8 +42,7 @@ class BaseLogger:
         Returns:
             None
         """
-        if not os.path.isdir(settings.LOGS_PATH):
-            os.makedirs(settings.LOGS_PATH)
+        settings.LOGS_PATH.mkdir(parents=True, exist_ok=True)
 
         self._setup()
         self._logger = logging.getLogger(self.logger_name)
@@ -80,7 +78,7 @@ class BaseLogger:
                     "backupCount": 10,
                     "encoding": "utf-8",
                     "formatter": "prod",
-                    "filename": os.path.join(settings.LOGS_PATH, self.log_file),
+                    "filename": str(settings.LOGS_PATH / self.log_file),
                 },
                 "sharer.file": {
                     "level": "INFO",
@@ -90,7 +88,7 @@ class BaseLogger:
                     "backupCount": 10,
                     "encoding": "utf-8",
                     "formatter": "prod",
-                    "filename": os.path.join(settings.LOGS_PATH, self.log_file),
+                    "filename": str(settings.LOGS_PATH / self.log_file),
                 },
             },
             "loggers": {

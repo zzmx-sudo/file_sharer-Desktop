@@ -4,27 +4,35 @@ __all__ = [
     "generate_timestamp",
     "get_local_ip",
     "generate_ftp_passwd",
+    "generate_secret_key",
     "exists_port",
     "generate_http_port",
     "generate_project_path",
     "get_config_from_toml",
     "generate_product_version",
+    "generate_color_card_map",
+    "window_reservation_when_box_destroyed",
+    "update_downloadUrl_with_hitLog",
+    "resize_window",
+    "json_response",
+    "response_ret_code",
+    "response_err_msg",
 ]
 
 import time
 import socket
 import random
-import os
 import sys
 import platform
 import uuid
 import json
 from typing import Dict, Any, Callable, Tuple, Optional
+from pathlib import Path
 
 import toml
 from PyQt5.Qt import QApplication, QWidget
-from PyQt5.QtGui import QGuiApplication
 from model import public_types as ptype
+from model.browse import BrowseFileDictModel
 from .response_code import RET, MSG_MAP
 
 
@@ -69,10 +77,10 @@ def get_local_ip() -> str:
     try:
         s.connect(("8.8.8.8", 80))
         ip = s.getsockname()[0]
-    except:
+    except Exception:
         try:
             ip = socket.gethostbyname(socket.gethostname())
-        except:
+        except Exception:
             return ""
     finally:
         s.close()
@@ -120,7 +128,7 @@ def exists_port(port: int) -> bool:
         sock.connect((get_local_ip(), port))
         sock.close()
         return True
-    except:
+    except Exception:
         return False
 
 
@@ -144,7 +152,7 @@ def generate_http_port(start_port: int) -> int:
         return start_port
 
 
-def generate_project_path() -> str:
+def generate_project_path() -> Path:
     """
     生成项目主目录路径
 
@@ -154,18 +162,16 @@ def generate_project_path() -> str:
     if getattr(sys, "frozen", False):
         # MacOS的静态文件均放在Resources路径下
         if get_system() == "Darwin":
-            return os.path.join(
-                os.path.dirname(os.path.dirname(sys.executable)), "Resources"
-            )
+            return Path(sys.executable).parent.parent / "Resources"
         else:
-            return os.path.dirname(sys.executable)
+            return Path(sys.executable).parent
     else:
         # MacOS下子进程为Resources/lib/python3.*/..., 需剔除到Resources
-        curr_path = os.path.abspath(__file__)
-        if "Resources" in curr_path:
-            return f"{curr_path.split('Resources')[0]}Resources"
+        curr_path = Path(__file__).resolve()
+        if "Resources" in curr_path.parts:
+            return Path(*curr_path.parts[: curr_path.parts.index("Resources") + 1])
         else:
-            return os.path.dirname(os.path.dirname(curr_path))
+            return curr_path.parent.parent
 
 
 def get_config_from_toml(is_customize: bool = True) -> Dict[str, Any]:
@@ -181,12 +187,12 @@ def get_config_from_toml(is_customize: bool = True) -> Dict[str, Any]:
     project_path = generate_project_path()
     tool_config = {}
     if is_customize:
-        settings_file = os.path.join(project_path, "customize.toml")
-        if not os.path.exists(settings_file):
-            settings_file = os.path.join(project_path, "pyproject.toml")
+        settings_file = project_path / "customize.toml"
+        if not settings_file.exists():
+            settings_file = project_path / "pyproject.toml"
     else:
-        settings_file = os.path.join(project_path, "pyproject.toml")
-    if not os.path.exists(settings_file):
+        settings_file = project_path / "pyproject.toml"
+    if not settings_file.exists():
         return tool_config
 
     try:
@@ -217,18 +223,16 @@ def generate_color_card_map() -> Dict[str, str]:
         Dict[str, str]: 配置的颜色表
     """
     project_path = generate_project_path()
-    color_card_json_path = os.path.join(
-        project_path, "static", "themes", "color_card.json"
-    )
-    if not os.path.exists(color_card_json_path):
-        color_card_json_path = os.path.join(project_path, "color_card.json")
-    if not os.path.exists(color_card_json_path):
+    color_card_json_path = project_path / "static" / "themes" / "color_card.json"
+    if not color_card_json_path.exists():
+        color_card_json_path = project_path / "color_card.json"
+    if not color_card_json_path.exists():
         return {}
 
-    with open(color_card_json_path, encoding="utf-8") as f:
+    with color_card_json_path.open(encoding="utf-8") as f:
         try:
             return json.load(f)
-        except:
+        except Exception:
             return {}
 
 
@@ -255,7 +259,7 @@ def window_reservation_when_box_destroyed(show_box: Callable) -> Callable:
     return _inner
 
 
-def update_downloadUrl_with_hitLog(fileDict: Dict[str, Any]) -> None:
+def update_downloadUrl_with_hitLog(fileDict: BrowseFileDictModel) -> None:
     """
     更新download_url, 以便告知服务端存储下载记录日志
 
@@ -265,24 +269,9 @@ def update_downloadUrl_with_hitLog(fileDict: Dict[str, Any]) -> None:
     Returns:
         None
     """
-    if ptype.HIT_LOG not in fileDict["downloadUrl"]:
-        new_download_url = f"{fileDict['downloadUrl']}?{ptype.HIT_LOG}=true"
+    if ptype.HIT_LOG not in fileDict.downloadUrl:
+        new_download_url = f"{fileDict.downloadUrl}?{ptype.HIT_LOG}=true"
         fileDict.update({"downloadUrl": new_download_url})
-
-
-def get_screen_resolution(window: QWidget) -> Tuple[int, int]:
-    """
-    获取当前屏幕分辨率
-
-    Args:
-        window: Qt界面对象
-
-    Returns:
-        Tuple[int, int]: 当前屏幕的分辨率 [宽, 高]
-    """
-    screen = QGuiApplication.screenAt(window.pos()).geometry()
-
-    return screen.width(), screen.height()
 
 
 def resize_window(

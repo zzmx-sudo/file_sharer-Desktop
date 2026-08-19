@@ -2,7 +2,8 @@ __all__ = ["QRCodeWindow"]
 
 
 import io
-from typing import Union
+import logging
+from typing import Optional
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QDialog
@@ -12,9 +13,8 @@ from qrcode.main import GenericImage
 from PIL import Image, ImageDraw
 
 from model.public_types import ThemeColor as themeColor
-from model.file import FileModel, DirModel
+from model.file import FileModel
 from settings import settings
-from utils.logger import sysLogger
 
 
 class QRCodeWindow(QDialog):
@@ -23,7 +23,7 @@ class QRCodeWindow(QDialog):
         校验环境窗口初始化函数
         """
         super(QRCodeWindow, self).__init__(parent)
-        self._fileObj: Union[FileModel, DirModel, None] = None
+        self._fileObj: Optional[FileModel] = None
         self.resize(300, 350)
         self.setStyleSheet(self.styleSheet())
         self.verticalLayout = QtWidgets.QVBoxLayout(self)
@@ -69,7 +69,7 @@ class QRCodeWindow(QDialog):
         self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
 
-    def show_qrcode(self, fileObj: Union[FileModel, DirModel]) -> None:
+    def show_qrcode(self, fileObj: FileModel) -> None:
         """
         显示二维码
 
@@ -81,7 +81,7 @@ class QRCodeWindow(QDialog):
         """
         self._fileObj = fileObj
         browse_url = fileObj.mobile_browse_url
-        sysLogger.debug(f"开始显示二维码, 浏览URL: {browse_url}")
+        self.sysLogger.debug(f"开始显示二维码, 浏览URL: {browse_url}")
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -98,7 +98,7 @@ class QRCodeWindow(QDialog):
         image.loadFromData(fp.getvalue(), "PNG")
         pixmap = QtGui.QPixmap.fromImage(image)
         self.qrcode_label.setPixmap(pixmap)
-        sysLogger.debug("二维码插入成功")
+        self.sysLogger.debug("二维码插入成功")
 
     @staticmethod
     def add_rounded_corners(image: GenericImage, radius: int = 12) -> GenericImage:
@@ -121,7 +121,7 @@ class QRCodeWindow(QDialog):
         image.putalpha(mask)
         return image
 
-    def free_secret_button_clicked(self, fileObj: Union[FileModel, DirModel]) -> None:
+    def free_secret_button_clicked(self, fileObj: FileModel) -> None:
         """
         临时免密按钮点击回调
 
@@ -131,16 +131,16 @@ class QRCodeWindow(QDialog):
         Returns:
             None
         """
-        sysLogger.debug("正在修改临时免密按钮样式")
+        self.sysLogger.debug("正在修改临时免密按钮样式")
         if self._fileObj is None or fileObj.uuid != self._fileObj.uuid:
-            sysLogger.error("系统错误, 欲修改免密状态的文件/文件夹对象与当前二维码显示的不一致")
+            self.sysLogger.error("系统错误, 欲修改免密状态的文件/文件夹对象与当前二维码显示的不一致")
             return
 
         self._fileObj.free_secret = not self._fileObj.free_secret
         button_text = "关闭临时免密" if self._fileObj.free_secret else "打开临时免密"
         self.freeSecretButton.setText(button_text)
         self.freeSecretButton.setStyleSheet(self.free_secret_button_style())
-        sysLogger.debug("临时免密按钮样式修改完成")
+        self.sysLogger.debug("临时免密按钮样式修改完成")
 
     def reset_free_secret(self) -> None:
         """
@@ -149,9 +149,9 @@ class QRCodeWindow(QDialog):
         Returns:
             None
         """
-        sysLogger.debug("正在重置(关闭)上一分享文件的临时免密")
+        self.sysLogger.debug("正在重置(关闭)上一分享文件的临时免密")
         if self._fileObj is None:
-            sysLogger.debug("无历史分享, 退出关闭临时免密")
+            self.sysLogger.debug("无历史分享, 退出关闭临时免密")
             return
 
         if self._fileObj.free_secret:
@@ -159,7 +159,7 @@ class QRCodeWindow(QDialog):
             self.freeSecretButton.setText("打开临时免密")
             self.freeSecretButton.setStyleSheet(self.free_secret_button_style())
             self.parent().change_free_secret(self._fileObj)
-        sysLogger.debug("重置(关闭)上一分享文件的临时免密完成")
+        self.sysLogger.debug("重置(关闭)上一分享文件的临时免密完成")
 
     def close(self) -> bool:
         """
@@ -265,3 +265,15 @@ class QRCodeWindow(QDialog):
                 border: 2px solid rgb({control_color.SpecialHovColor});
             }}
             """
+
+    @property
+    def sysLogger(self) -> logging.Logger:
+        """
+        sysLogger
+
+        Returns:
+            logging.Logger: logger.self.self.sysLogger
+        """
+        from utils.logger import sysLogger
+
+        return sysLogger
