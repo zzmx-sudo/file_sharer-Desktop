@@ -29,7 +29,6 @@ def generate_frontend_files():
 APP = [str(PROJECT_PATH / "main.py")]
 DATA_FILES = [
     str(PROJECT_PATH / "pyproject.toml"),
-    str(PROJECT_PATH / "file_sharing_backups.json"),
     str(PROJECT_PATH / "static/themes/color_card.json"),
     *generate_frontend_files(),
 ]
