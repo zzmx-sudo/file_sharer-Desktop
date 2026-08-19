@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
 cd ..
 PROJECT_PATH=`pwd`
 PYTHON_ENV_DIR="/Users/mr.cheng/PY_ENVS/file_sharer"
@@ -11,19 +15,18 @@ else
   mkdir "${PROJECT_PATH}/build"
 fi
 # 修改main_setup.py中PROJECT_PATH和PRODUCT_VERSION的值
-sed -i '' "s~PROJECT_PATH = .*~PROJECT_PATH = \"$PROJECT_PATH/\"~g" ${PROJECT_PATH}/main_setup.py
-sed -i '' "s~PRODUCT_VERSION = .*~PRODUCT_VERSION = \"$PRODUCT_VERSION\"~g" ${PROJECT_PATH}/main_setup.py
+sed -i '' "s~PROJECT_PATH = .*~PROJECT_PATH = Path(\"$PROJECT_PATH/\")~g" "${PROJECT_PATH}/main_setup.py"
+sed -i '' "s~PRODUCT_VERSION = .*~PRODUCT_VERSION = \"$PRODUCT_VERSION\"~g" "${PROJECT_PATH}/main_setup.py"
 # 进入虚拟环境
-if [ -d $PYTHON_ENV_DIR ]; then
-  source $PYTHON_ENV_DIR/bin/activate
+if [ -d "$PYTHON_ENV_DIR" ]; then
+  source "$PYTHON_ENV_DIR/bin/activate"
 else
   echo Using the global python env
 fi
 # 使用py2app打包源码
 echo "******************* Packaging the source code using py2app *******************"
-cd ${PROJECT_PATH}/build
-python ${PROJECT_PATH}/main_setup.py py2app
-echo "[]" > ${PROJECT_PATH}/build/dist/${PROJECT_NAME}.app/Contents/Resources/file_sharing_backups.json
+cd "${PROJECT_PATH}/build"
+python "${PROJECT_PATH}/main_setup.py" py2app
 
 # 使用create-dmg打包成dmg文件
 echo "******************* Packaging as MacOS installation program using create-dmg *******************"
@@ -36,9 +39,9 @@ if [ ! -d "${PROJECT_PATH}/build/installer" ]; then
   mkdir "${PROJECT_PATH}/build/installer"
 fi
 
-cp -r ${PROJECT_PATH}/build/dist/${PROJECT_NAME}.app ${PROJECT_PATH}/build/dmg/
+cp -r "${PROJECT_PATH}/build/dist/${PROJECT_NAME}.app" "${PROJECT_PATH}/build/dmg/"
 
-cd ${PROJECT_PATH}/build/
+cd "${PROJECT_PATH}/build/"
 if [ "$1" == "arm64" ]; then
   ARCH_NAME="arm64"
 else
