@@ -157,7 +157,7 @@ class BrowseFileDictModel(dict):
         Returns:
             Path: 相对主目录的路径
         """
-        return self["relativePath"]
+        return Path(self["relativePath"])
 
     @relativePath.setter
     def relativePath(self, newValue: Path) -> None:
