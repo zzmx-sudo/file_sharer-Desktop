@@ -257,4 +257,4 @@ class FuseSettings:
         return self._wrapper.WSGI_PORT
 
 
-settings = FuseSettings("prod")
+settings = FuseSettings("develop")

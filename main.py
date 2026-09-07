@@ -544,7 +544,13 @@ class MainWindow(QMainWindow):
         sysLogger.debug("正在创建分享")
 
         def _create_share_inner() -> None:
-            base_path = Path(self.ui.sharePathEdit.text())
+            base_path_str = self.ui.sharePathEdit.text()
+            if not base_path_str:
+                errmsg = "分享的路径不可为空！\n建议用按钮打开资源管理器选择路径"
+                sysLogger.warning(errmsg.replace("\n", ""))
+                self._ui_function.show_info_messageBox(errmsg, msg_color="red")
+                return
+            base_path = Path(base_path_str)
             if not base_path.is_dir():
                 errmsg = "分享的路径不存在！\n建议用按钮打开资源管理器选择路径"
                 sysLogger.warning(
@@ -792,14 +798,17 @@ class MainWindow(QMainWindow):
         if folder_path:
             lineEdit.setText(str(Path(folder_path)))
 
-    def _calc_file_count(self, base_path: Path, initial_count: int = 0) -> int:
-        sysLogger.debug("正在计算文件夹下文件个数")
+    def _calc_file_count(
+        self, base_path: Path, initial_count: int = 0, with_debug: bool = True
+    ) -> int:
+        if with_debug:
+            sysLogger.debug("正在计算文件夹下文件个数")
         if not base_path.is_dir():
             return 1
         else:
             for file_path in base_path.iterdir():
                 try:
-                    initial_count += self._calc_file_count(file_path)
+                    initial_count += self._calc_file_count(file_path, with_debug=False)
                 except:
                     raise
                 else:
